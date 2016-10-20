@@ -1,0 +1,349 @@
+{
+	"id": "b70f9750-9af9-1c0b-6d8a-ea98b22f3679",
+	"name": "v3",
+	"description": null,
+	"order": [
+		"527e3bed-4aa3-42f3-8927-88285d491de9",
+		"2acc5412-c9b4-84af-f839-79dc230b617f",
+		"024e4da2-be42-8d08-5cfd-b87760c3e119",
+		"b28408bd-874d-b9be-5d45-cf9c2ac17f02",
+		"6ca8210a-9a9c-2868-8d96-14ff5d0a4e80",
+		"571a09bd-4acc-96fa-0940-7d67b17872c1"
+	],
+	"folders": [],
+	"timestamp": 0,
+	"owner": "647731",
+	"public": false,
+	"published": false,
+	"requests": [
+		{
+			"id": "024e4da2-be42-8d08-5cfd-b87760c3e119",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3Mjc1NTQ1OCwiZXhwIjoxNDc1Nzc5NDU4fQ.blZv0bmAtT2Zksl_rGzVsSdrQjgxNMQp_9QU7YfgC_0\n",
+			"url": "https://api.appcar.com.ar/wsSiniestroLista",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [],
+			"dataMode": "urlencoded",
+			"version": 2,
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1475771518213,
+			"name": "wsSiniestroLista",
+			"description": "",
+			"collectionId": "b70f9750-9af9-1c0b-6d8a-ea98b22f3679",
+			"responses": []
+		},
+		{
+			"folder": null,
+			"id": "2acc5412-c9b4-84af-f839-79dc230b617f",
+			"name": "wsSiniestro",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "idVehiculo",
+					"value": "67",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "latitud",
+					"value": "-35.9044241437307",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "longitud",
+					"value": "-58.9533113063288",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaHora",
+					"value": "2016-09-22 12:07:54",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "lesiones",
+					"value": "false",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3Mjc1NTQ1OCwiZXhwIjoxNDc1Nzc5NDU4fQ.blZv0bmAtT2Zksl_rGzVsSdrQjgxNMQp_9QU7YfgC_0\n",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsSiniestro",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"collectionId": "b70f9750-9af9-1c0b-6d8a-ea98b22f3679"
+		},
+		{
+			"id": "527e3bed-4aa3-42f3-8927-88285d491de9",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3Mjc1NTQ1OCwiZXhwIjoxNDc1Nzc5NDU4fQ.blZv0bmAtT2Zksl_rGzVsSdrQjgxNMQp_9QU7YfgC_0\n",
+			"url": "https://api.appcar.com.ar/wsSiniestroImagen",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "idSiniestro",
+					"value": "127",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaHora",
+					"value": "2016-09-22 13:56:02",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "tipo",
+					"value": "registroPropio",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "imagen",
+					"value": "909c93a6-97d4-4e04-9e0e-811cd2ca95c2.jpg",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1475771922039,
+			"name": "wsSiniestroImagen",
+			"description": "",
+			"collectionId": "b70f9750-9af9-1c0b-6d8a-ea98b22f3679"
+		},
+		{
+			"id": "571a09bd-4acc-96fa-0940-7d67b17872c1",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3Mjc1NTQ1OCwiZXhwIjoxNDc1Nzc5NDU4fQ.blZv0bmAtT2Zksl_rGzVsSdrQjgxNMQp_9QU7YfgC_0\n",
+			"url": "https://api.appcar.com.ar/wsVehiculo",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "b70f9750-9af9-1c0b-6d8a-ea98b22f3679",
+			"data": [
+				{
+					"key": "patente",
+					"value": "SS347XX",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "marca",
+					"value": "CHEVROLET",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "modelo",
+					"value": "S10",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "tipoDispositivo",
+					"value": "2",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "id",
+					"value": "788ab89bc8877ff",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "norma",
+					"value": "1",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "nameSpace",
+					"value": "XXXX",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "instanceID",
+					"value": "d8",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "batteryLevel",
+					"value": "67%",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "color",
+					"value": "naranja",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "broadcastingPower",
+					"value": "full",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idVehiculo",
+					"value": "102",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "wsVehiculo UPD",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1475778245990,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "6ca8210a-9a9c-2868-8d96-14ff5d0a4e80",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3Mjc1NTQ1OCwiZXhwIjoxNDc1Nzc5NDU4fQ.blZv0bmAtT2Zksl_rGzVsSdrQjgxNMQp_9QU7YfgC_0\n",
+			"url": "https://api.appcar.com.ar/wsVehiculo",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "b70f9750-9af9-1c0b-6d8a-ea98b22f3679",
+			"data": [
+				{
+					"key": "patente",
+					"value": "SS347XX",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "marca",
+					"value": "CHEVROLET",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "modelo",
+					"value": "S10",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "tipoDispositivo",
+					"value": "2",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "id",
+					"value": "788ab89bc8877ff",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "norma",
+					"value": "1",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "nameSpace",
+					"value": "XXXX",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "instanceID",
+					"value": "XXXXXX",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "batteryLevel",
+					"value": "67%",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "color",
+					"value": "naranja",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "broadcastingPower",
+					"value": "full",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "wsVehiculo Ins",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1475778049739,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "b28408bd-874d-b9be-5d45-cf9c2ac17f02",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3Mjc1NTQ1OCwiZXhwIjoxNDc1Nzc5NDU4fQ.blZv0bmAtT2Zksl_rGzVsSdrQjgxNMQp_9QU7YfgC_0\n",
+			"url": "https://api.appcar.com.ar/wsVehiculoDesconectado",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "idVehiculo",
+					"value": "67",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "servicioDesconectado",
+					"value": "1",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaHora",
+					"value": "2016-10-06 14:20:57",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"version": 2,
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1475777769879,
+			"name": "wsVehiculoDesconectado",
+			"description": "",
+			"collectionId": "b70f9750-9af9-1c0b-6d8a-ea98b22f3679",
+			"responses": []
+		}
+	]
+}

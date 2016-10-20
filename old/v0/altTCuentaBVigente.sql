@@ -1,0 +1,2 @@
+ALTER TABLE score.tCuenta
+ ADD bVigente CHAR(1) ASCII NOT NULL DEFAULT '1';

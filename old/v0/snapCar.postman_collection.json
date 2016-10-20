@@ -1,0 +1,859 @@
+{
+	"id": "54c1e721-ac17-667f-5a06-4428579a577c",
+	"name": "snapCar",
+	"description": "",
+	"order": [
+		"58c744b6-40a0-a723-8a58-0efe2f191f7f",
+		"79c6d85e-7e89-ee2e-567f-a8e84172cd02",
+		"1e8706cf-5325-67bd-6683-23e812c624bc",
+		"7088bea0-5ce5-ac03-d475-ea2c7de2c73a",
+		"ebea902c-804e-2fec-fc9f-ca2dae42b5f1",
+		"6ce52fdf-1bf1-9d4b-a1c7-0d15abc14be2",
+		"3611adf7-894f-dc97-2b48-66fb9d46fb99",
+		"18ba0bef-3e4f-d9c4-24d0-a0cc51bdca58",
+		"07eb26b8-2015-08e7-cf18-cc419d978e5f",
+		"cf5d7aee-6f34-7586-f44f-8d6f76505874",
+		"5c8f59d4-2895-43d6-4ec9-cb196e3b5c38",
+		"96f6637c-7aa3-9b5e-3709-8febb6e6bbda",
+		"f13e8023-b3dd-e2ec-cb6a-7c822c8c6c51",
+		"37df5aae-eff0-5daf-1d22-cc801070b7bb",
+		"cdee46a4-e145-0803-c541-eb361eacaabc",
+		"831f7ee4-8fb1-6277-ca56-f0a8e6729ef9",
+		"c92804fa-46c7-0175-1666-edaf6b70755c",
+		"52a0a5e0-8a3a-805d-4885-1cbf60a6383b",
+		"c8d43e1e-c87f-a4a9-e9b6-036f70ee652e",
+		"21c8ba11-714e-7e5a-b78c-ef890365fa9a",
+		"e8bc288f-3e5f-ca8b-8206-90276f1795e2",
+		"266f9cba-d843-6cf1-0eff-1e898efd68f0",
+		"df32f078-7722-2199-6d9c-c2fc651ec6e1",
+		"243f021c-e037-b6e2-b0e4-263c28108804"
+	],
+	"folders": [],
+	"timestamp": 0,
+	"owner": "647731",
+	"public": false,
+	"published": false,
+	"requests": [
+		{
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MTcsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ2NTU3Nzk2NCwiZXhwIjoxNDY4NjAxOTY0fQ.WafBsMcoybls5U143kVHenrfow6Cyl55U47gahqu4RU\n",
+			"url": "https://api.appcar.com.ar/wsInvitacion",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"data": [
+				{
+					"key": "emailInvitado",
+					"value": "fernando@xnear.com",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "vehiculos[0]",
+					"value": "11",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "vehiculos[1]",
+					"value": "12",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "vehiculos[2]",
+					"value": "13",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "vehiculos[3]",
+					"value": "15",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "wsInvitacion",
+			"description": "",
+			"descriptionFormat": "html",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": null,
+			"id": "07eb26b8-2015-08e7-cf18-cc419d978e5f",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MiwiYkNvbmZpcm1hZG8iOiIwIiwiZkN1ZW50YSI6MiwiaWF0IjoxNDY1NDE1OTYxLCJleHAiOjE0Njg0Mzk5NjF9.yRbR81Y8_jCwOQo6VpLI95riG3tZmz_1fp8lKp1ZyDM\n",
+			"url": "https://api.appcar.com.ar/wsVehiculo",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "DELETE",
+			"data": [
+				{
+					"key": "idVehiculo",
+					"value": "11",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "wsVehiculo DEL",
+			"description": "",
+			"descriptionFormat": "html",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": null,
+			"id": "18ba0bef-3e4f-d9c4-24d0-a0cc51bdca58",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "1e8706cf-5325-67bd-6683-23e812c624bc",
+			"folder": null,
+			"name": "wsRecuperaPassword",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "email",
+					"value": "andres.galaz@gmail.com",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsRecuperaPassword",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"folder": null,
+			"id": "21c8ba11-714e-7e5a-b78c-ef890365fa9a",
+			"name": "wsLogin Fabi",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "email",
+					"value": "fabianbarbieri@live.com",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "28101990",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsLogin",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "243f021c-e037-b6e2-b0e4-263c28108804",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3MTk1NTg4OSwiZXhwIjoxNDc0OTc5ODg5fQ.7vpkkmxeVX0rxmIYsVF9fYQptEUq8paeyWQVX7nufSg\n",
+			"url": "https://api.appcar.com.ar/wsScoreConductor",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-08-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-08-31",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1471982694200,
+			"name": "wsScoreConductor Gonza",
+			"description": "",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"responses": []
+		},
+		{
+			"folder": null,
+			"id": "266f9cba-d843-6cf1-0eff-1e898efd68f0",
+			"name": "wsScore Fabi",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-07-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-07-30",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idUsuario_no",
+					"value": "23",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MTgsImJDb25maXJtYWRvIjoiMSIsImlhdCI6MTQ3MDAwMjg4NCwiZXhwIjoxNDczMDI2ODg0fQ.B5gn-j_jaUEz1rm2RMS4yWapaPIQ1aDf6Xs0bcGuyl0\n",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsScore",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"folder": null,
+			"id": "3611adf7-894f-dc97-2b48-66fb9d46fb99",
+			"name": "wsCambioPassword",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "nuevaPassword",
+					"value": "otraClave",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "confirmaPassword",
+					"value": "otraClave",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MiwiYkNvbmZpcm1hZG8iOiIwIiwiZkN1ZW50YSI6MiwiaWF0IjoxNDY1Mzk5MDM3LCJleHAiOjE0Njg0MjMwMzd9.D_ONjkYlfFaS1X2equG1Tisbu1zycc5GNpronBxjMXs\n",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsCambioPassword",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "37df5aae-eff0-5daf-1d22-cc801070b7bb",
+			"headers": "",
+			"url": "https://api.appcar.com.ar/wsLogin",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "email",
+					"value": "gonzalo.delger@snapcar.com.ar",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "Snapcar2016",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"version": 2,
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1471955907772,
+			"name": "wsLogin Gonza",
+			"description": "",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"responses": []
+		},
+		{
+			"id": "52a0a5e0-8a3a-805d-4885-1cbf60a6383b",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjMsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ2OTQ1OTg4NSwiZXhwIjoxNDcyNDgzODg1fQ.9vUgRj8XwMggHpHMamcDxz2jHDQ8RTlwppruzXRr1vg\n",
+			"url": "https://api.appcar.com.ar/wsScore",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-08-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-08-31",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"time": 1471237850812,
+			"name": "wsScore Andres",
+			"description": "",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"folder": null,
+			"rawModeData": null,
+			"descriptionFormat": "html"
+		},
+		{
+			"id": "58c744b6-40a0-a723-8a58-0efe2f191f7f",
+			"folder": null,
+			"name": "wsRegistro",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "email",
+					"value": "andres.galaz@gmail.com",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "elperro",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "nombre",
+					"value": "Andrés Galaz",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "dni",
+					"value": "95504594",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "sexo",
+					"value": "M",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaNacimiento",
+					"value": "1962-01-18",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsRegistro",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "5c8f59d4-2895-43d6-4ec9-cb196e3b5c38",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MzAsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ2ODg2NzE5NywiZXhwIjoxNDcxODkxMTk3fQ.uDzcZ3s9ZqFXd6866qBKdQ5nUWoZMgrxIlhcNzolxSU\n",
+			"url": "https://api.appcar.com.ar/wsScore",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-07-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-07-30",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "wsScore",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1466293621324,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"folder": null,
+			"rawModeData": null
+		},
+		{
+			"folder": null,
+			"id": "6ce52fdf-1bf1-9d4b-a1c7-0d15abc14be2",
+			"name": "wsVehiculo UPD",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "patente",
+					"value": "SS347HH",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "marca",
+					"value": "CHEVROLET",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "modelo",
+					"value": "S10b",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "tipoDispositivo",
+					"value": "1",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "id",
+					"value": "A8U0009AAADFFF001910",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idVehiculo",
+					"value": "13",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MTAsImJDb25maXJtYWRvIjoiMCIsImZDdWVudGEiOjMsImlhdCI6MTQ2NTMxMjE2MywiZXhwIjoxNDY1Mzk4NTYzfQ.pqTWyh7uY9nhdv-k6vt7GglYhuIygnYzn12FFbW1c1E\n",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsVehiculo",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "7088bea0-5ce5-ac03-d475-ea2c7de2c73a",
+			"folder": null,
+			"name": "wsLogin",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "email",
+					"value": "f@f.com",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "f",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": null,
+			"description": "",
+			"headers": "",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsLogin",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "831f7ee4-8fb1-6277-ca56-f0a8e6729ef9",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3MTk1NTg4OSwiZXhwIjoxNDc0OTc5ODg5fQ.7vpkkmxeVX0rxmIYsVF9fYQptEUq8paeyWQVX7nufSg\n",
+			"url": "https://api.appcar.com.ar/wsScoreVehiculo",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-08-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-08-31",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1471981656810,
+			"name": "wsScoreVehiculo Gonza",
+			"description": "",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "96f6637c-7aa3-9b5e-3709-8febb6e6bbda",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MSwiYkNvbmZpcm1hZG8iOiIwIiwiaWF0IjoxNDY2MDc5ODc1LCJleHAiOjE0NjkxMDM4NzV9.x6n9Nls3ppPtuYXWld-diCUY6OiHT07S0pa3aC-nugk\n",
+			"url": "https://api.appcar.com.ar/wsScore",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-04-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-04-30",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idUsuario",
+					"value": "3",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "wsScore idUsuario",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1466293718896,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "c8d43e1e-c87f-a4a9-e9b6-036f70ee652e",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjMsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ2OTQ1OTg4NSwiZXhwIjoxNDcyNDgzODg1fQ.9vUgRj8XwMggHpHMamcDxz2jHDQ8RTlwppruzXRr1vg\n",
+			"url": "https://api.appcar.com.ar/wsScoreVehiculo",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-08-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-08-31",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idVehiculo",
+					"value": "56",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"time": 1471237966488,
+			"name": "wsScoreVehiculo Andres",
+			"description": "",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"folder": null,
+			"rawModeData": null,
+			"descriptionFormat": "html"
+		},
+		{
+			"folder": null,
+			"id": "c92804fa-46c7-0175-1666-edaf6b70755c",
+			"name": "wsLogin Andres",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "email",
+					"value": "andres.galaz@gmail.com",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "Asdfgh95",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsLogin",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "cdee46a4-e145-0803-c541-eb361eacaabc",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjEsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ2ODg4MzA3OSwiZXhwIjoxNDcxOTA3MDc5fQ.UH5HRkk6nH_q86acMsv7oM1NyRwRjv_58KCrU5NNFuA\n",
+			"url": "https://api.appcar.com.ar/wsScore",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-08-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-08-31",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"version": 2,
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"time": 1471618559916,
+			"name": "wsScore Gonza",
+			"description": "",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"responses": [],
+			"folder": null,
+			"rawModeData": null,
+			"descriptionFormat": "html"
+		},
+		{
+			"id": "cf5d7aee-6f34-7586-f44f-8d6f76505874",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MSwiYkNvbmZpcm1hZG8iOiIwIiwiaWF0IjoxNDY2MDc5ODc1LCJleHAiOjE0NjkxMDM4NzV9.x6n9Nls3ppPtuYXWld-diCUY6OiHT07S0pa3aC-nugk\n",
+			"url": "https://api.appcar.com.ar/wsEventosViaje",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"data": [
+				{
+					"key": "idViaje",
+					"value": "1",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "wsEventosViaje",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1466293553754,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"folder": null,
+			"id": "df32f078-7722-2199-6d9c-c2fc651ec6e1",
+			"name": "wsVehiculo INS Andres",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "patente",
+					"value": "AA103FG",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "tipoDispositivoX",
+					"value": "1",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idX",
+					"value": "A8U0009AAADFFF001910",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idVehiculoX",
+					"value": "13",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MjMsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ3MDE4MjIwNiwiZXhwIjoxNDczMjA2MjA2fQ.YzMu52p8w_L8itlWJSdkLW-8s3aLNour48dooxpVuk4\n",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsVehiculo",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"folder": null,
+			"id": "e8bc288f-3e5f-ca8b-8206-90276f1795e2",
+			"name": "wsScoreVehiculo Fabi",
+			"dataMode": "urlencoded",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-07-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-07-30",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idVehiculo_no",
+					"value": "33",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MTgsImJDb25maXJtYWRvIjoiMSIsImlhdCI6MTQ3MDAwMjg4NCwiZXhwIjoxNDczMDI2ODg0fQ.B5gn-j_jaUEz1rm2RMS4yWapaPIQ1aDf6Xs0bcGuyl0\n",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsScoreVehiculo",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "ebea902c-804e-2fec-fc9f-ca2dae42b5f1",
+			"folder": null,
+			"name": "wsReToken",
+			"dataMode": "urlencoded",
+			"data": [],
+			"rawModeData": null,
+			"descriptionFormat": "html",
+			"description": "",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MSwiYkNvbmZpcm1hZG8iOiIwIiwiaWF0IjoxNDY3NjQ0NjI2LCJleHAiOjE0NzA2Njg2MjZ9.2QAd6m8FjpQypbV0HMRvSBtlPkXgYCXOmpUXnvi2uBA\n",
+			"method": "POST",
+			"pathVariables": {},
+			"url": "https://api.appcar.com.ar/wsReToken",
+			"preRequestScript": "",
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c"
+		},
+		{
+			"id": "f13e8023-b3dd-e2ec-cb6a-7c822c8c6c51",
+			"headers": "Authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwVXN1YXJpbyI6MzAsImJDb25maXJtYWRvIjoiMCIsImlhdCI6MTQ2ODg2NzE5NywiZXhwIjoxNDcxODkxMTk3fQ.uDzcZ3s9ZqFXd6866qBKdQ5nUWoZMgrxIlhcNzolxSU\n",
+			"url": "https://api.appcar.com.ar/wsScoreVehiculo",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"collectionId": "54c1e721-ac17-667f-5a06-4428579a577c",
+			"data": [
+				{
+					"key": "fechaInicio",
+					"value": "2016-07-01",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "fechaFin",
+					"value": "2016-07-30",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "idVehiculo",
+					"value": "51",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "wsScoreVehiculo",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1466293752458,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"currentHelper": "normal",
+			"helperAttributes": "{}",
+			"folder": null,
+			"rawModeData": null
+		}
+	]
+}

@@ -1,0 +1,4 @@
+DROP PROCEDURE IF EXISTS calculaScoreDiario;
+DROP PROCEDURE IF EXISTS calculaScoreByRango;
+DROP PROCEDURE IF EXISTS calculaScoreViaje;
+
