@@ -7,6 +7,5 @@ BEGIN
         DELETE FROM tUsuarioVehiculo
 	    WHERE pVehiculo = OLD.pVehiculo;
     END IF;
-    SET NEW.tModif = now();
 END //
 DELIMITER ;
