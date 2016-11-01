@@ -1,0 +1,8 @@
+DROP TRIGGER IF EXISTS trgUsuarioUpd;
+DELIMITER //
+CREATE TRIGGER trgUsuarioUpd BEFORE UPDATE
+    ON tUsuario FOR EACH ROW
+BEGIN
+    SET NEW.tModif = now();
+END //
+DELIMITER ;
