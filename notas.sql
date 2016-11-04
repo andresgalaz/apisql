@@ -1,3 +1,4 @@
+-- 
 select * from tCuenta where fUsuarioTitular=3;
 
 -- Lista duplicados de titular por cuenta
@@ -13,9 +14,8 @@ select * from tUsuario u left outer join tCuentaUsuario c on c.pUsuario = u.pUsu
 where c.pCuenta is null;
 
 -- Lista cuentas con mas de un titular
-select pCuenta, bTitular,count(*) from tCuentaUsuario 
+select pCuenta, bTitular,count(*) from tCuentaUsuario
 group by pCuenta, bTitular;
 
 -- Lista cuentas sin usuarios asignados
 select * from tCuenta c where not exists ( select '1' from tCuentaUsuario u where u.pCuenta = c.pCuenta )
-
