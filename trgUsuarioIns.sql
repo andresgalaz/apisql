@@ -1,4 +1,4 @@
-﻿DROP TRIGGER `score`.`trgUsuarioIns`;
+DROP TRIGGER `score`.`trgUsuarioIns`;
 CREATE TRIGGER `score`.`trgUsuarioIns` AFTER INSERT
     ON score.tUsuario FOR EACH ROW
 BEGIN

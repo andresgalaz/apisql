@@ -1,4 +1,4 @@
-﻿drop view if exists vSiniestro;
+DROP view if exists vSiniestro;
 create view vSiniestro as
 select sini.pSiniestro      , sini.fVehiculo        , sini.nLG, sini.nLT
      , sini.tSiniestro      , sini.bLesiones        , veh.cPatente

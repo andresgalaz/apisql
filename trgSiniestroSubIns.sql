@@ -1,4 +1,4 @@
-﻿DROP TRIGGER IF EXISTS trgSiniestroSubIns;
+DROP TRIGGER IF EXISTS trgSiniestroSubIns;
 DELIMITER //
 CREATE TRIGGER trgSiniestroSubIns
     BEFORE INSERT ON tSiniestroSub FOR 

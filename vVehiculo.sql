@@ -1,4 +1,4 @@
-﻿DROP VIEW IF EXISTS vVehiculo;
+DROP VIEW IF EXISTS vVehiculo;
 create VIEW vVehiculo AS
 select	  v.pVehiculo			AS fVehiculo
 		, v.cPatente			AS cPatente
