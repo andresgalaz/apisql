@@ -1,15 +1,14 @@
-DROP PROCEDURE IF EXISTS migraEventos;
+DROP PROCEDURE IF EXISTS prMigraEventos;
 DELIMITER //
-CREATE PROCEDURE migraEventos ( )
+CREATE PROCEDURE prMigraEventos ( )
 BEGIN
 	
     DROP TEMPORARY TABLE IF EXISTS tmpEvento;
-	CREATE TEMPORARY TABLE tmpEvento AS  
-	SELECT w.* 
+    CREATE TEMPORARY TABLE tmpEvento AS  
+    SELECT w.* 
     FROM   wEvento w 
            INNER JOIN tUsuario  u ON u.pUsuario  = w.fUsuario
-           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo
-    WHERE  w.bProcesado=0
+           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo;
 	
     INSERT INTO tEvento 
          ( nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT,
@@ -25,4 +24,4 @@ BEGIN
 
 END //
 DELIMITER ;
--- call migraEventos(now());
+-- call prMigraEventos(now());
