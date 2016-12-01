@@ -1,0 +1,8 @@
+DROP TRIGGER IF EXISTS trgScoreDiaUpd;
+DELIMITER //
+CREATE TRIGGER trgScoreDiaUpd BEFORE UPDATE
+    ON tScoreDia FOR EACH ROW
+BEGIN
+    SET NEW.tModif = now();
+END //
+DELIMITER ;
