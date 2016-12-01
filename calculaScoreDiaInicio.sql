@@ -1,8 +1,11 @@
 DROP PROCEDURE IF EXISTS calculaScoreDiaInicio;
 DELIMITER //
-CREATE PROCEDURE calculaScoreDiaInicio (in prmDia date)			integer;
+CREATE PROCEDURE calculaScoreDiaInicio (in prmDia date)
 BEGIN
-    -- Parametros
+-- Inicializa la tabla tScoreDia, insertando un registro por día por cada relación
+-- usuario / vehiculo de la tabla tUsuarioVehiculo. Se agregan dìas solo para la fecha
+-- de activación del del vehículo en adelante
+	-- Parametros
 	DECLARE vdDia				date;
 	DECLARE vdDiaSgte			date;
 
@@ -16,7 +19,8 @@ BEGIN
 	-- Acumuladores
 	DECLARE vpVehiculo			integer;
 	DECLARE vpUsuario			integer;
-	DECLARE vnCount			integer;
+	DECLARE vnCount				integer;
+	DECLARE vnRegIns			integer DEFAULT 0;
 
 
 	SELECT 'MSG 100', 'Inicio proceso CurEvento', now();
@@ -28,7 +32,6 @@ BEGIN
 		-- Cursor Eventos
 		-- Suma los puntajes de cada tipo de evento y cuenta los días de uso
 		DECLARE eofCurEvento integer DEFAULT 0;
-		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 		DECLARE CurEvento CURSOR FOR
 			SELECT uv.pVehiculo, uv.pUsuario
 			     , COUNT( sd.pScoreDia )	AS vnEventos
@@ -37,23 +40,25 @@ BEGIN
 										AND sd.fUsuario  = uv.pUsuario
 										AND sd.dFecha    >= vdDia
 										AND sd.dFecha    <  vdDiaSgte
+			WHERE  DATE( uv.tActiva ) <= vdDia
 			GROUP BY uv.pVehiculo, uv.pUsuario;
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vpVehiculo, vpUsuario, vnCount;
 		WHILE NOT eofCurEvento DO
 			-- No hay registros para este día, se inserta un registro en cero
 			IF vnCount = 0 THEN
+				SET vnRegIns = vnRegIns + 1;
 				INSERT INTO tScoreDia
-						( fVehiculo    		, fUsuario		, dFecha )
-				VALUES	( vpVehiculo     	, vpCuenta		, vdDia  );
+						( fVehiculo		, fUsuario	, dFecha )
+				VALUES	( vpVehiculo	, vpUsuario	, vdDia  );
 			END IF;
 			-- Siguiente registro
 			FETCH CurEvento INTO vpVehiculo, vpUsuario, vnCount;
 		END WHILE;
 		CLOSE CurEvento;
-		SELECT 'MSG 500', 'Fin CurEvento', now();
+		SELECT 'MSG 500', 'Fin CurEvento', now(), vnRegIns 'Registros';
 	END; -- FIn cursor eventos
 END //
 DELIMITER ;
--- call calculaScoreDiaInicio(now());
