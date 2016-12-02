@@ -1,6 +1,6 @@
-DROP PROCEDURE IF EXISTS calculaScoreDia;
+DROP PROCEDURE IF EXISTS prCalculaScoreDia;
 DELIMITER //
-CREATE PROCEDURE calculaScoreDia (in prmDia date)			integer;
+CREATE PROCEDURE prCalculaScoreDia (in prmDia date, in prmVehiculo integer, in prmUsuario integer )
 BEGIN
     -- Parametros
 	DECLARE vdDia				date;
@@ -22,6 +22,9 @@ BEGIN
 	DECLARE vnKms				decimal(8,2);
 	DECLARE vnHoraPunta			integer;
 	DECLARE vnEventos			integer;
+	
+	-- Contadores
+	DECLARE vnRegs				integer;
 
 	SET vdDia = prmDia;
 	SET vdDiaSgte = ADDDATE( vdDia, INTERVAL 1 DAY);
@@ -30,19 +33,19 @@ BEGIN
 		-- Cursor Eventos
 		-- Suma los puntajes de cada tipo de evento y cuenta los días de uso
 		DECLARE eofCurEvento integer DEFAULT 0;
-		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 		DECLARE CurEvento CURSOR FOR
-			SELECT ev.fVehiculo, ev.fUsuario
-				 , SUM( CASE ev.fTpEvento WHEN kEventoAceleracion	THEN ev.nPuntaje ELSE 0 END ) AS nSumaAceleracion
+			SELECT SUM( CASE ev.fTpEvento WHEN kEventoAceleracion	THEN ev.nPuntaje ELSE 0 END ) AS nSumaAceleracion
 				 , SUM( CASE ev.fTpEvento WHEN kEventoFrenada		THEN ev.nPuntaje ELSE 0 END ) AS nSumaFrenada
 				 , SUM( CASE ev.fTpEvento WHEN kEventoVelocidad		THEN ev.nPuntaje ELSE 0 END ) AS nSumaVelocidad
 				 , SUM( CASE ev.fTpEvento WHEN kEventoFin			THEN ev.nValor   ELSE 0 END ) AS nKms
 				 , SUM( esHoraPunta( ev.tEvento ))	AS vnHoraPunta
 				 , COUNT( * )						AS vnEventos
 			FROM   tEvento ev
-			WHERE  ev.tEvento >= vdDia
-			AND    ev.tEvento <  vdDiaSgte
-			GROUP BY ev.fVehiculo, ev.fUsuario;
+			WHERE  ev.fVehiculo = prmVehiculo
+			AND	   ev.fUsuario  = prmUsuario
+			AND	   ev.tEvento  >= vdDia
+			AND    ev.tEvento   < vdDiaSgte;
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vfVehiculo, vfUsuario
@@ -52,42 +55,56 @@ BEGIN
 
 			-- No hubieron eventos este día
 			IF vnEventos = 0 THEN
+				-- Ajusta booleano
+				SET vnEventos			= 0;
 				SET vnHoraPunta         = 0;
 				SET vnKms               = 0;
 				SET vnSumaVelocidad     = 0;
 				SET vnSumaFrenada       = 0;
 				SET vnSumaAceleracion   = 0;
+			ELSE
+				SET vnEventos			= 1;
+			END IF;
+			
+			-- Ajusta booleano
+			IF vnHoraPunta > 0 THEN
+				SET vnHoraPunta         = 1;
 			END IF;
 
+			-- Actualiza
+			UPDATE tScoreDia
+			SET	   nKms				= vnKms
+				 , nSumaFrenada		= vnSumaFrenada
+				 , nSumaAceleracion	= vnSumaAceleracion
+				 , nSumaVelocidad	= vnSumaVelocidad
+				 , bHoraPunta		= vnHoraPunta
+				 , bUso				= vnEventos
+			WHERE  fVehiculo = prmVehiculo
+			AND	   fUsuario  = prmUsuario
+			AND	   dFecha	 = vdDia;
+			
+			SET vnRegs = ROW_COUNT();
+			-- Si no actualizó nada, es porque no existe el registro, esto
+			-- es poco probable porque el proceso calculaScoreDiaInicio crea
+			-- a la hora 00:00 todos los registros de usuario vehiculo en cero
+			IF vnRegs = 0 THEN
 				INSERT INTO tScoreDia
-				( fVehiculo      	, fUsuario
-				, dPeriodo			, nKms
-				, nSumaFrenada  	 	, nSumaAceleracion		, nSumaVelocidad
-				, nFrenada	   	 	, nAceleracion			, nVelocidad
-				, nTotalDias			, nDiasUso				, nDiasPunta
-				, nScore				, nDescuento			, nDescuentoKM
-				, nDescuentoPtje
-				, nDescuentoSinUso
-				, nDescuentoNoUsoPunta	)
-				VALUES ( vpVehiculo     	, vpCuenta
-				, dMes				, round(vnKms,2)
-				, vnSumaFrenada  	, vnSumaAceleracion		, vnSumaVelocidad
-				, vnPtjFrenada   	, vnPtjAceleracion		, vnPtjVelocidad
-				, vnTotalDias		, vnDiasUso				, vnDiasPunta
-				, round( vnScore, 2) , round( vnDescuento, 2), round( vnDescuentoKM, 2 )
-				, round( vnDescuentoPtje, 2)
-				, round( ( vnTotalDias - vnDiasUso ) * kDescDiaSinUso, 2 )
-				, round( ( vnDiasUso - vnDiasPunta ) * kDescNoUsoPunta, 2 )
-				);
-				SET vpScoreDia = LAST_INSERT_ID();
-				-- Siguiente cuenta
-				FETCH CurEvento INTO vfVehiculo, vfUsuario
-								   , vnSumaAceleracion, vnSumaFrenada, vnSumaVelocidad, vnKms
-								   , vnHoraPunta, vnEventos;
+						( fVehiculo      	, fUsuario			, dFecha
+						, nKms				, nSumaFrenada  	 	
+						, nSumaAceleracion	, nSumaVelocidad
+						, bHoraPunta		, bUso )
+				VALUES	( vpVehiculo     	, vpCuenta			, vdDia
+						, vnKms				, vnSumaFrenada
+						, vnSumaAceleracion	, vnSumaVelocidad
+				 		, vnHoraPunta		, vnEventos );
+			END IF;
+			FETCH CurEvento INTO vfVehiculo, vfUsuario
+							   , vnSumaAceleracion, vnSumaFrenada, vnSumaVelocidad, vnKms
+							   , vnHoraPunta, vnEventos;
 		END WHILE;
 		CLOSE CurEvento;
 		SELECT 'MSG 500', 'Fin CurEvento', now(), vpScoreDia;
-	END; -- FIn cursor eventos
+	END; -- Fin cursor eventos
 END //
 DELIMITER ;
--- call calculaScoreDia(now());
+-- call prCalculaScoreDia(now());

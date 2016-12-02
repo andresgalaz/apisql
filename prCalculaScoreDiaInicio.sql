@@ -1,6 +1,6 @@
-DROP PROCEDURE IF EXISTS calculaScoreDiaInicio;
+DROP PROCEDURE IF EXISTS prCalculaScoreDiaInicio;
 DELIMITER //
-CREATE PROCEDURE calculaScoreDiaInicio (in prmDia date)
+CREATE PROCEDURE prCalculaScoreDiaInicio (in prmDia date)
 BEGIN
 -- Inicializa la tabla tScoreDia, insertando un registro por día por cada relación
 -- usuario / vehiculo de la tabla tUsuarioVehiculo. Se agregan dìas solo para la fecha
@@ -40,7 +40,7 @@ BEGIN
 										AND sd.fUsuario  = uv.pUsuario
 										AND sd.dFecha    >= vdDia
 										AND sd.dFecha    <  vdDiaSgte
-			WHERE  DATE( uv.tActiva ) <= vdDia
+			WHERE  uv.tActiva < vdDiaSgte
 			GROUP BY uv.pVehiculo, uv.pUsuario;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
@@ -51,14 +51,14 @@ BEGIN
 			IF vnCount = 0 THEN
 				SET vnRegIns = vnRegIns + 1;
 				INSERT INTO tScoreDia
-						( fVehiculo		, fUsuario	, dFecha )
-				VALUES	( vpVehiculo	, vpUsuario	, vdDia  );
+						( fVehiculo	, fUsuario , dFecha )
+				VALUES	( vpVehiculo, vpUsuario, vdDia  );
 			END IF;
 			-- Siguiente registro
 			FETCH CurEvento INTO vpVehiculo, vpUsuario, vnCount;
 		END WHILE;
 		CLOSE CurEvento;
 		SELECT 'MSG 500', 'Fin CurEvento', now(), vnRegIns 'Registros';
-	END; -- FIn cursor eventos
+	END; -- Fin cursor eventos
 END //
 DELIMITER ;
