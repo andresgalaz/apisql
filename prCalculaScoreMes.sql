@@ -25,9 +25,9 @@ BEGIN
 	DECLARE vnPorcFrenada 		decimal(10,2);
 	DECLARE vnPorcAceleracion 	decimal(10,2);
 	DECLARE vnPorcVelocidad 	decimal(10,2);
-	DECLARE vnPtjVelocidad		decimal(10,2);
-	DECLARE vnPtjFrenada		decimal(10,2);
-	DECLARE vnPtjAceleracion	decimal(10,2);
+	DECLARE vnPtjVelocidad		decimal(10,2) default 0;
+	DECLARE vnPtjFrenada		decimal(10,2) default 0;
+	DECLARE vnPtjAceleracion	decimal(10,2) default 0;
 	DECLARE vnDescDiaSinUso		decimal(10,2);
 	DECLARE vnDescNoHoraPunta	decimal(10,2);
 	DECLARE vnDiasUso			integer;
@@ -61,11 +61,6 @@ BEGIN
     AND    t.dFecha >= vdMes
     AND    t.dFecha  < vdMesSgte;  
 
-    -- Se considera la fracción de días desde el inicio de actividad del vehículo
-    -- Normalmente el inicio es el primer día del mes, pero no para los vehículos 
-    -- que entran en actividad en medio del mes en análisis (prmMes)
-	SET nFactorDias = vnDiasTotal / DATEDIFF( vdMesSgte, vdInicio );
-
 	IF vnDiasTotal = 0 THEN
 		SET vnDiasUso           = 0;
 		SET vnDiasPunta         = 0;
@@ -73,18 +68,23 @@ BEGIN
 		SET vnSumaVelocidad     = 0;
 		SET vnSumaFrenada       = 0;
 		SET vnSumaAceleracion   = 0;
+        SET vdInicio            = vdMes;
+    	SET vnKmsPond           = 0;
 	ELSE
 		IF vnKms > 0 THEN
 			SET vnPtjVelocidad	 = vnSumaVelocidad   * 100 / vnKms;
 			SET vnPtjFrenada	 = vnSumaFrenada     * 100 / vnKms;
    			SET vnPtjAceleracion = vnSumaAceleracion * 100 / vnKms;
-		ELSE
-			SET vnPtjVelocidad	 = 0;
-			SET vnPtjFrenada	 = 0;
-			SET vnPtjAceleracion = 0;
 		END IF;
+        -- Se considera la fracción de días desde el inicio de actividad del vehículo
+        -- Normalmente el inicio es el primer día del mes, pero no para los vehículos 
+        -- que entran en actividad en medio del mes en análisis (prmMes)
+    	SET nFactorDias = vnDiasTotal / DATEDIFF( vdMesSgte, vdInicio );
+    	-- Trae el descuento por kilómetros recorridos en el mes (o mes ponderado)
+    	-- si vnDescuento resulta negativo, en realidad es un recargo
+    	SET vnKmsPond = vnKms / nFactorDias;
 	END IF;
-
+    
     -- De acuerdo al tipo de evento, se hace la conversión usando la tablas de
     -- rangos por puntaje
 	SELECT nValor INTO vnPtjVelocidad
@@ -102,9 +102,6 @@ BEGIN
 	WHERE  fTpevento = kEventoAceleracion
 	AND    nInicio <= vnPtjAceleracion AND vnPtjAceleracion < nFin;
 
-	-- Trae el descuento por kilómetros recorridos en el mes (o mes ponderado)
-	-- si vnDescuento resulta negativo, en realidad es un recargo
-	SET vnKmsPond = vnKms / nFactorDias;
 	SELECT d.nValor
 	INTO   vnDescuentoKM
 	FROM   tRangoDescuento d
@@ -141,7 +138,11 @@ BEGIN
 	IF vnDescuento < -kDescLimite THEN
 		SET vnDescuento = -kDescLimite;
 	END IF;
-    
+
+    DELETE FROM tScoreMes 
+    WHERE  fVehiculo = prmVehiculo
+    AND    dPeriodo  = vdMes;
+
 	INSERT INTO tScoreMes
 		   ( fVehiculo      	, fCuenta
 		   , dPeriodo			, nKms

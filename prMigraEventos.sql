@@ -2,9 +2,7 @@
 DELIMITER //
 CREATE PROCEDURE prMigraEventos ( )
 BEGIN
-
     -- SELECT '100 Inicio', now();
-    
     DROP TEMPORARY TABLE IF EXISTS tmpEvento;
     CREATE TEMPORARY TABLE tmpEvento AS  
     SELECT w.* 
@@ -19,8 +17,7 @@ BEGIN
 	DELETE FROM tEvento
     WHERE  nIdViaje in ( SELECT DISTINCT tmp.nIdViaje
                          FROM   tmpEvento tmp );
-    -- SELECT '300 Elimina los viajes que ya existen', now();
-                         
+    -- SELECT '300 Elimina los viajes que ya existen', now();                     
     INSERT INTO tEvento 
          ( nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT,
            cCalle, nVelocidadMaxima, nValor, fVehiculo, fUsuario,
@@ -30,9 +27,31 @@ BEGIN
            nPuntaje, tModif 
     FROM   tmpEvento;
     -- SELECT '400 Inserta eventos', now();
+
+	BEGIN
+		-- Claves
+		DECLARE vnIdViaje	integer;
+		-- Cursor Eventos por Viaje
+		DECLARE eofCurEvento integer DEFAULT 0;
+		DECLARE CurEvento CURSOR FOR
+			SELECT DISTINCT w.nIdViaje
+			FROM   tmpEvento w;
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
+
+        -- SELECT '510 Abre cursor', now();
+		OPEN  CurEvento;
+		FETCH CurEvento INTO vnIdViaje;
+        -- SELECT '520 Inicio cursor', now();
+		WHILE NOT eofCurEvento DO
+			-- Calcula Score diario
+			CALL prCalculaScoreViaje( vnIdViaje );
+			FETCH CurEvento INTO vnIdViaje;
+		END WHILE;
+		CLOSE CurEvento;
+	END; -- Fin cursor eventos
     
 	BEGIN
-		-- Acumuladores
+		-- Claves
 		DECLARE vpVehiculo	integer;
 		DECLARE vpUsuario	integer;
 		DECLARE vdFecha	    date;
@@ -42,9 +61,7 @@ BEGIN
 		DECLARE eofCurEvento integer DEFAULT 0;
 		DECLARE CurEvento CURSOR FOR
 			SELECT DISTINCT w.fVehiculo, w.fUsuario, date( w.tEvento )
-			FROM   wEvento w
-		           INNER JOIN tUsuario  u ON u.pUsuario  = w.fUsuario
-		           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo;
+			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
         -- SELECT '510 Abre cursor', now();
@@ -62,7 +79,7 @@ BEGIN
     -- Calcula Score Mensual, solo de los vehículos involucrados, viene después del
     -- cálculo diario porque para calcular el mensual, se utiliza la tabla tScoreDia
 	BEGIN
-		-- Acumuladores
+		-- Claves
 		DECLARE vpVehiculo	integer;
 		DECLARE vcPeriodo	varchar(20);
 		-- Cursor Eventos
@@ -71,9 +88,7 @@ BEGIN
 		DECLARE eofCurEvento integer DEFAULT 0;
 		DECLARE CurEvento CURSOR FOR
 			SELECT DISTINCT concat(substr(( w.tEvento ),1,8),'01'), w.fVehiculo
-			FROM   wEvento w
-		           INNER JOIN tUsuario  u ON u.pUsuario  = w.fUsuario
-		           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo;
+			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
         -- SELECT '510 Abre cursor', now();
@@ -101,9 +116,7 @@ BEGIN
 		DECLARE eofCurEvento integer DEFAULT 0;
 		DECLARE CurEvento CURSOR FOR
 			SELECT DISTINCT concat(substr(( w.tEvento ),1,8),'01'), w.fVehiculo, w.fUsuario
-			FROM   wEvento w
-		           INNER JOIN tUsuario  u ON u.pUsuario  = w.fUsuario
-		           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo;
+			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
         -- SELECT '510 Abre cursor', now();
@@ -122,8 +135,6 @@ BEGIN
   
 	-- Limpia tabla temporal
     DELETE FROM wEvento 
-    -- Por problema con el rendimiento con esta sentencia,
-    -- no se guardan los registros no migrados con errores
     WHERE  pEvento in ( select t.pEvento from tmpEvento t );
     -- SELECT '600 Borra registros migrados', now();
 

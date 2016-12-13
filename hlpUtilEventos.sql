@@ -5,16 +5,20 @@ truncate table tScoreMesConductor;
 ALTER TABLE tScoreMesConductor AUTO_INCREMENT=1;
 truncate table tScoreDia;
 ALTER TABLE tScoreDia AUTO_INCREMENT=1;
-call prResetScoreDia();
 truncate table tEvento;
 ALTER TABLE tEvento AUTO_INCREMENT=1;
 truncate table wEvento;
 ALTER TABLE wEvento AUTO_INCREMENT=1;
+
+-- Llena las tablas de Score con valores en cero para cada mes o dia, segun corresponda
+call prResetScore();
+
 */
 select 'T',count(*) from tEvento t union all
-select 'S',count(*) from tScoreDia t union all
-select 'M',count(*) from tScoreMes t union all
-select 'C',count(*) from tScoreMesConductor t union all
+select 'I',sum(t.nValor) from tEvento t where t.fTpEvento = 1 union all
+select 'SD',count(*) from tScoreDia t union all
+select 'SM',count(*) from tScoreMes t union all
+select 'SMC',count(*) from tScoreMesConductor t union all
 select 'W',count(*) from wEvento t ;
 
 -- Muestra los meses que tienen eventos
@@ -55,4 +59,23 @@ from   score.tScoreMes m1
 left outer join tScoreMes m2 
 on  m2.fVehiculo = m1.fVehiculo
 and m2.dPeriodo  = m1.dPeriodo
-where m1.dPeriodo >= '2016-12-01'
+where m1.dPeriodo >= '2016-12-01';
+
+select m1.fVehiculo            , m1.fUsuario, m1.dPeriodo
+, m1.nScore               , m2.nScore
+, m1.nSumaVelocidad       , m2.nSumaVelocidad
+, m1.nVelocidad           , m2.nVelocidad
+, m1.nSumaFrenada         , m2.nSumaFrenada
+, m1.nFrenada             , m2.nFrenada
+, m1.nSumaAceleracion     , m2.nSumaAceleracion
+, m1.nAceleracion         , m2.nAceleracion
+, m1.nKms                 , m2.nKms
+, m1.nDiasPunta           , m2.nDiasPunta
+, m1.nTotalDias           , m2.nTotalDias
+, m1.nDiasUso             , m2.nDiasUso
+from   score.tScoreMesConductor m1 
+left outer join tScoreMesConductor m2 
+on  m2.fVehiculo = m1.fVehiculo
+and m2.fUsuario  = m1.fUsuario
+and m2.dPeriodo  = m1.dPeriodo
+    where m1.dPeriodo >= '2016-12-01'
