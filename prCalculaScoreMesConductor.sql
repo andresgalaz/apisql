@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prCalculaScoreMesConductor;
+DROP PROCEDURE IF EXISTS prCalculaScoreMesConductor;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreMesConductor (in prmMes date, in prmVehiculo integer, in prmUsuario integer )
 BEGIN

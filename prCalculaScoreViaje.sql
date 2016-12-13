@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prCalculaScoreViaje;
+DROP PROCEDURE IF EXISTS prCalculaScoreViaje;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreViaje (in prmViaje integer )
 BEGIN

@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 truncate table tScoreMes;
 ALTER TABLE tScoreMes AUTO_INCREMENT=1;
 truncate table tScoreMesConductor;
