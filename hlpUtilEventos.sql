@@ -1,6 +1,8 @@
 ﻿/* 
 truncate table tScoreMes;
-
+ALTER TABLE tScoreMes AUTO_INCREMENT=1;
+truncate table tScoreMesConductor;
+ALTER TABLE tScoreMesConductor AUTO_INCREMENT=1;
 truncate table tScoreDia;
 ALTER TABLE tScoreDia AUTO_INCREMENT=1;
 call prResetScoreDia();
@@ -9,11 +11,10 @@ ALTER TABLE tEvento AUTO_INCREMENT=1;
 truncate table wEvento;
 ALTER TABLE wEvento AUTO_INCREMENT=1;
 */
-select t.* from tEvento t order by t.tEvento desc;
-select t.* from wEvento t order by t.tEvento desc;
 select 'T',count(*) from tEvento t union all
 select 'S',count(*) from tScoreDia t union all
 select 'M',count(*) from tScoreMes t union all
+select 'C',count(*) from tScoreMesConductor t union all
 select 'W',count(*) from wEvento t ;
 
 -- Muestra los meses que tienen eventos

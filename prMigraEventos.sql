@@ -58,6 +58,66 @@ BEGIN
 		END WHILE;
 		CLOSE CurEvento;
 	END; -- Fin cursor eventos
+    
+    -- Calcula Score Mensual, solo de los vehículos involucrados, viene después del
+    -- cálculo diario porque para calcular el mensual, se utiliza la tabla tScoreDia
+	BEGIN
+		-- Acumuladores
+		DECLARE vpVehiculo	integer;
+		DECLARE vcPeriodo	varchar(20);
+		-- Cursor Eventos
+		-- Busca los registros unicos de Vehiculo, Periodo de evento (Dia uno del mes)
+		-- para calcular el score mensual
+		DECLARE eofCurEvento integer DEFAULT 0;
+		DECLARE CurEvento CURSOR FOR
+			SELECT DISTINCT concat(substr(( w.tEvento ),1,8),'01'), w.fVehiculo
+			FROM   wEvento w
+		           INNER JOIN tUsuario  u ON u.pUsuario  = w.fUsuario
+		           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo;
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
+
+        -- SELECT '510 Abre cursor', now();
+		OPEN  CurEvento;
+		FETCH CurEvento INTO vcPeriodo, vpVehiculo;
+        -- SELECT '520 Inicio cursor', now();
+		WHILE NOT eofCurEvento DO
+			-- Calcula Score Mensual
+			CALL prCalculaScoreMes( vcPeriodo, vpVehiculo );
+			FETCH CurEvento INTO vcPeriodo, vpVehiculo;
+		END WHILE;
+		CLOSE CurEvento;
+	END; -- Fin cursor eventos
+
+    -- Calcula Score Mensual por Conductor (usuario), solo de los usuarios involucrados
+    -- viene después del cálculo diario porque se utiliza la tabla tScoreDia
+	BEGIN
+		-- Acumuladores
+		DECLARE vpVehiculo	integer;
+		DECLARE vpUsuario	integer;
+		DECLARE vcPeriodo	varchar(20);
+		-- Cursor Eventos
+		-- Busca los registros unicos de Vehiculo, Periodo de evento (Dia uno del mes)
+		-- para calcular el score mensual
+		DECLARE eofCurEvento integer DEFAULT 0;
+		DECLARE CurEvento CURSOR FOR
+			SELECT DISTINCT concat(substr(( w.tEvento ),1,8),'01'), w.fVehiculo, w.fUsuario
+			FROM   wEvento w
+		           INNER JOIN tUsuario  u ON u.pUsuario  = w.fUsuario
+		           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo;
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
+
+        -- SELECT '510 Abre cursor', now();
+		OPEN  CurEvento;
+		FETCH CurEvento INTO vcPeriodo, vpVehiculo, vpUsuario;
+        -- SELECT '520 Inicio cursor', now();
+		WHILE NOT eofCurEvento DO
+			-- Calcula Score Mes por Condductor
+			CALL prCalculaScoreMesConductor( vcPeriodo, vpVehiculo, vpUsuario );
+			FETCH CurEvento INTO vcPeriodo, vpVehiculo, vpUsuario;
+		END WHILE;
+		CLOSE CurEvento;
+	END; -- Fin cursor eventos
+    
     -- SELECT '530 Fin cursor', now();
   
 	-- Limpia tabla temporal
