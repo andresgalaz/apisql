@@ -1,4 +1,4 @@
-DROP PROCEDURE IF EXISTS prCalculaScoreDiaInicio;
+﻿DROP PROCEDURE IF EXISTS prCalculaScoreDiaInicio;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreDiaInicio (in prmDia date)
 BEGIN
@@ -22,8 +22,7 @@ BEGIN
 	DECLARE vnCount				integer;
 	DECLARE vnRegIns			integer DEFAULT 0;
 
-
-	SELECT 'MSG 100', 'Inicio proceso CurEvento', now();
+	-- SELECT 'MSG 100', 'Inicio proceso CurEvento', now();
 	-- Ajusta filtro del Where
 	SET vdDia = prmDia;
 	SET vdDiaSgte = ADDDATE( vdDia, INTERVAL 1 DAY);
@@ -58,7 +57,7 @@ BEGIN
 			FETCH CurEvento INTO vpVehiculo, vpUsuario, vnCount;
 		END WHILE;
 		CLOSE CurEvento;
-		SELECT 'MSG 500', 'Fin CurEvento', now(), vnRegIns 'Registros';
+		-- SELECT 'MSG 500', 'Fin CurEvento', now(), vnRegIns 'Registros';
 	END; -- Fin cursor eventos
 END //
 DELIMITER ;
