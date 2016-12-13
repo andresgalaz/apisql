@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS score_desa.calculaScoreMesConductorVeh;
+DROP PROCEDURE IF EXISTS score_desa.calculaScoreMesConductorVeh;
 CREATE PROCEDURE score_desa.`calculaScoreMesConductorVeh`(in prmMes date)
 BEGIN
 	DECLARE kDescDiaSinUso		float   DEFAULT 1;
