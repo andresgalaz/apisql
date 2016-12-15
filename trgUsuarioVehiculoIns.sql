@@ -7,6 +7,6 @@ CREATE TRIGGER trgUsuarioVehiculoIns
 BEGIN
     call prCalculaScoreDia( date(now()), NEW.pVehiculo, NEW.pUsuario );
     call prCalculaScoreMes( date(now()), NEW.pVehiculo  );
-    call prCalculaScoreMesConductor( date(now(), NEW.pVehiculo, NEW.pUsuario );
+    call prCalculaScoreMesConductor( date(now()), NEW.pVehiculo, NEW.pUsuario );
 END //
 DELIMITER ;
