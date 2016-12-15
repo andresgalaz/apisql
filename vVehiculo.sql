@@ -23,5 +23,3 @@ from	tVehiculo v
         inner join tUsuario			uu	on uu.pUsuario			= uv.pUsuario
 		inner join tScoreMes		s	on s.fVehiculo			= v.pVehiculo
 where	v.bVigente = '1'
--- De la fecha actual, toma el primer día del mes (i.e. el periodo)
-and     s.dPeriodo = DATE(DATE_SUB(now(), INTERVAL DAYOFMONTH(now()) - 1 DAY))
