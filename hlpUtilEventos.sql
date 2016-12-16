@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 truncate table tScoreMes;
 ALTER TABLE tScoreMes AUTO_INCREMENT=1;
 truncate table tScoreMesConductor;
@@ -56,10 +56,10 @@ select m1.fVehiculo            , m1.dPeriodo
 , m1.nTotalDias           , m2.nTotalDias
 , m1.nDiasUso             , m2.nDiasUso
 from   score.tScoreMes m1 
-left outer join tScoreMes m2 
+left outer join score_desa.tScoreMes m2 
 on  m2.fVehiculo = m1.fVehiculo
 and m2.dPeriodo  = m1.dPeriodo
-where m1.dPeriodo >= '2016-12-01';
+where m1.fVehiculo = 142; -- m1.dPeriodo >= '2016-12-01';
 
 select m1.fVehiculo            , m1.fUsuario, m1.dPeriodo
 , m1.nScore               , m2.nScore
@@ -74,7 +74,7 @@ select m1.fVehiculo            , m1.fUsuario, m1.dPeriodo
 , m1.nTotalDias           , m2.nTotalDias
 , m1.nDiasUso             , m2.nDiasUso
 from   score.tScoreMesConductor m1 
-left outer join tScoreMesConductor m2 
+left outer join score_desa.tScoreMesConductor m2 
 on  m2.fVehiculo = m1.fVehiculo
 and m2.fUsuario  = m1.fUsuario
 and m2.dPeriodo  = m1.dPeriodo
