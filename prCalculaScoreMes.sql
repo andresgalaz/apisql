@@ -2,9 +2,9 @@ DROP PROCEDURE IF EXISTS prCalculaScoreMes;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreMes (in prmMes date, in prmVehiculo integer)
 BEGIN
-	DECLARE kDescDiaSinUso		float   DEFAULT 1;
-	DECLARE kDescNoUsoPunta		float	DEFAULT 0.5;
-	DECLARE kDescLimite			integer	DEFAULT 45;
+	DECLARE kDescDiaSinUso		float   DEFAULT 0.66;
+	DECLARE kDescNoUsoPunta		float	DEFAULT 0.33;
+	DECLARE kDescLimite			integer	DEFAULT 40;
 
 	DECLARE kEventoInicio		integer DEFAULT 1;
 	DECLARE kEventoFin			integer DEFAULT 2;
@@ -34,7 +34,7 @@ BEGIN
 	DECLARE vnDiasPunta			integer;
 	DECLARE vnScore				decimal(10,2);
 	DECLARE vnDescuentoKM		decimal(10,2);
-	DECLARE vnDescuentoPtje		decimal(10,2);
+--	DECLARE vnDescuentoPtje		decimal(10,2);
 	DECLARE vnDescuento			decimal(10,2);
 
 	DECLARE vnDiasTotal         integer;
@@ -119,19 +119,36 @@ BEGIN
 	SET vnScore = ( vnPtjFrenada     * vnPorcFrenada )
 				+ ( vnPtjAceleracion * vnPorcAceleracion )
 				+ ( vnPtjVelocidad   * vnPorcVelocidad );
+	/*
 	SELECT d.nValor
 	INTO   vnDescuentoPtje
 	FROM   tRangoDescuento d
 	WHERE  d.cTpDescuento = 'SCORE'
 	AND    d.nInicio <= vnScore AND vnScore < nFin;
+    */
 
 	SET vnDescuento = vnDescuentoKM;
 	-- Descuento por días sin uso
 	SET vnDescuento = vnDescuento + ( vnDiasTotal - vnDiasUso ) * kDescDiaSinUso;
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
 	SET vnDescuento = vnDescuento + ( vnDiasUso - vnDiasPunta ) * kDescNoUsoPunta;
-	-- Ajusta por el Puntaje
-	SET vnDescuento = vnDescuento * vnDescuentoPtje;
+	-- Ajusta por el puntaje
+	IF vnDescuento > 0 THEN
+		-- Descuento
+		IF vnScore > 60 THEN
+			SET vnDescuento = vnDescuento * vnScore / 100;
+		ELSE
+			SET vnDescuento = 0;
+		END IF;
+	ELSE
+		-- Recargo
+		IF vnScore > 60 THEN
+        	SET vnDescuento = vnDescuento * ( 100 - vnScore ) / 100;
+        END IF;
+        -- else: Se aplica el 100% del recargo
+	END IF;
+
+	-- SET vnDescuento = vnDescuento * vnDescuentoPtje;
 	IF vnDescuento > kDescLimite THEN
 		SET vnDescuento = kDescLimite;
 	END IF;
