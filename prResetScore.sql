@@ -1,10 +1,10 @@
 DROP PROCEDURE IF EXISTS prResetScore;
 DELIMITER //
-CREATE PROCEDURE prResetScore()
+CREATE PROCEDURE prResetScore( in prm_dInicio DATE)
 BEGIN
     -- Inicializa la tabla tScoreDia para todos los días a partir de mayo de 2016
 	-- Parametros
-	DECLARE vdDia				date DEFAULT '2016-05-01';
+	DECLARE vdDia				date DEFAULT prm_dInicio;
     
     WHILE vdDia < now() DO
         -- SELECT now(), vdDia;
@@ -12,7 +12,7 @@ BEGIN
 	    SET vdDia = ADDDATE( vdDia, INTERVAL 1 DAY);
     END WHILE;
 
-	SET vdDia = '2016-05-01';
+	SET vdDia = prm_dInicio;
     
     WHILE vdDia < now() DO
         SELECT now(), vdDia;
