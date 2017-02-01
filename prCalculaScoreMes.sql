@@ -167,15 +167,14 @@ BEGIN
 		   , nFrenada	   	 	, nAceleracion			, nVelocidad
 		   , nTotalDias			, nDiasUso				, nDiasPunta
 	   	   , nScore				, nDescuento			, nDescuentoKM
-		   , nDescuentoPtje	    , nDescuentoSinUso
-		   , nDescuentoNoUsoPunta	)
+		   , nDescuentoSinUso 	, nDescuentoNoUsoPunta	)
 	VALUES ( prmVehiculo    	, vfCuenta
 		   , vdMes				, vnKms
 		   , vnSumaFrenada  	, vnSumaAceleracion		, vnSumaVelocidad
 		   , vnPtjFrenada   	, vnPtjAceleracion		, vnPtjVelocidad
 		   , vnDiasTotal		, vnDiasUso				, vnDiasPunta
 	   	   , vnScore            , vnDescuento           , vnDescuentoKM
-		   , vnDescuentoPtje    , ( vnDiasTotal - vnDiasUso ) * kDescDiaSinUso
+		   , ( vnDiasTotal - vnDiasUso ) * kDescDiaSinUso
 		   , ( vnDiasUso - vnDiasPunta ) * kDescNoUsoPunta  );
 END //
 DELIMITER ;
