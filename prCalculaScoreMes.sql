@@ -1,4 +1,4 @@
-DROP PROCEDURE IF EXISTS prCalculaScoreMes;
+﻿DROP PROCEDURE IF EXISTS prCalculaScoreMes;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreMes (in prmMes date, in prmVehiculo integer)
 BEGIN
@@ -38,7 +38,7 @@ BEGIN
 	DECLARE vnDescuento			decimal(10,2);
 
 	DECLARE vnDiasTotal         integer;
-	DECLARE nFactorDias         float;
+	DECLARE vnFactorDias        float;
 
 	-- Asegura que la fecha sea el primer día del Mes y sin Hora
 	SET vdMes	  = DATE(DATE_SUB(prmMes, INTERVAL DAYOFMONTH(prmMes) - 1 DAY));
@@ -79,10 +79,10 @@ BEGIN
         -- Se considera la fracción de días desde el inicio de actividad del vehículo
         -- Normalmente el inicio es el primer día del mes, pero no para los vehículos 
         -- que entran en actividad en medio del mes en análisis (prmMes)
-    	SET nFactorDias = vnDiasTotal / DATEDIFF( vdMesSgte, vdInicio );
+    	SET vnFactorDias = vnDiasTotal / DATEDIFF( vdMesSgte, vdInicio );
     	-- Trae el descuento por kilómetros recorridos en el mes (o mes ponderado)
     	-- si vnDescuento resulta negativo, en realidad es un recargo
-    	SET vnKmsPond = vnKms / nFactorDias;
+    	SET vnKmsPond = vnKms / vnFactorDias;
 	END IF;
     
     -- De acuerdo al tipo de evento, se hace la conversión usando la tablas de
@@ -110,9 +110,7 @@ BEGIN
 
     -- Parámetros de ponderación por tipo de evento
 	SELECT nPorcFrenada / 100 , nPorcAceleracion /100 , nPorcVelocidad /100
-		 , nDescDiaSinUso     , nDescNoHoraPunta
 	INTO   vnPorcFrenada      , vnPorcAceleracion     , vnPorcVelocidad
-		 , vnDescDiaSinUso    , vnDescNoHoraPunta
 	FROM   tParamCalculo;
 
 	-- Trae el descuento a aplicar por los puntos
@@ -127,11 +125,13 @@ BEGIN
 	AND    d.nInicio <= vnScore AND vnScore < nFin;
     */
 
-	SET vnDescuento = vnDescuentoKM;
+	SET vnDescuento = round(vnDescuentoKM * vnFactorDias, 0);
 	-- Descuento por días sin uso
-	SET vnDescuento = vnDescuento + ( vnDiasTotal - vnDiasUso ) * kDescDiaSinUso;
+    SET vnDescDiaSinUso = round(( vnDiasTotal - vnDiasUso ) * kDescDiaSinUso, 0);
+	SET vnDescuento = vnDescuento + vnDescDiaSinUso;
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
-	SET vnDescuento = vnDescuento + ( vnDiasUso - vnDiasPunta ) * kDescNoUsoPunta;
+    SET vnDescNoHoraPunta = round(( vnDiasUso - vnDiasPunta ) * kDescNoUsoPunta,0);
+	SET vnDescuento = vnDescuento + vnDescNoHoraPunta;
 	-- Ajusta por el puntaje
 	IF vnDescuento > 0 THEN
 		-- Descuento
@@ -155,6 +155,7 @@ BEGIN
 	IF vnDescuento < -kDescLimite THEN
 		SET vnDescuento = -kDescLimite;
 	END IF;
+	SET vnDescuento = round(vnDescuento, 0);
 
     DELETE FROM tScoreMes 
     WHERE  fVehiculo = prmVehiculo
@@ -167,15 +168,15 @@ BEGIN
 		   , nFrenada	   	 	, nAceleracion			, nVelocidad
 		   , nTotalDias			, nDiasUso				, nDiasPunta
 	   	   , nScore				, nDescuento			, nDescuentoKM
-		   , nDescuentoSinUso 	, nDescuentoNoUsoPunta	)
+		   , nDescuentoSinUso 	, nDescuentoNoUsoPunta	, nFactorDias )
 	VALUES ( prmVehiculo    	, vfCuenta
 		   , vdMes				, vnKms
 		   , vnSumaFrenada  	, vnSumaAceleracion		, vnSumaVelocidad
 		   , vnPtjFrenada   	, vnPtjAceleracion		, vnPtjVelocidad
 		   , vnDiasTotal		, vnDiasUso				, vnDiasPunta
 	   	   , vnScore            , vnDescuento           , vnDescuentoKM
-		   , ( vnDiasTotal - vnDiasUso ) * kDescDiaSinUso
-		   , ( vnDiasUso - vnDiasPunta ) * kDescNoUsoPunta  );
+		   , vnDescDiaSinUso    , vnDescNoHoraPunta     , vnFactorDias
+           );
 END //
 DELIMITER ;
 -- call prCalculaScoreMes(now());
