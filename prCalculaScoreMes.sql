@@ -2,8 +2,6 @@
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreMes (in prmMes date, in prmVehiculo integer)
 BEGIN
-	DECLARE kDescDiaSinUso		float   DEFAULT 0.66;
-	DECLARE kDescNoUsoPunta		float	DEFAULT 0.33;
 	DECLARE kDescLimite			integer	DEFAULT 40;
 
 	DECLARE kEventoInicio		integer DEFAULT 1;
@@ -25,6 +23,8 @@ BEGIN
 	DECLARE vnPorcFrenada 		decimal(10,2);
 	DECLARE vnPorcAceleracion 	decimal(10,2);
 	DECLARE vnPorcVelocidad 	decimal(10,2);
+	DECLARE vnParamDiaSinUso    decimal(5,2);
+	DECLARE vnParamNoHoraPunta  decimal(5,2);
 	DECLARE vnPtjVelocidad		decimal(10,2) default 0;
 	DECLARE vnPtjFrenada		decimal(10,2) default 0;
 	DECLARE vnPtjAceleracion	decimal(10,2) default 0;
@@ -110,7 +110,9 @@ BEGIN
 
     -- Parámetros de ponderación por tipo de evento
 	SELECT nPorcFrenada / 100 , nPorcAceleracion /100 , nPorcVelocidad /100
+	     , nDescDiaSinUso     , nDescNoHoraPunta
 	INTO   vnPorcFrenada      , vnPorcAceleracion     , vnPorcVelocidad
+	     , vnParamDiaSinUso   , vnParamNoHoraPunta
 	FROM   tParamCalculo;
 
 	-- Trae el descuento a aplicar por los puntos
@@ -127,10 +129,10 @@ BEGIN
 
 	SET vnDescuento = round(vnDescuentoKM * vnFactorDias, 0);
 	-- Descuento por días sin uso
-    SET vnDescDiaSinUso = round(( vnDiasTotal - vnDiasUso ) * kDescDiaSinUso, 0);
+    SET vnDescDiaSinUso = round(( vnDiasTotal - vnDiasUso ) * vnParamDiaSinUso, 0);
 	SET vnDescuento = vnDescuento + vnDescDiaSinUso;
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
-    SET vnDescNoHoraPunta = round(( vnDiasUso - vnDiasPunta ) * kDescNoUsoPunta,0);
+    SET vnDescNoHoraPunta = round(( vnDiasUso - vnDiasPunta ) * vnParamNoHoraPunta,0);
 	SET vnDescuento = vnDescuento + vnDescNoHoraPunta;
 	-- Ajusta por el puntaje
 	IF vnDescuento > 0 THEN
