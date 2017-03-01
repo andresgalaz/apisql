@@ -1,4 +1,4 @@
-DROP VIEW  IF EXISTS trip_observations_view;
+﻿DROP VIEW  IF EXISTS trip_observations_view;
 create view trip_observations_view as
 select t.id                     AS trip_id          , t.client_id              AS client_id
      , t.from_date              AS fecha_ini        , t.to_date                AS fecha_fin
@@ -19,7 +19,8 @@ select t.id                     AS trip_id          , t.client_id              A
      , t.updated_at             AS ts_modif 
   from trips t
        join      clients c               on c.id            = t.client_id
-       left join trip_observations o     on o.trip_id       = t.id
+       left join trip_observations_g o   on o.trip_id       = t.id
+--     left join trip_observations   o   on o.trip_id       = t.id
        left join observation_ranges r    on r.id            = o.observation_range_id
        left join streets so              on so.id           = o.street_id
        left join streets st              on st.id           = t.main_street_id
