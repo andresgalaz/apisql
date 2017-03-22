@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS vVehiculo;
+﻿DROP VIEW IF EXISTS vVehiculo;
 create VIEW vVehiculo AS
 select	  v.pVehiculo			AS fVehiculo
 		, v.cPatente			AS cPatente
@@ -10,7 +10,7 @@ select	  v.pVehiculo			AS fVehiculo
 --		, v.fCuenta				AS fCuenta
 		, uv.pUsuario			AS fUsuario
         , uu.cNombre            AS cUsuario
-		, uv.fUsuarioTitular	AS fUsuarioTitular
+		, v.fUsuarioTitular	    AS fUsuarioTitular
         , ut.cNombre            AS cUsuarioTitular
 		, s.dPeriodo			AS dPeriodo
 		, s.nKms				AS nKms

@@ -119,13 +119,6 @@ BEGIN
 	SET vnScore = ( vnPtjFrenada     * vnPorcFrenada )
 				+ ( vnPtjAceleracion * vnPorcAceleracion )
 				+ ( vnPtjVelocidad   * vnPorcVelocidad );
-	/*
-	SELECT d.nValor
-	INTO   vnDescuentoPtje
-	FROM   tRangoDescuento d
-	WHERE  d.cTpDescuento = 'SCORE'
-	AND    d.nInicio <= vnScore AND vnScore < nFin;
-    */
 
 	SET vnDescuento = round(vnDescuentoKM * vnFactorDias, 0);
 	-- Descuento por días sin uso
@@ -143,11 +136,15 @@ BEGIN
 			SET vnDescuento = 0;
 		END IF;
 	ELSE
-		-- Recargo
+		-- Recargo, si maneja bien se disminuye el recargo
 		IF vnScore > 60 THEN
         	SET vnDescuento = vnDescuento * ( 100 - vnScore ) / 100;
         END IF;
-        -- else: Se aplica el 100% del recargo
+		-- Si maneja mal se aumenta el recargo
+		IF vnScore < 40 THEN
+			-- Se recarga 1 punto por cada score bajo 40
+			SET vnDescuento = vnDescuento + 40 - vnScore;
+		END IF;
 	END IF;
 
 	-- SET vnDescuento = vnDescuento * vnDescuentoPtje;
