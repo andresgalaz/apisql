@@ -120,12 +120,12 @@ BEGIN
 				+ ( vnPtjAceleracion * vnPorcAceleracion )
 				+ ( vnPtjVelocidad   * vnPorcVelocidad );
 
-	SET vnDescuento = round(vnDescuentoKM * vnFactorDias, 0);
+	SET vnDescuento = vnDescuentoKM * vnFactorDias;
 	-- Descuento por días sin uso
-    SET vnDescDiaSinUso = round(( vnDiasTotal - vnDiasUso ) * vnParamDiaSinUso, 0);
+    SET vnDescDiaSinUso = ( vnDiasTotal - vnDiasUso ) * vnParamDiaSinUso;
 	SET vnDescuento = vnDescuento + vnDescDiaSinUso;
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
-    SET vnDescNoHoraPunta = round(( vnDiasUso - vnDiasPunta ) * vnParamNoHoraPunta,0);
+    SET vnDescNoHoraPunta = ( vnDiasUso - vnDiasPunta ) * vnParamNoHoraPunta;
 	SET vnDescuento = vnDescuento + vnDescNoHoraPunta;
 	-- Ajusta por el puntaje
 	IF vnDescuento > 0 THEN
@@ -143,7 +143,7 @@ BEGIN
 		-- Si maneja mal se aumenta el recargo
 		IF vnScore < 40 THEN
 			-- Se recarga 1 punto por cada score bajo 40
-			SET vnDescuento = vnDescuento + 40 - vnScore;
+			SET vnDescuento = vnDescuento - ( 40 - vnScore );
 		END IF;
 	END IF;
 
@@ -153,6 +153,9 @@ BEGIN
 	END IF;
 	IF vnDescuento < -kDescLimite THEN
 		SET vnDescuento = -kDescLimite;
+	END IF;
+	IF vdInicio <> vdMes THEN
+		SET vnDescuento = vnDescuento / vnFactorDias / DATEDIFF( vdMesSgte, vdInicio );
 	END IF;
 	SET vnDescuento = round(vnDescuento, 0);
 
