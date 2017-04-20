@@ -33,4 +33,9 @@ and fTpEvento=5 and nPuntaje>5;
 call prResetScore( '2017-04-01' );
 
 -- Recalcula
-call prRecalculaScore( '2017-04-01', 185, 54 );
+-- AGalaz - AD478SS
+call prRecalculaScore( '2017-04-01', 56, 23 );
+-- 101	JAM Mondolo	228	AA822AG
+call prRecalculaScore( '2017-04-01', 228, 101 );
+-- 77	Bruno Gielczynsky 	203	AA909NM	66	Gonzalo Delger
+call prRecalculaScore( '2017-04-01', 203, 77 );
