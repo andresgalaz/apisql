@@ -1,4 +1,4 @@
-DROP PROCEDURE IF EXISTS prCalculaScoreDia;
+﻿DROP PROCEDURE IF EXISTS prCalculaScoreDia;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreDia ( in prmDia      date
                                    , in prmVehiculo integer
@@ -39,7 +39,7 @@ BEGIN
 		 , COUNT( * )						AS vnEventos
 	INTO   vnAceleracion, vnFrenada, vnVelocidad, vnKms
 		 , vnHoraPunta, vnEventos
-	FROM   tEvento ev
+	FROM   vEvento ev
 	WHERE  ev.fVehiculo = prmVehiculo
 	AND	   ev.fUsuario  = prmUsuario
 	AND	   ev.tEvento  >= vdDia
@@ -63,6 +63,12 @@ BEGIN
 		SET vnHoraPunta     = 1;
 	END IF;
 
+    /*
+    IF vnVelocidad is null then
+        SET vnVelocidad = 0;
+    END IF;
+    */
+    
 	-- Actualiza
 	UPDATE tScoreDia
 	SET	   nKms			= vnKms
@@ -90,6 +96,7 @@ BEGIN
 				, vnAceleracion     , vnVelocidad
 		 		, vnHoraPunta		, vnEventos );
 	END IF;
+
     /*
 	SELECT 'MSG 500', 'Fin CurEvento', now()
          , prmVehiculo     	, prmUsuario		, vdDia

@@ -7,7 +7,7 @@ BEGIN
 	DECLARE vdDia				date DEFAULT prm_dInicio;
     
     WHILE vdDia < now() DO
-        SELECT now(), vdDia;
+        -- SELECT now(), vdDia;
         CALL prCalculaScoreDiaInicio( vdDia );
 	    SET vdDia = ADDDATE( vdDia, INTERVAL 1 DAY);
     END WHILE;

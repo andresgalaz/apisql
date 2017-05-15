@@ -1,4 +1,4 @@
-DROP PROCEDURE IF EXISTS prCalculaScoreViaje;
+﻿DROP PROCEDURE IF EXISTS prCalculaScoreViaje;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreViaje (in prmViaje integer )
 BEGIN
@@ -27,7 +27,7 @@ BEGIN
          , SUM( CASE ev.fTpEvento WHEN kEventoFin			THEN ev.nValor   ELSE 0 END ) AS nKms
          , COUNT( * )
     INTO   vnSumaAceleracion, vnSumaFrenada, vnSumaVelocidad, vnKms, vnCantidad
-    FROM   tEvento ev
+    FROM   vEvento ev
     WHERE  ev.nIdViaje = prmViaje;
 
 	IF vnCantidad = 0 THEN
@@ -67,10 +67,9 @@ BEGIN
     SET    nValor = ( vnPtjFrenada		* vnPorcFrenada		)
     			  + ( vnPtjAceleracion	* vnPorcAceleracion	)
     			  + ( vnPtjVelocidad	* vnPorcVelocidad 	)
-    WHERE  tEvento.nIdViaje  = prmViaje
-    AND    tEvento.fTpEvento = kEventoInicio;
+    WHERE  nIdViaje  = prmViaje
+    AND    fTpEvento = kEventoInicio;
 
 END //
 DELIMITER ;
--- call calculaScoreMesViaje(now());
 

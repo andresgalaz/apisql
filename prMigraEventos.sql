@@ -1,4 +1,4 @@
-DROP PROCEDURE IF EXISTS prMigraEventos;
+﻿DROP PROCEDURE IF EXISTS prMigraEventos;
 DELIMITER //
 CREATE PROCEDURE prMigraEventos ( )
 BEGIN
@@ -26,8 +26,8 @@ BEGIN
            cCalle, nVelocidadMaxima, nValor, fVehiculo, fUsuario,
            nPuntaje, tModif 
     FROM   tmpEvento;
+    
     -- SELECT '400 Inserta eventos', now();
-
 	BEGIN
 		-- Claves
 		DECLARE vnIdViaje	integer;
@@ -64,10 +64,10 @@ BEGIN
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '510 Abre cursor', now();
+        -- SELECT '610 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vpVehiculo, vpUsuario, vdFecha;
-        -- SELECT '520 Inicio cursor', now();
+        -- SELECT '620 Inicio cursor', now();
 		WHILE NOT eofCurEvento DO
 			-- Calcula Score diario
 			CALL prCalculaScoreDia( vdFecha, vpVehiculo, vpUsuario );
@@ -91,10 +91,10 @@ BEGIN
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '510 Abre cursor', now();
+        -- SELECT '710 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vcPeriodo, vpVehiculo;
-        -- SELECT '520 Inicio cursor', now();
+        -- SELECT '720 Inicio cursor', now();
 		WHILE NOT eofCurEvento DO
 			-- Calcula Score Mensual
 			CALL prCalculaScoreMes( vcPeriodo, vpVehiculo );
@@ -119,10 +119,10 @@ BEGIN
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '510 Abre cursor', now();
+        -- SELECT '810 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vcPeriodo, vpVehiculo, vpUsuario;
-        -- SELECT '520 Inicio cursor', now();
+        -- SELECT '820 Inicio cursor', now();
 		WHILE NOT eofCurEvento DO
 			-- Calcula Score Mes por Condductor
 			CALL prCalculaScoreMesConductor( vcPeriodo, vpVehiculo, vpUsuario );
@@ -131,12 +131,12 @@ BEGIN
 		CLOSE CurEvento;
 	END; -- Fin cursor eventos
     
-    -- SELECT '530 Fin cursor', now();
+    -- SELECT '830 Fin cursor', now();
   
 	-- Limpia tabla temporal
     DELETE FROM wEvento 
     WHERE  pEvento in ( select t.pEvento from tmpEvento t );
-    -- SELECT '600 Borra registros migrados', now();
+    -- SELECT '900 Borra registros migrados', now();
 
 END //
 DELIMITER ;

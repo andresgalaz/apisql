@@ -10,6 +10,8 @@ truncate table tEvento;
 ALTER TABLE tEvento AUTO_INCREMENT=1;
 truncate table wEvento;
 ALTER TABLE wEvento AUTO_INCREMENT=1;
+truncate table wEventoDeleted;
+ALTER TABLE wEvento AUTO_INCREMENT=1;
 
 */
 -- Llena las tablas de Score con valores en cero para cada mes o dia, segun corresponda
@@ -24,7 +26,8 @@ select 'I',sum(t.nValor) from tEvento t where t.fTpEvento = 1 union all
 select 'SD',count(*) from tScoreDia t union all
 select 'SM',count(*) from tScoreMes t union all
 select 'SMC',count(*) from tScoreMesConductor t union all
-select 'W',count(*) from wEvento t ;
+select 'W',count(*) from wEvento t union all 
+select 'WD',count(*) from wEventoDeleted t;
 
 -- Muestra los meses que tienen eventos
 select substr( t.dFecha,1,7) ,count(*) from tScoreDia t

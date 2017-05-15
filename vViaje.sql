@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS vViaje;
+﻿DROP VIEW IF EXISTS vViaje;
 CREATE VIEW vViaje AS
 SELECT	v.pVehiculo			AS	fVehiculo		,	v.cPatente	AS	cPatente
 	 ,	v.fUsuarioTitular	AS	fUsuarioTitular
@@ -19,11 +19,12 @@ FROM	tEvento			ini
 		INNER JOIN tUsuario				ut	ON	ut.pUsuario		=	v.fUsuarioTitular
 		LEFT JOIN  tUsuario				uu	ON	uu.pUsuario		=	ini.fUsuario
 WHERE	ini.fTpEvento	=	1 -- Inicio del Viaje
-AND     fin.nValor > 0 -- Solo considera viajes que tengan kilómetros
--- Se espera que al menos tenga un evento
+AND     fin.nValor > 0.3 -- Solo considera viajes que tengan al menos 300 mt
+/*  Se espera que al menos tenga un evento
 AND     EXISTS ( SELECT 'x'
                  FROM   tEvento eve
                  WHERE  eve.nIdViaje = ini.nIdViaje
                  AND    eve.fTpEvento in ( 3, 4, 5 )
                )
+*/               
 ORDER BY ini.tEvento DESC
