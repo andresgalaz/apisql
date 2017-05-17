@@ -163,6 +163,9 @@ BEGIN
     WHERE  fVehiculo = prmVehiculo
     AND    dPeriodo  = vdMes;
 
+    IF vnDescuento is null THEN
+        SET vnDescuento = 0;
+    END IF;
 	INSERT INTO tScoreMes
 		   ( fVehiculo      	, fCuenta
 		   , dPeriodo			, nKms
