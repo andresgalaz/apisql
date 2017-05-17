@@ -30,9 +30,10 @@ BEGIN
     FROM   vEvento ev
     WHERE  ev.nIdViaje = prmViaje;
 
-	IF vnCantidad = 0 THEN
+	IF IFNULL(vnCantidad,0) = 0 THEN
+        SET vnCantidad        = 0;
 		SET vnSumaAceleracion = 0;
-		SET vnSumaFrenada	 = 0;
+		SET vnSumaFrenada	  = 0;
 		SET vnSumaVelocidad   = 0;
 		SET vnKms             = 0;
 	ELSE

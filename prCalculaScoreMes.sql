@@ -61,7 +61,7 @@ BEGIN
     AND    t.dFecha >= vdMes
     AND    t.dFecha  < vdMesSgte;  
 
-	IF vnDiasTotal = 0 THEN
+	IF IFNULL(vnDiasTotal,0) = 0 THEN
 		SET vnDiasUso           = 0;
 		SET vnDiasPunta         = 0;
 		SET vnKms               = 0;
@@ -70,6 +70,7 @@ BEGIN
 		SET vnSumaAceleracion   = 0;
         SET vdInicio            = vdMes;
     	SET vnKmsPond           = 0;
+    	SET vnFactorDias        = 1 / DATEDIFF( vdMesSgte, vdInicio );
 	ELSE
 		IF vnKms > 0 THEN
 			SET vnPtjVelocidad	 = vnSumaVelocidad   * 100 / vnKms;
@@ -107,7 +108,7 @@ BEGIN
 	FROM   tRangoDescuento d
 	WHERE  d.cTpDescuento = 'KM'
 	AND    d.nInicio <= vnKmsPond AND vnKmsPond < nFin;
-
+    
     -- Parámetros de ponderación por tipo de evento
 	SELECT nPorcFrenada / 100 , nPorcAceleracion /100 , nPorcVelocidad /100
 	     , nDescDiaSinUso     , nDescNoHoraPunta
@@ -162,10 +163,7 @@ BEGIN
     DELETE FROM tScoreMes 
     WHERE  fVehiculo = prmVehiculo
     AND    dPeriodo  = vdMes;
-
-    IF vnDescuento is null THEN
-        SET vnDescuento = 0;
-    END IF;
+    
 	INSERT INTO tScoreMes
 		   ( fVehiculo      	, fCuenta
 		   , dPeriodo			, nKms

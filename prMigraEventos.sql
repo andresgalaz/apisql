@@ -1,5 +1,5 @@
-﻿DROP PROCEDURE IF EXISTS prMigraEventos;
-DELIMITER //
+﻿DELIMITER //
+DROP PROCEDURE IF EXISTS prMigraEventos //
 CREATE PROCEDURE prMigraEventos ( )
 BEGIN
     -- SELECT '100 Inicio', now();
@@ -8,7 +8,8 @@ BEGIN
     SELECT w.* 
     FROM   wEvento w 
            INNER JOIN tUsuario  u ON u.pUsuario  = w.fUsuario
-           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo;
+           INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo
+    WHERE w.tEvento >= '2016-08-01';
     -- SELECT '200 Crea tabla temporal', now();
     
     -- Elimina los viajes que ya se habían migrado, dado que vienen nuevos eventos
@@ -26,7 +27,7 @@ BEGIN
            cCalle, nVelocidadMaxima, nValor, fVehiculo, fUsuario,
            nPuntaje, tModif 
     FROM   tmpEvento;
-    
+
     -- SELECT '400 Inserta eventos', now();
 	BEGIN
 		-- Claves
@@ -75,7 +76,7 @@ BEGIN
 		END WHILE;
 		CLOSE CurEvento;
 	END; -- Fin cursor eventos
-    
+
     -- Calcula Score Mensual, solo de los vehículos involucrados, viene después del
     -- cálculo diario porque para calcular el mensual, se utiliza la tabla tScoreDia
 	BEGIN
@@ -139,4 +140,4 @@ BEGIN
     -- SELECT '900 Borra registros migrados', now();
 
 END //
-DELIMITER ;
+

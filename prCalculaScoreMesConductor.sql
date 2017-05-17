@@ -1,4 +1,4 @@
-DROP PROCEDURE IF EXISTS prCalculaScoreMesConductor;
+﻿DROP PROCEDURE IF EXISTS prCalculaScoreMesConductor;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreMesConductor (in prmMes date, in prmVehiculo integer, in prmUsuario integer )
 BEGIN
@@ -46,7 +46,7 @@ BEGIN
 	AND    t.dFecha   >= vdMes
 	AND    t.dFecha    < vdMesSgte;
 
-    IF vnDiasTotal = 0 THEN
+    IF IFNULL(vnDiasTotal, 0) = 0 THEN
         SET vnDiasUso           = 0;
         SET vnDiasPunta         = 0;
         SET vnKms               = 0;
