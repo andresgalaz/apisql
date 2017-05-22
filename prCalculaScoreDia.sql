@@ -14,11 +14,13 @@ BEGIN
 	DECLARE kEventoAceleracion	integer DEFAULT 3;
 	DECLARE kEventoFrenada		integer DEFAULT 4;
 	DECLARE kEventoVelocidad	integer DEFAULT 5;
+	DECLARE kEventoCurva	    integer DEFAULT 6;
 
 	-- Acumuladores
 	DECLARE vnAceleracion	    decimal(10,2);
 	DECLARE vnFrenada		    decimal(10,2);
 	DECLARE vnVelocidad		    decimal(10,2);
+	DECLARE vnCurva 		    decimal(10,2);
 	DECLARE vnKms				decimal(10,2);
 	DECLARE vnHoraPunta			integer;
 	DECLARE vnEventos			integer;
@@ -34,10 +36,11 @@ BEGIN
 	SELECT SUM( CASE ev.fTpEvento WHEN kEventoAceleracion	THEN ev.nPuntaje ELSE 0 END ) AS nAceleracion
 		 , SUM( CASE ev.fTpEvento WHEN kEventoFrenada		THEN ev.nPuntaje ELSE 0 END ) AS nFrenada
 		 , SUM( CASE ev.fTpEvento WHEN kEventoVelocidad		THEN ev.nPuntaje ELSE 0 END ) AS nVelocidad
+		 , SUM( CASE ev.fTpEvento WHEN kEventoCurva		    THEN ev.nPuntaje ELSE 0 END ) AS nCurva
 		 , SUM( CASE ev.fTpEvento WHEN kEventoFin			THEN ev.nValor   ELSE 0 END ) AS nKms
 		 , SUM( esHoraPunta( ev.tEvento ))	AS vnHoraPunta
 		 , COUNT( * )						AS vnEventos
-	INTO   vnAceleracion, vnFrenada, vnVelocidad, vnKms
+	INTO   vnAceleracion, vnFrenada, vnVelocidad, vnCurva, vnKms
 		 , vnHoraPunta, vnEventos
 	FROM   vEvento ev
 	WHERE  ev.fVehiculo = prmVehiculo
@@ -50,9 +53,10 @@ BEGIN
 		SET vnEventos		= 0;
 		SET vnHoraPunta     = 0;
 		SET vnKms           = 0;
-		SET vnVelocidad     = 0;
 		SET vnFrenada       = 0;
 		SET vnAceleracion   = 0;
+		SET vnVelocidad     = 0;
+		SET vnCurva         = 0;
 	ELSE
 		-- Ajusta booleano
 		SET vnEventos		= 1;
@@ -62,12 +66,6 @@ BEGIN
 	IF vnHoraPunta > 0 THEN
 		SET vnHoraPunta     = 1;
 	END IF;
-
-    /*
-    IF vnVelocidad is null then
-        SET vnVelocidad = 0;
-    END IF;
-    */
     
 	-- Actualiza
 	UPDATE tScoreDia
@@ -75,6 +73,7 @@ BEGIN
 		 , nFrenada		= vnFrenada
 		 , nAceleracion	= vnAceleracion
 		 , nVelocidad	= vnVelocidad
+		 , nCurva	    = vnCurva
 		 , bHoraPunta	= vnHoraPunta
 		 , bUso			= vnEventos
 	WHERE  fVehiculo = prmVehiculo
@@ -89,21 +88,14 @@ BEGIN
 		INSERT INTO tScoreDia
 				( fVehiculo      	, fUsuario			, dFecha
 				, nKms				, nFrenada  	 	
-				, nAceleracion	    , nVelocidad
+				, nAceleracion	    , nVelocidad        , nCurva
 				, bHoraPunta		, bUso )
 		VALUES	( prmVehiculo     	, prmUsuario		, vdDia
 				, vnKms				, vnFrenada
-				, vnAceleracion     , vnVelocidad
+				, vnAceleracion     , vnVelocidad       , vnCurva
 		 		, vnHoraPunta		, vnEventos );
 	END IF;
 
-    /*
-	SELECT 'MSG 500', 'Fin CurEvento', now()
-         , prmVehiculo     	, prmUsuario		, vdDia
-		 , vnKms		    , vnFrenada
-		 , vnAceleracion    , vnVelocidad
-		 , vnHoraPunta		, vnEventos;
-    */         
 END //
 DELIMITER ;
 -- call prCalculaScoreDia(now());

@@ -9,6 +9,7 @@ BEGIN
 	DECLARE kEventoAceleracion	integer DEFAULT 3;
 	DECLARE kEventoFrenada		integer DEFAULT 4;
 	DECLARE kEventoVelocidad	integer DEFAULT 5;
+	DECLARE kEventoCurva        integer DEFAULT 6;
 
 	DECLARE vdMes				date;
 	DECLARE vdMesSgte			date;
@@ -17,17 +18,20 @@ BEGIN
 	DECLARE vfCuenta			integer;
 	DECLARE vnKmsPond			decimal(10,2);
 	DECLARE vnKms				decimal(10,2);
-	DECLARE vnSumaVelocidad		decimal(10,2);
 	DECLARE vnSumaFrenada		decimal(10,2);
 	DECLARE vnSumaAceleracion	decimal(10,2);
+	DECLARE vnSumaVelocidad		decimal(10,2);
+	DECLARE vnSumaCurva         decimal(10,2);
 	DECLARE vnPorcFrenada 		decimal(10,2);
 	DECLARE vnPorcAceleracion 	decimal(10,2);
 	DECLARE vnPorcVelocidad 	decimal(10,2);
+	DECLARE vnPorcCurva         decimal(10,2);
 	DECLARE vnParamDiaSinUso    decimal(5,2);
 	DECLARE vnParamNoHoraPunta  decimal(5,2);
-	DECLARE vnPtjVelocidad		decimal(10,2) default 0;
 	DECLARE vnPtjFrenada		decimal(10,2) default 0;
 	DECLARE vnPtjAceleracion	decimal(10,2) default 0;
+	DECLARE vnPtjVelocidad		decimal(10,2) default 0;
+	DECLARE vnPtjCurva          decimal(10,2) default 0;
 	DECLARE vnDescDiaSinUso		decimal(10,2);
 	DECLARE vnDescNoHoraPunta	decimal(10,2);
 	DECLARE vnDiasUso			integer;
@@ -45,15 +49,16 @@ BEGIN
 	SET vdMesSgte = ADDDATE(vdMes, INTERVAL 1 MONTH);
 
     SELECT v.fCuenta
-         , MIN( t.dFecha )       dInicio       , SUM( t.nKms )            nSumaKms
-         , SUM( t.nFrenada )     nSumaFrenada  , SUM( t.nAceleracion )    nSumaAceleracion
-         , SUM( t.nVelocidad )   nSumaVelocidad, COUNT(DISTINCT t.dFecha) nDiasTotal
-         , SUM( t.bUso )         nDiasUso
-         , SUM( t.bHoraPunta )   nDiasPunta
+         , MIN( t.dFecha )          dInicio       , SUM( t.nKms )            nSumaKms
+         , SUM( t.nFrenada )        nSumaFrenada  , SUM( t.nAceleracion )    nSumaAceleracion
+         , SUM( t.nVelocidad )      nSumaVelocidad, SUM( t.nCurva )          nSumaCurva
+         , COUNT(DISTINCT t.dFecha) nDiasTotal
+         , SUM( t.bUso )            nDiasUso      , SUM( t.bHoraPunta )      nDiasPunta
     INTO   vfCuenta
          , vdInicio                            , vnKms
          , vnSumaFrenada                       , vnSumaAceleracion
-         , vnSumaVelocidad                     , vnDiasTotal
+         , vnSumaVelocidad                     , vnSumaCurva
+         , vnDiasTotal
          , vnDiasUso                           , vnDiasPunta
     FROM   tScoreDia t
     INNER JOIN tVehiculo v ON v.pVehiculo = t.fVehiculo
@@ -65,17 +70,19 @@ BEGIN
 		SET vnDiasUso           = 0;
 		SET vnDiasPunta         = 0;
 		SET vnKms               = 0;
-		SET vnSumaVelocidad     = 0;
 		SET vnSumaFrenada       = 0;
 		SET vnSumaAceleracion   = 0;
+		SET vnSumaVelocidad     = 0;
+		SET vnSumaCurva         = 0;
         SET vdInicio            = vdMes;
     	SET vnKmsPond           = 0;
     	SET vnFactorDias        = 1 / DATEDIFF( vdMesSgte, vdInicio );
 	ELSE
 		IF vnKms > 0 THEN
-			SET vnPtjVelocidad	 = vnSumaVelocidad   * 100 / vnKms;
 			SET vnPtjFrenada	 = vnSumaFrenada     * 100 / vnKms;
    			SET vnPtjAceleracion = vnSumaAceleracion * 100 / vnKms;
+			SET vnPtjVelocidad	 = vnSumaVelocidad   * 100 / vnKms;
+			SET vnPtjCurva   	 = vnSumaCurva       * 100 / vnKms;
 		END IF;
         -- Se considera la fracción de días desde el inicio de actividad del vehículo
         -- Normalmente el inicio es el primer día del mes, pero no para los vehículos 
@@ -88,11 +95,6 @@ BEGIN
     
     -- De acuerdo al tipo de evento, se hace la conversión usando la tablas de
     -- rangos por puntaje
-	SELECT nValor INTO vnPtjVelocidad
-	FROM   tRangoPuntaje
-	WHERE  fTpevento = kEventoVelocidad
-	AND    nInicio <= vnPtjVelocidad AND vnPtjVelocidad < nFin;
-
 	SELECT nValor INTO vnPtjFrenada
 	FROM   tRangoPuntaje
 	WHERE  fTpevento = kEventoFrenada
@@ -103,23 +105,34 @@ BEGIN
 	WHERE  fTpevento = kEventoAceleracion
 	AND    nInicio <= vnPtjAceleracion AND vnPtjAceleracion < nFin;
 
-	SELECT d.nValor
+	SELECT nValor INTO vnPtjVelocidad
+	FROM   tRangoPuntaje
+	WHERE  fTpevento = kEventoVelocidad
+	AND    nInicio <= vnPtjVelocidad AND vnPtjVelocidad < nFin;
+
+    SELECT nValor INTO vnPtjCurva
+	FROM   tRangoPuntaje
+	WHERE  fTpevento = kEventoCurva
+	AND    nInicio <= vnPtjCurva AND vnPtjCurva < nFin;
+
+    SELECT d.nValor
 	INTO   vnDescuentoKM
 	FROM   tRangoDescuento d
 	WHERE  d.cTpDescuento = 'KM'
 	AND    d.nInicio <= vnKmsPond AND vnKmsPond < nFin;
     
     -- Parámetros de ponderación por tipo de evento
-	SELECT nPorcFrenada / 100 , nPorcAceleracion /100 , nPorcVelocidad /100
+	SELECT nPorcFrenada / 100 , nPorcAceleracion / 100, nPorcVelocidad / 100, nPorcCurva / 100
 	     , nDescDiaSinUso     , nDescNoHoraPunta
-	INTO   vnPorcFrenada      , vnPorcAceleracion     , vnPorcVelocidad
+	INTO   vnPorcFrenada      , vnPorcAceleracion     , vnPorcVelocidad     , vnPorcCurva
 	     , vnParamDiaSinUso   , vnParamNoHoraPunta
 	FROM   tParamCalculo;
 
 	-- Trae el descuento a aplicar por los puntos
-	SET vnScore = ( vnPtjFrenada     * vnPorcFrenada )
+	SET vnScore = ( vnPtjFrenada     * vnPorcFrenada     )
 				+ ( vnPtjAceleracion * vnPorcAceleracion )
-				+ ( vnPtjVelocidad   * vnPorcVelocidad );
+				+ ( vnPtjVelocidad   * vnPorcVelocidad   )
+                + ( vnPtjCurva       * vnPorcCurva       );
 
 	SET vnDescuento = vnDescuentoKM * vnFactorDias;
 	-- Descuento por días sin uso
@@ -167,15 +180,15 @@ BEGIN
 	INSERT INTO tScoreMes
 		   ( fVehiculo      	, fCuenta
 		   , dPeriodo			, nKms
-		   , nSumaFrenada  	 	, nSumaAceleracion		, nSumaVelocidad
-		   , nFrenada	   	 	, nAceleracion			, nVelocidad
+		   , nSumaFrenada  	 	, nSumaAceleracion		, nSumaVelocidad   , nSumaCurva
+		   , nFrenada	   	 	, nAceleracion			, nVelocidad       , nCurva
 		   , nTotalDias			, nDiasUso				, nDiasPunta
 	   	   , nScore				, nDescuento			, nDescuentoKM
 		   , nDescuentoSinUso 	, nDescuentoNoUsoPunta	, nFactorDias )
 	VALUES ( prmVehiculo    	, vfCuenta
 		   , vdMes				, vnKms
-		   , vnSumaFrenada  	, vnSumaAceleracion		, vnSumaVelocidad
-		   , vnPtjFrenada   	, vnPtjAceleracion		, vnPtjVelocidad
+		   , vnSumaFrenada  	, vnSumaAceleracion		, vnSumaVelocidad  , vnSumaCurva
+		   , vnPtjFrenada   	, vnPtjAceleracion		, vnPtjVelocidad   , vnPtjCurva
 		   , vnDiasTotal		, vnDiasUso				, vnDiasPunta
 	   	   , vnScore            , vnDescuento           , vnDescuentoKM
 		   , vnDescDiaSinUso    , vnDescNoHoraPunta     , vnFactorDias
