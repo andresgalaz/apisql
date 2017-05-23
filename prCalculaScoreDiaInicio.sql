@@ -1,4 +1,4 @@
-DROP PROCEDURE IF EXISTS prCalculaScoreDiaInicio;
+﻿DROP PROCEDURE IF EXISTS prCalculaScoreDiaInicio;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreDiaInicio (in prmDia date)
 BEGIN
@@ -8,13 +8,6 @@ BEGIN
 	-- Parametros
 	DECLARE vdDia				date;
 	DECLARE vdDiaSgte			date;
-
-	-- Constantes
-	DECLARE kEventoInicio		integer DEFAULT 1;
-	DECLARE kEventoFin			integer DEFAULT 2;
-	DECLARE kEventoAceleracion	integer DEFAULT 3;
-	DECLARE kEventoFrenada		integer DEFAULT 4;
-	DECLARE kEventoVelocidad	integer DEFAULT 5;
 
 	-- Acumuladores
 	DECLARE vpVehiculo			integer;

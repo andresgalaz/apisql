@@ -112,13 +112,13 @@ BEGIN
 	INSERT INTO tScoreMesConductor
 		   ( fVehiculo      	, fUsuario
 		   , dPeriodo			, nScore				, nKms
-		   , nSumaFrenada  	 	, nSumaAceleracion		, nSumaVelocidad   , nSumaVelocidad
-		   , nFrenada	   	 	, nAceleracion			, nVelocidad       , nVelocidad
+		   , nSumaFrenada  	 	, nSumaAceleracion		, nSumaVelocidad   , nSumaCurva
+		   , nFrenada	   	 	, nAceleracion			, nVelocidad       , nCurva
 		   , nTotalDias			, nDiasUso				, nDiasPunta	)
 	VALUES ( prmVehiculo     	, prmUsuario
 		   , vdMes				, vnScore  	            , vnKms
-		   , vnSumaFrenada  	, vnSumaAceleracion		, vnSumaVelocidad  , vnSumaVelocidad
-		   , vnPtjFrenada   	, vnPtjAceleracion		, vnPtjVelocidad   , vnPtjVelocidad
+		   , vnSumaFrenada  	, vnSumaAceleracion		, vnSumaVelocidad  , vnSumaCurva
+		   , vnPtjFrenada   	, vnPtjAceleracion		, vnPtjVelocidad   , vnPtjCurva
 		   , vnDiasTotal		, vnDiasUso				, vnDiasPunta	);
 END //
 DELIMITER ;
