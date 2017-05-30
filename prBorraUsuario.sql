@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS prBorraUsuario //
 CREATE PROCEDURE prBorraUsuario (in prm_pUsuario integer, in prm_bVehiculos integer )
 BEGIN
