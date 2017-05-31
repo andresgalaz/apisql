@@ -6,7 +6,7 @@ BEGIN
     
     SELECT distinct fUsuarioTitular
     INTO   vfUsuarioTitular
-    FROM   tUsuarioVehiculo 
+    FROM   tVehiculo 
     WHERE  pVehiculo = prm_pVehiculo;
     
     IF vfUsuarioTitular = prm_pUsuario THEN

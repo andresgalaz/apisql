@@ -89,7 +89,6 @@ BEGIN
 	WHERE  fTpevento = kEventoCurva
 	AND    nInicio <= vnPtjCurva and vnPtjCurva < nFin;
 
-
     SELECT nPorcFrenada / 100 , nPorcAceleracion /100 , nPorcVelocidad /100 , nPorcCurva /100
     INTO   vnPorcFrenada      , vnPorcAceleracion     , vnPorcVelocidad     , vnPorcCurva
     FROM   tParamCalculo;
@@ -101,7 +100,7 @@ BEGIN
                     + ( vnPtjCurva       * vnPorcCurva );
     ELSE
         SET vnScore = 100;
-        SET vnKms       = 0;
+        SET vnKms   = 0;
     END IF;
 
     DELETE FROM tScoreMesConductor
