@@ -1,11 +1,13 @@
-﻿use score;
+﻿DROP TABLE IF EXISTS wMemoryScoreVehiculo;
+
+use score;
 set @dIni=date('2017-05-01');
-set @dFin=date(now());
+set @dFin=date('2017-05-31');
 set @vehiculo=351;
 set @usuario=54;
 
-select @dIni as dIni, @dFin as dFin, @vehiculo as idVehiculo, @usuario as idUsuario;
 /*
+select @dIni as dIni, @dFin as dFin, @vehiculo as idVehiculo, @usuario as idUsuario;
 select smc.fVehiculo,  v.cPatente, v.fUsuarioTitular, u.cNombre , smc.nKms, smc.nScore
 from tScoreMesConductor smc 
       inner join tVehiculo v on v.pVehiculo = smc.fVehiculo
@@ -13,6 +15,7 @@ from tScoreMesConductor smc
 where smc.fUsuario=@usuario and smc.fVehiculo=@vehiculo and smc.dPeriodo=@dIni;
 call prScoreConductorRangoFecha( @usuario,@vehiculo, @dIni, @dFin);
 */
+
 -- Desde prCalculaScoreMes
 SELECT v.fCuenta, t.fVehiculo, t.fUsuario
      , MIN( t.dFecha )          dInicio       , SUM( t.nKms )            nSumaKms
@@ -20,12 +23,6 @@ SELECT v.fCuenta, t.fVehiculo, t.fUsuario
      , SUM( t.nVelocidad )      nSumaVelocidad, SUM( t.nCurva )          nSumaCurva
      , COUNT(DISTINCT t.dFecha) nDiasTotal
      , SUM( t.bUso )            nDiasUso      , SUM( t.bHoraPunta )      nDiasPunta
-/* INTO   vfCuenta
-     , vdInicio                            , vnKms
-     , vnSumaFrenada                       , vnSumaAceleracion
-     , vnSumaVelocidad                     , vnSumaCurva
-     , vnDiasTotal
-     , vnDiasUso                           , vnDiasPunta */
 FROM   tScoreDia t
        INNER JOIN tVehiculo v ON v.pVehiculo = t.fVehiculo
 WHERE  t.fVehiculo = @vehiculo
@@ -39,4 +36,6 @@ from tScoreMes m
       inner join tUsuario u on u.pUsuario = v.fUsuarioTitular
       inner join tUsuarioVehiculo uv on uv.pVehiculo = v.pVehiculo
 where uv.pUsuario = @usuario and m.dPeriodo=@dIni;
+
 call prScoreVehiculoRangoFecha( @usuario, @dIni, @dFin);
+call prScoreVehiculoRangoFecha( 115, @dIni, @dFin);

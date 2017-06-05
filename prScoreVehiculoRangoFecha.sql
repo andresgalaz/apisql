@@ -1,217 +1,208 @@
-DELIMITER //
+﻿DELIMITER //
 DROP PROCEDURE IF EXISTS prScoreVehiculoRangoFecha //
 CREATE PROCEDURE prScoreVehiculoRangoFecha (IN prm_pUsuario INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
 	DECLARE kDescLimite			INTEGER	DEFAULT 40;
-	DECLARE kEventoInicio		INTEGER DEFAULT 1;
-	DECLARE kEventoFin			INTEGER DEFAULT 2;
-	DECLARE kEventoAceleracion	INTEGER DEFAULT 3;
-	DECLARE kEventoFrenada		INTEGER DEFAULT 4;
-	DECLARE kEventoVelocidad	INTEGER DEFAULT 5;
-	DECLARE kEventoCurva		INTEGER DEFAULT 6;
+	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
+	DECLARE kEventoFin			INTEGER	DEFAULT 2;
+	DECLARE kEventoAceleracion	INTEGER	DEFAULT 3;
+	DECLARE kEventoFrenada		INTEGER	DEFAULT 4;
+	DECLARE kEventoVelocidad	INTEGER	DEFAULT 5;
+	DECLARE kEventoCurva		INTEGER	DEFAULT 6;
+	
+	DECLARE vdIni				DATE;
 	DECLARE vdFin				DATE;
-
-	IF prm_dIni > prm_dFin THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La fecha de inicio no puede ser inferior a la fecha de fin';
+	DECLARE vnKmsTotal			DECIMAL(10,2)	DEFAULT 0.0;
+	DECLARE vnScoreGlobal		DECIMAL(10,2)	DEFAULT 0.0;
+	
+	IF prm_dIni IS NULL THEN
+		SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAYOFMONTH(now()) - 1 DAY));
+	ELSE
+		SET vdIni = prm_dIni;
 	END IF;
 
-	SET vdFin = ADDDATE(prm_dFin, INTERVAL 1 DAY);
+	IF prm_dFin IS NULL THEN
+		SET vdFin = now();
+	ELSE
+		SET vdFin = prm_dFin;
+	END IF;
 
-	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryScoreVehiculo (
-		pVehiculo	INT				UNSIGNED NOT NULL,
-		nKms		DECIMAL(10,2)	UNSIGNED NOT NULL	DEFAULT '0.0',
-		nScore		DECIMAL(10,2)	UNSIGNED NOT NULL	DEFAULT '0.0',
-		nDescuento	DECIMAL( 5,2)						DEFAULT '0.0',
-		PRIMARY KEY (pVehiculo)
-	) ENGINE=MEMORY;
-	DELETE FROM wMemoryScoreVehiculo WHERE 1 = 1;
+--	IF vdIni > vdFin THEN
+--		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La fecha de inicio no puede ser inferior a la fecha de fin';
+--	END IF;
+	SET vdFin = ADDDATE(vdFin, INTERVAL 1 DAY);
+
+	-- Crea tabla temporal, si existe la limpia
+	CALL prCreaTmpScoreVehiculo();
 
 	BEGIN
-		DECLARE vpVehiculo			INTEGER;
-		DECLARE vfUsuarioTitular	INTEGER;
+		DECLARE vpVehiculo				INTEGER;
+		DECLARE vfUsuarioTitular		INTEGER;
+		-- Calculo Score usuario
+		DECLARE vnQViajesUsr			INTEGER;
+		DECLARE vnScoreUsr				DECIMAL(10,2);
+		DECLARE vnKmsUsr				DECIMAL(10,2);
+		DECLARE vnSumaFrenadaUsr		DECIMAL(10,2);
+		DECLARE vnSumaAceleracionUsr	DECIMAL(10,2);
+		DECLARE vnSumaVelocidadUsr		DECIMAL(10,2);
+		DECLARE vnSumaCurvaUsr			DECIMAL(10,2);
+		DECLARE vnQFrenadaUsr			INTEGER;
+		DECLARE vnQAceleracionUsr		INTEGER;
+		DECLARE vnQVelocidadUsr			INTEGER;
+		DECLARE vnQCurvaUsr				INTEGER;
+		DECLARE vnPtjFrenadaUsr			DECIMAL(10,2) DEFAULT 0;
+		DECLARE vnPtjAceleracionUsr		DECIMAL(10,2) DEFAULT 0;
+		DECLARE vnPtjVelocidadUsr		DECIMAL(10,2) DEFAULT 0;
+		DECLARE vnPtjCurvaUsr			DECIMAL(10,2) DEFAULT 0;
+		-- Sale de la tabla tParamCalculo: Distancia minima en KMS
+		DECLARE vnDistanciaMin			DECIMAL(10,2) DEFAULT 0;
 		
-		DECLARE vdInicio			DATE;
-		DECLARE vnKmsPond			DECIMAL(10,2);
-		DECLARE vnKms				DECIMAL(10,2);
-		DECLARE vnSumaFrenada		DECIMAL(10,2);
-		DECLARE vnSumaAceleracion	DECIMAL(10,2);
-		DECLARE vnSumaVelocidad		DECIMAL(10,2);
-		DECLARE vnSumaCurva			DECIMAL(10,2);
-		DECLARE vnPorcFrenada 		DECIMAL(10,2);
-		DECLARE vnPorcAceleracion 	DECIMAL(10,2);
-		DECLARE vnPorcVelocidad 	DECIMAL(10,2);
-		DECLARE vnPorcCurva			DECIMAL(10,2);
-		DECLARE vnParamDiaSinUso	DECIMAL(5,2);
-		DECLARE vnParamNoHoraPunta	DECIMAL(5,2);
-		DECLARE vnPtjFrenada		DECIMAL(10,2) DEFAULT 0;
-		DECLARE vnPtjAceleracion	DECIMAL(10,2) DEFAULT 0;
-		DECLARE vnPtjVelocidad		DECIMAL(10,2) DEFAULT 0;
-		DECLARE vnPtjCurva			DECIMAL(10,2) DEFAULT 0;
-		DECLARE vnDescDiaSinUso		DECIMAL(10,2);
-		DECLARE vnDescNoHoraPunta	DECIMAL(10,2);
-		DECLARE vnDiasUso			INTEGER;
-		DECLARE vnDiasPunta			INTEGER;
-		DECLARE vnScore				DECIMAL(10,2);
-		DECLARE vnDescuentoKM		DECIMAL(10,2);
-		DECLARE vnDescuento			DECIMAL(10,2);
-
-		DECLARE vnDiasTotal			INTEGER;
-		DECLARE vnFactorDias		float;
 		-- Cursor Vehiculos para borrar 
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE CurVeh CURSOR FOR
-			SELECT t.fVehiculo, v.fUsuarioTitular
-				 ,	MIN( t.dFecha )				dInicio			, SUM( t.nKms )			nSumaKms
-				 ,	SUM( t.nFrenada )			nSumaFrenada	, SUM( t.nAceleracion )	nSumaAceleracion
-				 ,	SUM( t.nVelocidad )			nSumaVelocidad	, SUM( t.nCurva )		nSumaCurva
-				 ,	COUNT(DISTINCT t.dFecha)	nDiasTotal
-				 ,	SUM( t.bUso )				nDiasUso		, SUM( t.bHoraPunta )	nDiasPunta
-			FROM	tScoreDia t
-					JOIN tVehiculo v ON v.pVehiculo = t.fVehiculo
-			WHERE	t.fUsuario	=	prm_pUsuario
-			AND		t.dFecha	>=	prm_dIni
+			SELECT uv.pVehiculo, uv.fUsuarioTitular
+				 	-- Calcula Score del usuario
+				 ,	SUM( t.nKms				)	nKmsUsr				 ,	SUM( t.nFrenada			)	nSumaFrenadaUsr
+				 ,	SUM( t.nAceleracion		)	nSumaAceleracionUsr	 ,	SUM( t.nVelocidad		)	nSumaVelocidadUsr
+				 ,	SUM( t.nCurva			)	nSumaCurvaUsr		 ,	SUM( t.nQFrenada		)	nQFrenadaUsr
+				 ,	SUM( t.nQAceleracion	)	nQAceleracionUsr	 ,	SUM( t.nQVelocidad		)	nQVelocidadUsr
+				 ,	SUM( t.nQCurva			)	nQCurvaUsr
+			FROM	tUsuarioVehiculo uv
+					JOIN tScoreDia t ON t.fVehiculo =	uv.pVehiculo
+									AND t.fUsuario	=	uv.pUsuario
+			WHERE	t.dFecha	>=	vdIni
 			AND		t.dFecha	<	vdFin
-			GROUP BY t.fVehiculo, v.fUsuarioTitular;
+			AND		uv.pUsuario =	prm_pUsuario
+			GROUP BY uv.pVehiculo, uv.fUsuarioTitular;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurVeh = 1;
-		
+
 		OPEN CurVeh;
-		FETCH CurVeh INTO vpVehiculo		, vfUsuarioTitular
-						, vdInicio			, vnKms
-						, vnSumaFrenada		, vnSumaAceleracion
-						, vnSumaVelocidad	, vnSumaCurva
-						, vnDiasTotal
-						, vnDiasUso			, vnDiasPunta;
+		FETCH CurVeh INTO vpVehiculo		, vfUsuarioTitular		, vnKmsUsr
+						, vnSumaFrenadaUsr	, vnSumaAceleracionUsr	, vnSumaVelocidadUsr, vnSumaCurvaUsr
+						, vnQFrenadaUsr		, vnQAceleracionUsr		, vnQVelocidadUsr	, vnQCurvaUsr;
 		WHILE NOT eofCurVeh DO
+			CALL prCalculaScoreVehiculo( vpVehiculo, vdIni, vdFin );
 		
-			IF IFNULL(vnDiasTotal,0) = 0 THEN
-				SET vnDiasUso			= 0;
-				SET vnDiasPunta			= 0;
-				SET vnKms				= 0;
-				SET vnSumaFrenada		= 0;
-				SET vnSumaAceleracion	= 0;
-				SET vnSumaVelocidad		= 0;
-				SET vnSumaCurva			= 0;
-				SET vdInicio			= prm_dIni;
-				SET vnKmsPond			= 0;
-				SET vnFactorDias		= 1 / DATEDIFF( vdFin, vdInicio );
+			IF IFNULL(vnKmsUsr,0) = 0 THEN
+				SET vnKmsUsr			= 0;
+				SET vnSumaFrenadaUsr	= 0;
+				SET vnSumaAceleracionUsr= 0;
+				SET vnSumaVelocidadUsr	= 0;
+				SET vnSumaCurvaUsr		= 0;
+				SET vnQFrenadaUsr		= 0;
+				SET vnQAceleracionUsr	= 0;
+				SET vnQVelocidadUsr		= 0;
+				SET vnQCurvaUsr			= 0;
 			ELSE
-				IF vnKms > 0 THEN
-					SET vnPtjFrenada		= vnSumaFrenada			* 100 / vnKms;
-					SET vnPtjAceleracion	= vnSumaAceleracion		* 100 / vnKms;
-					SET vnPtjVelocidad		= vnSumaVelocidad		* 100 / vnKms;
-					SET vnPtjCurva			= vnSumaCurva			* 100 / vnKms;
+				IF vnKmsUsr > 0 then
+					SET vnPtjFrenadaUsr		= vnSumaFrenadaUsr		* 100 / vnKmsUsr;
+					SET vnPtjAceleracionUsr	= vnSumaAceleracionUsr	* 100 / vnKmsUsr;
+					SET vnPtjVelocidadUsr	= vnSumaVelocidadUsr	* 100 / vnKmsUsr;
+					SET vnPtjCurvaUsr		= vnSumaCurvaUsr		* 100 / vnKmsUsr;
 				END IF;
-				-- Se considera la fracción de días desde el inicio de actividad del vehículo
-				-- Normalmente el inicio es el primer día del mes, pero no para los vehículos 
-				-- que entran en actividad en medio del mes en análisis (prmMes)
-				SET vnFactorDias = vnDiasTotal / DATEDIFF( vdFin, vdInicio );
-				-- Trae el descuento por kilómetros recorridos en el mes (o mes ponderado)
-				-- si vnDescuento resulta negativo, en realidad es un recargo
-				SET vnKmsPond = vnKms / vnFactorDias;
 			END IF;
-			
-			-- De acuerdo al tipo de evento, se hace la conversión usando la tablas de
-			-- rangos por puntaje
-			SELECT	nValor INTO vnPtjFrenada
-			FROM	tRangoPuntaje
-			WHERE	fTpevento = kEventoFrenada
-			AND		nInicio <= vnPtjFrenada AND vnPtjFrenada < nFin;
 
-			SELECT	nValor INTO vnPtjAceleracion
-			FROM	tRangoPuntaje
-			WHERE	fTpevento = kEventoAceleracion
-			AND		nInicio <= vnPtjAceleracion AND vnPtjAceleracion < nFin;
+			-- Calcula Score Usuario
+			-- De acuerdo al tipo de evento, se hace la conversión usando la tablas de rangos por puntaje
+			SELECT	nValor INTO vnPtjFrenadaUsr FROM tRangoPuntaje
+			WHERE	fTpevento = kEventoFrenada AND nInicio <= vnPtjFrenadaUsr AND vnPtjFrenadaUsr < nFin;
 
-			SELECT	nValor INTO vnPtjVelocidad
-			FROM	tRangoPuntaje
-			WHERE	fTpevento = kEventoVelocidad
-			AND		nInicio <= vnPtjVelocidad AND vnPtjVelocidad < nFin;
+			SELECT	nValor INTO vnPtjAceleracionUsr FROM tRangoPuntaje
+			WHERE	fTpevento = kEventoAceleracion AND nInicio <= vnPtjAceleracionUsr AND vnPtjAceleracionUsr < nFin;
 
-			SELECT	nValor INTO vnPtjCurva
-			FROM	tRangoPuntaje
-			WHERE	fTpevento = kEventoCurva
-			AND		nInicio <= vnPtjCurva AND vnPtjCurva < nFin;
+			SELECT	nValor INTO vnPtjVelocidadUsr FROM tRangoPuntaje
+			WHERE	fTpevento = kEventoVelocidad AND nInicio <= vnPtjVelocidadUsr AND vnPtjVelocidadUsr < nFin;
 
-			SELECT	d.nValor
-			INTO	vnDescuentoKM
-			FROM	tRangoDescuento d
-			WHERE	d.cTpDescuento = 'KM'
-			AND		d.nInicio <= vnKmsPond AND vnKmsPond < nFin;
-			
+			SELECT	nValor INTO vnPtjCurvaUsr FROM tRangoPuntaje
+			WHERE	fTpevento = kEventoCurva AND nInicio <= vnPtjCurvaUsr AND vnPtjCurvaUsr < nFin;
+
 			-- Parámetros de ponderación por tipo de evento
-			SELECT	nPorcFrenada / 100	, nPorcAceleracion / 100, nPorcVelocidad / 100	, nPorcCurva / 100
-				 ,	nDescDiaSinUso		, nDescNoHoraPunta
-			INTO	vnPorcFrenada		, vnPorcAceleracion		, vnPorcVelocidad		, vnPorcCurva
-				 ,	vnParamDiaSinUso	, vnParamNoHoraPunta
+			SELECT	( vnPtjFrenadaUsr		* nPorcFrenada		/ 100 )
+				+	( vnPtjAceleracionUsr	* nPorcAceleracion	/ 100 )
+				+	( vnPtjVelocidadUsr		* nPorcVelocidad	/ 100 )
+				+	( vnPtjCurvaUsr			* nPorcCurva		/ 100 )
+			INTO	vnScoreUsr
 			FROM	tParamCalculo;
 
-			-- Trae el descuento a aplicar por los puntos
-			SET vnScore = ( vnPtjFrenada		* vnPorcFrenada		)
-						+ ( vnPtjAceleracion	* vnPorcAceleracion	)
-						+ ( vnPtjVelocidad		* vnPorcVelocidad	)
-						+ ( vnPtjCurva			* vnPorcCurva		);
-
-			SET vnDescuento = vnDescuentoKM * vnFactorDias;
-			-- Descuento por días sin uso
-			SET vnDescDiaSinUso = ( vnDiasTotal - vnDiasUso ) * vnParamDiaSinUso;
-			SET vnDescuento = vnDescuento + vnDescDiaSinUso;
-			-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
-			SET vnDescNoHoraPunta = ( vnDiasUso - vnDiasPunta ) * vnParamNoHoraPunta;
-			SET vnDescuento = vnDescuento + vnDescNoHoraPunta;
-			-- Ajusta por el puntaje
-			IF vnDescuento > 0 THEN
-				-- Descuento
-				IF vnScore > 60 THEN
-					SET vnDescuento = vnDescuento * vnScore / 100;
-				ELSE
-					SET vnDescuento = 0;
-				END IF;
-			ELSE
-				-- Recargo, si maneja bien se disminuye el recargo
-				IF vnScore > 60 THEN
-					SET vnDescuento = vnDescuento * ( 100 - vnScore ) / 100;
-				END IF;
-				-- Si maneja mal se aumenta el recargo
-				IF vnScore < 40 THEN
-					-- Se recarga 1 punto por cada score bajo 40
-					SET vnDescuento = vnDescuento - ( 40 - vnScore );
-				END IF;
-			END IF;
-
-			-- SET vnDescuento = vnDescuento * vnDescuentoPtje;
-			IF vnDescuento > kDescLimite THEN
-				SET vnDescuento = kDescLimite;
-			END IF;
-			IF vnDescuento < -kDescLimite THEN
-				SET vnDescuento = -kDescLimite;
-			END IF;
-			IF vdInicio <> prm_dIni THEN
-				SET vnDescuento = vnDescuento / vnFactorDias / DATEDIFF( vdFin, vdInicio );
-			END IF;
-			SET vnDescuento = round(vnDescuento, 0);
-
-			-- Inserta en tabla temporal
-			INSERT INTO wMemoryScoreVehiculo 
-					( pVehiculo , nKms , nScore , nDescuento )
-			VALUES	( vpVehiculo, vnKms, vnScore, vnDescuento );
+			-- Si no es el titular, se muestran los KM y Viajes del usuario solamente, no los del vehículo
+			-- por eso se actualiza la tabla temporal que generó prCalculaScoreVehiculo
+			IF prm_pUsuario <> vfUsuarioTitular THEN
+				-- Kimoletros totales del usuario y Score Global por Kilometro
+				SET vnKmsTotal		= vnKmsTotal	+ vnKmsUsr;
+				SET vnScoreGlobal	= vnScoreGlobal	+ vnScoreUsr * vnKmsUsr;
 			
+				SELECT	COUNT(*) INTO vnQViajesUsr
+				FROM	tEvento e
+						INNER JOIN tParamCalculo p ON 1 = 1
+				WHERE	e.fUsuario	= 	prm_pUsuario
+				AND		e.fVehiculo =	vpVehiculo
+				AND		e.tEvento	>=	vdIni
+				AND		e.tEvento	<	vdFin
+				AND		e.fTpEvento =	kEventoFin
+				AND		e.nValor	>	p.nDistanciaMin;
+
+				UPDATE	wMemoryScoreVehiculo
+				SET		nKms			= vnKmsUsr
+					,	nQViajes		= vnQViajesUsr
+					,	nScore			= vnScoreUsr
+					,	nQFrenada		= vnQFrenadaUsr
+					,	nQAceleracion	= vnQAceleracionUsr
+					,	nQVelocidad		= vnQVelocidadUsr
+					,	nQCurva			= vnQCurvaUsr
+				WHERE	pVehiculo	= vpVehiculo;
+			ELSE
+				-- Acumula los totales del vehículo
+				SELECT	nKms + vnKmsTotal	, nScore * nKms + vnScoreGlobal
+				INTO	vnKmsTotal			, vnScoreGlobal
+				FROM	wMemoryScoreVehiculo
+				WHERE	pVehiculo = vpVehiculo;
+			END IF;
+
 			FETCH CurVeh INTO vpVehiculo		, vfUsuarioTitular
-							, vdInicio			, vnKms
-							, vnSumaFrenada		, vnSumaAceleracion
-							, vnSumaVelocidad	, vnSumaCurva
-							, vnDiasTotal
-							, vnDiasUso			, vnDiasPunta;
+							, vnKmsUsr
+							, vnSumaFrenadaUsr	, vnSumaAceleracionUsr	, vnSumaVelocidadUsr, vnSumaCurvaUsr
+							, vnQFrenadaUsr		, vnQAceleracionUsr		, vnQVelocidadUsr	, vnQCurvaUsr;
 		END WHILE;
 		CLOSE CurVeh;
 	END;
 
-	SELECT w.pVehiculo			AS idVehiculo	, v.cPatente	AS patente
-		 , v.fUsuarioTitular	AS idTitular	, ut.cNombre	AS titular
-		 , w.nKms				AS kms
-		 , w.nScore				AS score		, w.nDescuento	AS descuento
+	-- Entrega un cursor con los totales globales del Usuario
+	IF vnKmsTotal <= 0 THEN
+		SELECT 0 AS kmsTotal, 100 AS scoreGlobal; 
+	ELSE
+		SELECT vnKmsTotal AS nKmsTotal, round( vnScoreGlobal	/ vnKmsTotal, 0 ) AS nScoreGlobal; 
+	END IF;
+	-- Entrega un cursor con el detalle por vehículo
+	SELECT w.pVehiculo			, v.cPatente
+		 , v.fUsuarioTitular	, ut.cNombre			AS cUsuarioTitular
+		 , w.nKms				, w.nScore
+		 , w.nDescuento			, w.nDiasTotal
+		 , w.nDiasUso			, w.nDiasPunta
+		 , w.nQFrenada			, w.nQAceleracion		, w.nQVelocidad			, w.nQCurva
+		 , w.nQViajes
 	FROM wMemoryScoreVehiculo w
 		 JOIN score.tVehiculo	v	ON v.pVehiculo = w.pVehiculo
 		 JOIN score.tUsuario	ut	ON ut.pUsuario = v.fUsuarioTitular;
-
+	-- Entrega un cursor con los conductores que pueden usar los vehiculos 
+	-- que este usuario puede usar
+	SELECT	uv2.pVehiculo, uv2.pUsuario, u.cNombre cUsuario
+		 ,	SUM( t.nKms )	nKms
+	FROM	tUsuarioVehiculo uv1 
+			INNER JOIN tUsuarioVehiculo uv2	ON uv2.pVehiculo	= uv1.pVehiculo
+			INNER JOIN tUsuario			u	ON u.pUsuario		= uv2.pUsuario
+			INNER JOIN tScoreDia		t	ON t.fUsuario		= uv2.pUsuario
+	WHERE	t.dFecha	>=	vdIni
+	AND		t.dFecha	<	vdFin
+	AND		uv1.pUsuario =	prm_pUsuario
+	GROUP BY uv2.pVehiculo, uv2.pUsuario, u.cNombre;
+	-- Resumen final, cuenta todos los eventos de usuario
+	SELECT	SUM( t.nQFrenada		)	nQFrenada
+		 ,	SUM( t.nQAceleracion	)	nQAceleracion
+		 ,	SUM( t.nQVelocidad		)	nQVelocidad
+		 ,	SUM( t.nQCurva			)	nQCurva
+	FROM	tScoreDia	t
+	WHERE	t.dFecha	>=	vdIni
+	AND		t.dFecha	<	vdFin
+	AND		t.fUsuario =	prm_pUsuario;
+	
 END //
-

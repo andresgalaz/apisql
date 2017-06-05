@@ -34,14 +34,13 @@ BEGIN
 	-- Normalmente el inicio es el primer día del mes, pero no para los vehículos 
 	-- que entran en actividad en medio del mes en análisis (prmMes)
    	SET vo_nFactorDias = prmDiasVigencia / prmDiasMes;
+
    	-- Si es una fracción del mes, pondera la cantidad de KMS
    	SET vnKmsPond = prmKms / vo_nFactorDias;
 
-	SELECT d.nValor         
-	INTO   vo_nDescuentoKM
+	SELECT d.nValor INTO vo_nDescuentoKM
 	FROM   tRangoDescuento d
-	WHERE  d.cTpDescuento = 'KM'
-	AND    d.nInicio < vnKmsPond AND vnKmsPond <= d.nFin;
+	WHERE  d.cTpDescuento = 'KM' AND d.nInicio <= vnKmsPond AND vnKmsPond < d.nFin;
 
 	-- Se considera la fracción de días desde el inicio de actividad del vehículo
 	-- Normalmente el inicio es el primer día del mes, pero no para los vehículos 
@@ -51,6 +50,7 @@ BEGIN
 	-- Descuento por días sin uso
 	SET vo_nDescDiaSinUso = round(( prmDiasMes - prmDiasUso ) * kParamDiaSinUso, 0);
 	SET vo_nDescuento = vo_nDescuento + vo_nDescDiaSinUso;
+
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
 	SET vo_nDescNoHoraPunta = round(( prmDiasUso - prmDiasPunta ) * kParamNoHoraPunta,0);
 	SET vo_nDescuento = vo_nDescuento + vo_nDescNoHoraPunta;
@@ -67,11 +67,10 @@ BEGIN
 		IF prmScore > 60 THEN
 			SET vo_nDescuento = vo_nDescuento * ( 100 - prmScore ) / 100;
 		END IF;
-		-- Si maneja mal se aumenta el recargo
-		IF prmScore < 40 THEN
-			-- Se recarga 1 punto por cada score bajo 40
-			SET vo_nDescuento = vo_nDescuento - ( 40 - prmScore );
-		END IF;
+	END IF;
+	IF prmScore < 40 THEN
+		-- Se recarga 1 punto por cada score bajo 40
+		SET vo_nDescuento = vo_nDescuento - ( 40 - prmScore );
 	END IF;
 
 	IF vo_nDescuento > kDescLimite THEN
@@ -82,5 +81,7 @@ BEGIN
 	END IF;
 	SET vo_nDescuento = round(vo_nDescuento, 0);
 
+-- select prmKms, prmDiasUso, prmDiasPunta, prmScore, prmDiasMes, prmDiasVigencia, vo_nDescuento, vo_nDescuentoKM, vo_nDescDiaSinUso, vo_nDescNoHoraPunta, vo_nFactorDias;
+	 
 END //
 DELIMITER ;
