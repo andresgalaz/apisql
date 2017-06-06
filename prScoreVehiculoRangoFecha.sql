@@ -166,13 +166,13 @@ BEGIN
 		CLOSE CurVeh;
 	END;
 
-	-- Entrega un cursor con los totales globales del Usuario
+	-- CURSOR 1: Entrega un cursor con los totales globales del Usuario
 	IF vnKmsTotal <= 0 THEN
 		SELECT 0 AS kmsTotal, 100 AS scoreGlobal; 
 	ELSE
 		SELECT vnKmsTotal AS nKmsTotal, round( vnScoreGlobal	/ vnKmsTotal, 0 ) AS nScoreGlobal; 
 	END IF;
-	-- Entrega un cursor con el detalle por vehículo
+	-- CURSOR 2: Entrega un cursor con el detalle por vehículo
 	SELECT w.pVehiculo			, v.cPatente
 		 , v.fUsuarioTitular	, ut.cNombre			AS cUsuarioTitular
 		 , w.nKms				, w.nScore
@@ -183,8 +183,8 @@ BEGIN
 	FROM wMemoryScoreVehiculo w
 		 JOIN score.tVehiculo	v	ON v.pVehiculo = w.pVehiculo
 		 JOIN score.tUsuario	ut	ON ut.pUsuario = v.fUsuarioTitular;
-	-- Entrega un cursor con los conductores que pueden usar los vehiculos 
-	-- que este usuario puede usar
+	-- CURSOR 3: Entrega un cursor con los conductores que pueden usar los vehiculos 
+	-- 			 que este usuario puede usar
 	SELECT	uv2.pVehiculo, uv2.pUsuario, u.cNombre cUsuario
 		 ,	SUM( t.nKms )	nKms
 	FROM	tUsuarioVehiculo uv1 
@@ -195,7 +195,7 @@ BEGIN
 	AND		t.dFecha	<	vdFin
 	AND		uv1.pUsuario =	prm_pUsuario
 	GROUP BY uv2.pVehiculo, uv2.pUsuario, u.cNombre;
-	-- Resumen final, cuenta todos los eventos de usuario
+	-- CURSOR 4: Resumen final, cuenta todos los eventos de usuario
 	SELECT	SUM( t.nQFrenada		)	nQFrenada
 		 ,	SUM( t.nQAceleracion	)	nQAceleracion
 		 ,	SUM( t.nQVelocidad		)	nQVelocidad
@@ -204,5 +204,42 @@ BEGIN
 	WHERE	t.dFecha	>=	vdIni
 	AND		t.dFecha	<	vdFin
 	AND		t.fUsuario =	prm_pUsuario;
-	
+	-- CURSOR 5: Detalle de los viajes del usuario
+	SELECT	v.pVehiculo				AS	fVehiculo		,	v.cPatente				AS	cPatente
+		 ,	v.fUsuarioTitular		AS	fUsuarioTitular ,	ut.cNombre				AS	cNombreTitular
+		 ,	ini.fUsuario			AS	fUsuario	 	,	IFNULL(uu.cNombre,'Desconocido') AS cNombreConductor
+		 ,	ini.nIdViaje			AS	nIdViaje
+		 ,	ini.cCalle				AS	cCalleInicio	,	fin.cCalle				AS	cCalleFin
+		 ,	ini.tEvento				AS	tInicio			,	fin.tEvento				AS	tFin
+		 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)							AS	nDuracionSeg
+		 ,	ROUND(ini.nValor,0)	AS	nScore			,	ROUND(fin.nValor,2)	AS	nKms
+		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoAceleracion	THEN 1 ELSE 0 END ) AS	nQAceleracion
+		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoFrenada		THEN 1 ELSE 0 END ) AS	nQFrenada
+		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoVelocidad		THEN 1 ELSE 0 END ) AS	nQVelocidad
+		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoCurva			THEN 1 ELSE 0 END ) AS	nQCurva
+	FROM	tParamCalculo				AS	prm
+			-- Inicio del Viaje
+			INNER JOIN tEvento			AS	ini ON	ini.fTpEvento	=	kEventoInicio
+			-- Fin del Viaje
+			INNER JOIN tEvento			AS	fin	ON	fin.nIdViaje	=	ini.nIdViaje
+										       AND	fin.fTpEvento   =	kEventoFin
+											   AND	fin.nValor		> 	prm.nDistanciaMin
+			-- Eventos
+			INNER JOIN tEvento			AS	eve ON	eve.nIdViaje	=	ini.nIdViaje
+												AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
+			INNER JOIN tVehiculo		AS 	v	ON	v.pVehiculo		= 	ini.fVehiculo
+			-- Solo muestra los viajes de los usuario relacionados. Pueden existir viajes de usuario no identificados
+			INNER JOIN tUsuarioVehiculo AS	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
+											   AND	uv.pUsuario		=	ini.fUsuario
+			INNER JOIN tUsuario			AS	ut	ON	ut.pUsuario		=	v.fUsuarioTitular
+			LEFT JOIN  tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
+	WHERE	ini.fUsuario	=	prm_pUsuario
+	AND		ini.tEvento		>=	vdIni
+	AND		fin.tEvento		<	vdFin
+	GROUP BY	v.pVehiculo	,	v.cPatente	,	v.fUsuarioTitular	,	ut.cNombre
+		 	,	ini.fUsuario,	uu.cNombre	,	ini.nIdViaje		,	ini.cCalle
+			,	fin.cCalle 	,	ini.tEvento	,	fin.tEvento			,	ini.nValor
+			,	fin.nValor	
+	ORDER BY ini.tEvento DESC;
+
 END //

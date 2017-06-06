@@ -9,22 +9,17 @@ SELECT	v.pVehiculo			AS	fVehiculo		,	v.cPatente	AS	cPatente
 	 ,	ini.cCalle			AS	cCalleInicio	,	fin.cCalle	AS	cCalleFin
 	 ,	ini.tEvento			AS	tInicio			,	fin.tEvento	AS	tFin
 	 ,	ini.nValor			AS	nScore			,	fin.nValor	AS	nKms
-FROM	tEvento			ini
-		INNER JOIN tEvento				fin	ON	fin.nIdViaje	=	ini.nIdViaje
+FROM	tParamCalculo				AS	prm
+		-- Inicio del Viaje
+		INNER JOIN tEvento			AS	ini ON	ini.fTpEvento	=	1 
+		-- Fin del Viaje
+		INNER JOIN tEvento			AS	fin	ON	fin.nIdViaje	=	ini.nIdViaje
 									       AND	fin.fTpEvento   =	2 -- Fin del Viaje
-		INNER JOIN tVehiculo		 	v	ON	v.pVehiculo		= 	ini.fVehiculo
+										   AND	fin.nValor		> 	prm.nDistanciaMin
+		INNER JOIN tVehiculo		AS 	v	ON	v.pVehiculo		= 	ini.fVehiculo
 		-- Solo muestra los viajes de los usuario relacionados. Pueden existir viajes de usuario no identificados
-		INNER JOIN tUsuarioVehiculo 	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
+		INNER JOIN tUsuarioVehiculo AS	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
 										   AND	uv.pUsuario		=	ini.fUsuario
-		INNER JOIN tUsuario				ut	ON	ut.pUsuario		=	v.fUsuarioTitular
-		LEFT JOIN  tUsuario				uu	ON	uu.pUsuario		=	ini.fUsuario
-WHERE	ini.fTpEvento	=	1 -- Inicio del Viaje
-AND     fin.nValor > 0.3 -- Solo considera viajes que tengan al menos 300 mt
-/*  Se espera que al menos tenga un evento
-AND     EXISTS ( SELECT 'x'
-                 FROM   tEvento eve
-                 WHERE  eve.nIdViaje = ini.nIdViaje
-                 AND    eve.fTpEvento in ( 3, 4, 5 )
-               )
-*/               
+		INNER JOIN tUsuario			AS	ut	ON	ut.pUsuario		=	v.fUsuarioTitular
+		LEFT JOIN  tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
 ORDER BY ini.tEvento DESC

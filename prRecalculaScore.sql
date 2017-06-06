@@ -12,12 +12,12 @@ BEGIN
         CALL prCalculaScoreDia( vdDia, prm_fVehiculo, prm_fUsuario );
 	    SET vdDia = ADDDATE( vdDia, INTERVAL 1 DAY);
     END WHILE;
-    SELECT prm_fVehiculo, prm_fUsuario, cDias;
+    -- SELECT prm_fVehiculo, prm_fUsuario, cDias;
 
 	SET vdDia = prm_dInicio;
     
     WHILE vdDia < now() DO
-        SELECT prm_fVehiculo, prm_fUsuario, vdDia;
+        -- SELECT prm_fVehiculo, prm_fUsuario, vdDia;
         CALL prCalculaScoreMes( vdDia, prm_fVehiculo );
         CALL prCalculaScoreMesConductor( vdDia, prm_fVehiculo, prm_fUsuario );
 	    SET vdDia = ADDDATE( vdDia, INTERVAL 1 MONTH);
