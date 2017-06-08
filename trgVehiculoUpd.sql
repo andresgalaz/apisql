@@ -1,4 +1,4 @@
-DROP TRIGGER IF EXISTS trgVehiculoUpd;
+﻿DROP TRIGGER IF EXISTS trgVehiculoUpd;
 DELIMITER //
 CREATE TRIGGER trgVehiculoUpd BEFORE UPDATE
     ON tVehiculo FOR EACH ROW
@@ -8,5 +8,6 @@ BEGIN
 	    WHERE pVehiculo = OLD.pVehiculo;
     END IF;
     SET NEW.tModif = now();
+	SET new.dIniVigencia = DATE(NOW());
 END //
 DELIMITER ;
