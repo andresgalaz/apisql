@@ -1,7 +1,7 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS prScoreVehiculoRangoFecha //
-CREATE PROCEDURE prScoreVehiculoRangoFecha (IN prm_pUsuario INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
-BEGIN
+CREATE PROCEDURE prScoreVehiculoRangoFecha ( IN prm_pUsuario INTEGER , IN prm_pVehiculo INTEGER , IN prm_nPeriodo INTEGER , IN prm_dIni DATE , IN prm_dFin DATE )
+lbPrincipal:BEGIN
 	DECLARE kDescLimite			INTEGER	DEFAULT 40;
 	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
 	DECLARE kEventoFin			INTEGER	DEFAULT 2;
@@ -14,6 +14,12 @@ BEGIN
 	DECLARE vdFin				DATE;
 	DECLARE vnKmsTotal			DECIMAL(10,2)	DEFAULT 0.0;
 	DECLARE vnScoreGlobal		DECIMAL(10,2)	DEFAULT 0.0;
+
+
+	IF 1 = 1 THEN
+ 		SELECT prm_pUsuario, IFNULL(prm_pVehiculo,-100) veh, prm_nPeriodo, prm_dIni, prm_dFin;
+		LEAVE lbPrincipal;
+	END IF;
 	
 	IF prm_dIni IS NULL THEN
 		SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAYOFMONTH(now()) - 1 DAY));
@@ -222,17 +228,17 @@ BEGIN
 			INNER JOIN tEvento			AS	ini ON	ini.fTpEvento	=	kEventoInicio
 			-- Fin del Viaje
 			INNER JOIN tEvento			AS	fin	ON	fin.nIdViaje	=	ini.nIdViaje
-										       AND	fin.fTpEvento   =	kEventoFin
-											   AND	fin.nValor		> 	prm.nDistanciaMin
+										 		AND	fin.fTpEvento	=	kEventoFin
+											 	AND	fin.nValor		> 	prm.nDistanciaMin
 			-- Eventos
 			INNER JOIN tEvento			AS	eve ON	eve.nIdViaje	=	ini.nIdViaje
 												AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
 			INNER JOIN tVehiculo		AS 	v	ON	v.pVehiculo		= 	ini.fVehiculo
 			-- Solo muestra los viajes de los usuario relacionados. Pueden existir viajes de usuario no identificados
 			INNER JOIN tUsuarioVehiculo AS	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
-											   AND	uv.pUsuario		=	ini.fUsuario
+												AND	uv.pUsuario		=	ini.fUsuario
 			INNER JOIN tUsuario			AS	ut	ON	ut.pUsuario		=	v.fUsuarioTitular
-			LEFT JOIN  tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
+			LEFT JOIN tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
 	WHERE	ini.fUsuario	=	prm_pUsuario
 	AND		ini.tEvento		>=	vdIni
 	AND		fin.tEvento		<	vdFin
@@ -241,5 +247,4 @@ BEGIN
 			,	fin.cCalle 	,	ini.tEvento	,	fin.tEvento			,	ini.nValor
 			,	fin.nValor	
 	ORDER BY ini.tEvento DESC;
-
 END //
