@@ -8,6 +8,5 @@ BEGIN
 	    WHERE pVehiculo = OLD.pVehiculo;
     END IF;
     SET NEW.tModif = now();
-	SET new.dIniVigencia = DATE(NOW());
 END //
 DELIMITER ;
