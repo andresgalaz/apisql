@@ -183,18 +183,29 @@ BEGIN
 		SELECT vnKmsTotal AS nKmsTotal, round( vnScoreGlobal	/ vnKmsTotal, 0 ) AS nScoreGlobal; 
 	END IF;
 	-- CURSOR 2: Entrega un cursor con el detalle por vehículo
-	SELECT w.pVehiculo			, v.cPatente
-		 , v.fUsuarioTitular	, ut.cNombre					AS cUsuarioTitular
-		 , SUBSTRING(vdIni, 1, 10 )							AS dInicio
-		 , SUBSTRING(DATE_SUB(vdFin, INTERVAL 1 DAY), 1, 10 )	AS dFin
-		 , w.nKms				, w.nScore
-		 , w.nDescuento			, w.nDiasTotal
-		 , w.nDiasUso			, w.nDiasPunta
-		 , w.nQFrenada			, w.nQAceleracion		, w.nQVelocidad			, w.nQCurva
-		 , w.nQViajes
-	FROM wMemoryScoreVehiculo w
-		 JOIN score.tVehiculo	v	ON v.pVehiculo = w.pVehiculo
-		 JOIN score.tUsuario	ut	ON ut.pUsuario = v.fUsuarioTitular;
+	BEGIN
+		SELECT	w.pVehiculo			, v.cPatente,
+				v.fUsuarioTitular	, ut.cNombre					AS cUsuarioTitular,
+				SUBSTRING(vdIni, 1, 10 )							AS dInicio,
+				SUBSTRING(DATE_SUB(vdFin, INTERVAL 1 DAY), 1, 10 )	AS dFin,
+				w.nKms				, w.nScore,
+				w.nDescuento		, w.nDiasTotal,
+				w.nDiasUso			, w.nDiasPunta,
+				w.nQFrenada			, w.nQAceleracion		, w.nQVelocidad			, w.nQCurva,
+				w.nQViajes,
+				(	select	max(e.tEvento)
+					from	tEvento e
+					where	e.fVehiculo = w.pVehiculo	) AS tUltimoRegistro,
+				(	select	max(it.tRegistroActual)
+					from	tInicioTransferencia it
+					where	it.fVehiculo = v.pVehiculo	) AS tUltimaSincro,
+				(	select	fnEstadoSincro(max(it.tRegistroActual))
+					from	tInicioTransferencia it
+					where	it.fVehiculo = v.pVehiculo	) AS cEstadoSincro
+		FROM wMemoryScoreVehiculo w
+			 JOIN score.tVehiculo	v	ON v.pVehiculo = w.pVehiculo
+			 JOIN score.tUsuario	ut	ON ut.pUsuario = v.fUsuarioTitular;
+	END;
 	-- CURSOR 3: Entrega un cursor con los conductores que pueden usar los vehiculos 
 	-- 			 que este usuario puede usar
 	SELECT	uv2.pVehiculo, uv2.pUsuario, u.cNombre cUsuario
