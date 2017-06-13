@@ -131,13 +131,13 @@ BEGIN
 	-- Se espera que la exista la tabla wMemoryScoreVehiculo, la cual es creada por prCreaTmpScoreVehiculo
 	-- Inserta en tabla temporal
 	INSERT INTO wMemoryScoreVehiculo 
-			( pVehiculo 	, nKms				, nScore
-			, nQViajes		, nDescuento		, nDiasTotal		, nDiasUso		, nDiasPunta
-			, nQFrenada		, nQAceleracion		, nQVelocidad		, nQCurva
+			( pVehiculo 		, dInicio			, dFin				, nKms				, nScore
+			, nQViajes			, nDescuento		, nDiasTotal		, nDiasUso			, nDiasPunta
+			, nQFrenada			, nQAceleracion		, nQVelocidad		, nQCurva
 			)
-	VALUES	( prm_pVehiculo	, vnKms				, vnScore
-			, vnQViajes		, vnDescuento		, vnDiasTotal		, vnDiasUso		, vnDiasPunta 
-			, vnQFrenada	, vnQAceleracion	, vnQVelocidad		, vnQCurva
+	VALUES	( prm_pVehiculo		, prm_dIni			, prm_dFin			, vnKms				, vnScore
+			, vnQViajes			, vnDescuento		, vnDiasTotal		, vnDiasUso			, vnDiasPunta 
+			, vnQFrenada		, vnQAceleracion	, vnQVelocidad		, vnQCurva
 			);
 
 END //
