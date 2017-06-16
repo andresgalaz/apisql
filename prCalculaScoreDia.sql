@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prCalculaScoreDia;
+DROP PROCEDURE IF EXISTS prCalculaScoreDia;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreDia	(	in prmDia		DATE
 									,	in prmVehiculo	INTEGER
@@ -86,8 +86,9 @@ BEGIN
 		WHERE	fVehiculo	= prmVehiculo
 		AND		fUsuario	= prmUsuario
 		AND		dFecha	 	= vdDia;
-
+SELECT prmVehiculo, prmUsuario, vdDia, bInsert;
 		IF bInsert = '0' THEN
+SELECT 'Actualiza',prmVehiculo, prmUsuario, vdDia, bInsert;
 			-- Actualiza
 			UPDATE tScoreDia
 			SET		nKms			= vnKms
@@ -101,6 +102,7 @@ BEGIN
 			AND		fUsuario	= prmUsuario
 			AND		dFecha	 	= vdDia;
 		ELSE			
+SELECT 'Inserta',prmVehiculo, prmUsuario, vdDia, bInsert;
 			INSERT INTO tScoreDia
 					( fVehiculo			, fUsuario			, dFecha
 					, nKms				, bHoraPunta		, bUso

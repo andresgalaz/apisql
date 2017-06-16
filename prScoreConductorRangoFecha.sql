@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS prScoreConductorRangoFecha //
 CREATE PROCEDURE prScoreConductorRangoFecha ( IN prm_pUsuario INTEGER, IN prm_pVehiculo INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
@@ -102,7 +102,9 @@ BEGIN
 							vnQAceleracion		, vnQVelocidad		,
 							vnQFrenada			, vnQCurva			;
 		WHILE NOT eofCurVeh DO
-			CALL prCalculaScoreVehiculo( vpVehiculo, vdIni, vdFin );
+			IF NOT EXISTS (SELECT 1 FROM wMemoryScoreVehiculo WHERE pVehiculo = vpVehiculo ) THEN
+				CALL prCalculaScoreVehiculo( vpVehiculo, vdIni, vdFin );
+			END IF;
 
 			IF IFNULL(vnKms, 0) > 0 THEN
 				SET vnPtjFrenada	= vnSumaFrenada		* 100 / vnKms;

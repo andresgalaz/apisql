@@ -1,4 +1,4 @@
-DELIMITER //
+﻿DELIMITER //
 DROP PROCEDURE IF EXISTS prMigraEventos //
 CREATE PROCEDURE prMigraEventos ( )
 BEGIN
@@ -29,7 +29,7 @@ BEGIN
            nPuntaje, tModif 
     FROM   tmpEvento;
 
-SELECT '400 Inserta eventos', now();
+    -- SELECT '400 Inserta eventos', now();
 	BEGIN
 		-- Claves
 		DECLARE vnIdViaje	integer;
@@ -66,7 +66,7 @@ SELECT '400 Inserta eventos', now();
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-SELECT '610 Abre cursor', now();
+        -- SELECT '610 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vpVehiculo, vpUsuario, vdFecha;
         -- SELECT '620 Inicio cursor', now();
@@ -93,7 +93,7 @@ SELECT '610 Abre cursor', now();
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-SELECT '710 Abre cursor', now();
+        -- SELECT '710 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vcPeriodo, vpVehiculo;
         -- SELECT '720 Inicio cursor', now();
@@ -121,7 +121,7 @@ SELECT '710 Abre cursor', now();
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-SELECT '810 Abre cursor', now();
+        -- SELECT '810 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vcPeriodo, vpVehiculo, vpUsuario;
         -- SELECT '820 Inicio cursor', now();
