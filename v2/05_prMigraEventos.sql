@@ -21,10 +21,10 @@ BEGIN
                          FROM   tmpEvento tmp );
 --	SELECT '300 Elimina los viajes que ya existen', now();                     
     INSERT INTO tEvento 
-         ( nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT,
+         ( nIdObservation, nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT,
            cCalle, cCalleCorta, nVelocidadMaxima, nValor, fVehiculo, fUsuario,
            nPuntaje, nNivelApp, tModif ) 
-    SELECT nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT,
+    SELECT nIdObservation, nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT,
            cCalle, cCalleCorta, nVelocidadMaxima, nValor, fVehiculo, fUsuario,
            nPuntaje, nNivelApp, tModif 
     FROM   tmpEvento;
