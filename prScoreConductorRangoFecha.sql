@@ -124,7 +124,7 @@ BEGIN
 				SELECT nValor INTO vnPtjCurva
 				FROM   tRangoPuntaje WHERE fTpevento = kEventoCurva AND nInicio <= vnPtjCurva and vnPtjCurva < nFin;
 
-				-- Parámetros de ponderación por tipo de evento
+                -- Parámetros de ponderación por tipo de evento
 				SELECT	( vnPtjFrenada		* nPorcFrenada		/ 100 )
 					+	( vnPtjAceleracion	* nPorcAceleracion	/ 100 )
 					+	( vnPtjVelocidad	* nPorcVelocidad	/ 100 )
