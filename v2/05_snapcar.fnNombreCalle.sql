@@ -1,9 +1,9 @@
 DELIMITER //
 USE snapcar //
 DROP FUNCTION IF EXISTS fnNombreCalle //
-CREATE FUNCTION fnNombreCalle (	prm_tipo	char(1)		, prm_name		varchar(100), prm_street_number	varchar(100),
-								prm_town	varchar(100), prm_city		varchar(100), prm_substate		varchar(100),
-								prm_state	varchar(100), prm_country	varchar(100) ) RETURNS varchar(500)
+CREATE FUNCTION fnNombreCalle (	prm_tipo			char(1)		, prm_name	varchar(100),
+								prm_street_number	varchar(100), prm_town	varchar(100), prm_city			varchar(100),
+								prm_substate		varchar(100), prm_state	varchar(100), prm_country		varchar(100) ) RETURNS varchar(500)
 BEGIN
 	/*
 	Devuelve el nombre de la calle. Si prm_tipo:
