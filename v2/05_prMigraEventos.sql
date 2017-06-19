@@ -1,8 +1,8 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS prMigraEventos //
 CREATE PROCEDURE prMigraEventos ( )
 BEGIN
-    -- SELECT '100 Inicio', now();
+--	SELECT '100 Inicio', now();
     DROP TEMPORARY TABLE IF EXISTS tmpEvento;
     CREATE TEMPORARY TABLE tmpEvento AS  
     SELECT w.* 
@@ -11,7 +11,7 @@ BEGIN
            INNER JOIN tVehiculo v ON v.pVehiculo = w.fVehiculo
     WHERE w.tEvento >= '2017-01-01';
 --  WHERE w.tEvento >= '2016-08-01';
-    -- SELECT '200 Crea tabla temporal', now();
+--	SELECT '200 Crea tabla temporal', now();
     
     -- Elimina los viajes que ya se habían migrado, dado que vienen nuevos eventos
     -- para el mismo viaje. Esto ocurre cuando pasa mucho tiempo entre un evento y otro
@@ -19,17 +19,17 @@ BEGIN
 	DELETE FROM tEvento
     WHERE  nIdViaje in ( SELECT DISTINCT tmp.nIdViaje
                          FROM   tmpEvento tmp );
-    -- SELECT '300 Elimina los viajes que ya existen', now();                     
+--	SELECT '300 Elimina los viajes que ya existen', now();                     
     INSERT INTO tEvento 
          ( nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT,
            cCalle, cCalleCorta, nVelocidadMaxima, nValor, fVehiculo, fUsuario,
-           nPuntaje, tModif ) 
+           nPuntaje, nNivelApp, tModif ) 
     SELECT nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT,
            cCalle, cCalleCorta, nVelocidadMaxima, nValor, fVehiculo, fUsuario,
-           nPuntaje, tModif 
+           nPuntaje, nNivelApp, tModif 
     FROM   tmpEvento;
 
-    -- SELECT '400 Inserta eventos', now();
+--	SELECT '400 Inserta eventos', now();
 	BEGIN
 		-- Claves
 		DECLARE vnIdViaje	integer;
@@ -43,7 +43,7 @@ BEGIN
         -- SELECT '510 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vnIdViaje;
-        -- SELECT '520 Inicio cursor', now();
+--	SELECT '520 Inicio cursor', now();
 		WHILE NOT eofCurEvento DO
 			-- Calcula Score diario
 			CALL prCalculaScoreViaje( vnIdViaje );
@@ -66,7 +66,7 @@ BEGIN
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '610 Abre cursor', now();
+--		SELECT '610 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vpVehiculo, vpUsuario, vdFecha;
         -- SELECT '620 Inicio cursor', now();
@@ -93,7 +93,7 @@ BEGIN
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '710 Abre cursor', now();
+--		SELECT '710 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vcPeriodo, vpVehiculo;
         -- SELECT '720 Inicio cursor', now();
@@ -121,7 +121,7 @@ BEGIN
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '810 Abre cursor', now();
+--		SELECT '810 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vcPeriodo, vpVehiculo, vpUsuario;
         -- SELECT '820 Inicio cursor', now();

@@ -1,6 +1,4 @@
-﻿/* 
--- Esto está comentado por seguridad, al correrlo por error
-truncate table tScoreMes;
+﻿truncate table tScoreMes;
 ALTER TABLE tScoreMes AUTO_INCREMENT=1;
 truncate table tScoreMesConductor;
 ALTER TABLE tScoreMesConductor AUTO_INCREMENT=1;
@@ -11,9 +9,8 @@ ALTER TABLE tEvento AUTO_INCREMENT=1;
 truncate table wEvento;
 ALTER TABLE wEvento AUTO_INCREMENT=1;
 truncate table wEventoDeleted;
-ALTER TABLE wEvento AUTO_INCREMENT=1;
+ALTER TABLE wEventoDeleted AUTO_INCREMENT=1;
 
-*/
 -- Llena las tablas de Score con valores en cero para cada mes o dia, segun corresponda
 -- call prResetScore( '2016-08-01' );
 call prResetScore( '2017-01-01' );
