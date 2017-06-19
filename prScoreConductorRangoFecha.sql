@@ -185,7 +185,7 @@ BEGIN
 	
 	-- CURSOR 2: Entrega un cursor con los totales globales del conductor
 	SELECT	w.pUsuario	, u.cNombre         AS cUsuario	,
-			w.nKms		, w.nScore / w.nKms AS nScore	,
+			w.nKms		, ROUND(w.nScore / w.nKms,0) AS nScore	,
 			w.nQViajes	, w.nQAceleracion       		,
 			w.nQFrenada	, w.nQVelocidad	        		,
 			w.nQCurva

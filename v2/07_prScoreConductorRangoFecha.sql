@@ -124,7 +124,7 @@ BEGIN
 				SELECT nValor INTO vnPtjCurva
 				FROM   tRangoPuntaje WHERE fTpevento = kEventoCurva AND nInicio <= vnPtjCurva and vnPtjCurva < nFin;
 
-				-- Parámetros de ponderación por tipo de evento
+                -- Parámetros de ponderación por tipo de evento
 				SELECT	( vnPtjFrenada		* nPorcFrenada		/ 100 )
 					+	( vnPtjAceleracion	* nPorcAceleracion	/ 100 )
 					+	( vnPtjVelocidad	* nPorcVelocidad	/ 100 )
@@ -150,7 +150,7 @@ BEGIN
 				SET vnQFrenada		= 0;
 				SET vnQCurva		= 0;
 			END IF;
-select vpUsuario, vpVehiculo, vnKms, vnScore;
+
 			IF EXISTS (SELECT 1 FROM wMemoryScoreConductor WHERE pUsuario = vpUsuario ) THEN
 				UPDATE wMemoryScoreConductor 
 				SET		nKms			= nKms			+ vnKms				,
@@ -185,7 +185,7 @@ select vpUsuario, vpVehiculo, vnKms, vnScore;
 	
 	-- CURSOR 2: Entrega un cursor con los totales globales del conductor
 	SELECT	w.pUsuario	, u.cNombre         AS cUsuario	,
-			w.nKms		, w.nScore / w.nKms AS nScore	,
+			w.nKms		, ROUND(w.nScore / w.nKms,0) AS nScore	,
 			w.nQViajes	, w.nQAceleracion       		,
 			w.nQFrenada	, w.nQVelocidad	        		,
 			w.nQCurva
