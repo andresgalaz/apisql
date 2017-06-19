@@ -6,7 +6,7 @@ select t.id                     AS trip_id          , t.client_id              A
      , t.distance               AS distance         , c.vehicle_id             AS vehicle_id
      , c.driver_id              AS driver_id        , o.prefix_observation     AS prefix
      , r.points                 AS puntos           , r.app_level			   AS app_level
-	 , o.observed_value         AS obs_value
+	 , o.id						AS observation_id	, o.observed_value         AS obs_value
      , o.permited_value         AS permited_value   , o.from_time              AS obs_fecha
 	 , snapcar.fnNombreCalle( 'L', so.name, so.street_number, so.town, so.city, so.substate, so.state, so.country ) AS calle
 	 , snapcar.fnNombreCalle( 'C', so.name, so.street_number, so.town, so.city, so.substate, so.state, so.country ) AS calle_corta
