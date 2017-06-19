@@ -1,4 +1,4 @@
-DELIMITER //
+﻿DELIMITER //
 DROP PROCEDURE IF EXISTS prScoreConductorRangoFecha //
 CREATE PROCEDURE prScoreConductorRangoFecha ( IN prm_pUsuario INTEGER, IN prm_pVehiculo INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
@@ -150,11 +150,11 @@ BEGIN
 				SET vnQFrenada		= 0;
 				SET vnQCurva		= 0;
 			END IF;
-
+select vpUsuario, vpVehiculo, vnKms, vnScore;
 			IF EXISTS (SELECT 1 FROM wMemoryScoreConductor WHERE pUsuario = vpUsuario ) THEN
 				UPDATE wMemoryScoreConductor 
 				SET		nKms			= nKms			+ vnKms				,
-						nScore			= nScore		+ vnScore			,
+						nScore			= nScore		+ vnScore * vnKms	,
 						nQAceleracion	= nQAceleracion + vnQAceleracion	,
 						nQVelocidad		= nQVelocidad	+ vnQVelocidad		,
 						nQFrenada		= nQFrenada		+ vnQFrenada		,
@@ -163,10 +163,10 @@ BEGIN
 				WHERE	pUsuario = vpUsuario;
 			ELSE
 				INSERT INTO wMemoryScoreConductor(
-						pUsuario		, nKms			, nScore		, nQViajes	,
-						nQAceleracion	, nQVelocidad	, nQFrenada		, nQCurva	)
-				VALUES( vpUsuario		, vnKms			, vnScore		, vnQViajes ,
-						VnQAceleracion	, VnQVelocidad	, VnQFrenada	, VnQCurva 	);
+						pUsuario		, nKms			, nScore		    , nQViajes	,
+						nQAceleracion	, nQVelocidad	, nQFrenada	    	, nQCurva	)
+				VALUES( vpUsuario		, vnKms			, vnScore * vnKms   , vnQViajes ,
+						VnQAceleracion	, VnQVelocidad	, VnQFrenada	    , VnQCurva 	);
 			END IF;
 
 			FETCH CurVeh INTO	vpUsuario			, vpVehiculo		,
@@ -184,10 +184,10 @@ BEGIN
 			SUBSTRING(DATE_SUB(vdFin, INTERVAL 1 DAY), 1, 10 )	AS dFin;
 	
 	-- CURSOR 2: Entrega un cursor con los totales globales del conductor
-	SELECT	w.pUsuario	, u.cNombre AS cUsuario	,
-			w.nKms		, w.nScore				,
-			w.nQViajes	, w.nQAceleracion		,
-			w.nQFrenada	, w.nQVelocidad			,
+	SELECT	w.pUsuario	, u.cNombre         AS cUsuario	,
+			w.nKms		, w.nScore / w.nKms AS nScore	,
+			w.nQViajes	, w.nQAceleracion       		,
+			w.nQFrenada	, w.nQVelocidad	        		,
 			w.nQCurva
 	FROM	wMemoryScoreConductor	AS w
 			JOIN tUsuario 			AS u ON u.pUsuario = w.pUsuario;
