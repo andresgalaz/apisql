@@ -1,6 +1,6 @@
-﻿USE snapcar;
-DROP VIEW  IF EXISTS trip_observations_view;
-create view trip_observations_view as
+-- ﻿USE snapcar;
+DROP VIEW  IF EXISTS snapcar.trip_observations_view;
+create view snapcar.trip_observations_view as
 select t.id                     AS trip_id          , t.client_id              AS client_id
      , t.from_date              AS fecha_ini        , t.to_date                AS fecha_fin
      , t.distance               AS distance         , c.vehicle_id             AS vehicle_id

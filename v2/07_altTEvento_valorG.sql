@@ -1,0 +1,2 @@
+ALTER TABLE score.tEvento
+ ADD nValorG SMALLINT UNSIGNED AFTER nValor;

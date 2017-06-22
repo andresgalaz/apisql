@@ -10,6 +10,7 @@ BEGIN
 		'L' : Devuelve el nombre largo
 		'C' : Devuelve el nombre corto
 	*/
+    
 	DECLARE nombreCorto VARCHAR(500) DEFAULT '';
 	IF PRM_TIPO = 'L' AND IFNULL(prm_name,'') <> '' THEN
 		SET nombreCorto = CONCAT(nombreCorto, prm_name );
@@ -18,7 +19,7 @@ BEGIN
 		END IF;
 		SET nombreCorto = CONCAT(nombreCorto, ', ' );
 	END IF;
-	IF prm_state = 'Ciudad Autónoma de Buenos Aires' THEN
+	IF prm_state = 'Ciudad AutÃ³noma de Buenos Aires' THEN
 		IF IFNULL(prm_town,'') <> '' THEN
 			SET nombreCorto = CONCAT(nombreCorto, prm_town, ', CABA, ' );
 		ELSE
@@ -31,7 +32,7 @@ BEGIN
 		IF IFNULL(prm_substate,'') <> '' AND IFNULL(prm_substate,'') <> IFNULL(prm_city,'') THEN
 			SET nombreCorto = CONCAT(nombreCorto, prm_substate, ', ' );
 		END IF;
-		SET nombreCorto = CONCAT(nombreCorto, 'Bs.As., ' );
+		SET nombreCorto = CONCAT(nombreCorto, 'Bs.As., '  );
 	ELSE
 		IF IFNULL(prm_town,'') <> '' THEN
 			SET nombreCorto = CONCAT(nombreCorto, prm_town, ', ' );
@@ -50,7 +51,7 @@ BEGIN
 		END IF;
 	END IF;
 	
-	RETURN SUBSTRING(nombreCorto, 1, LENGTH(nombreCorto)-2);
+	RETURN SUBSTRING(nombreCorto, 1, CHAR_LENGTH(nombreCorto)-2);
 	
 END //
 
