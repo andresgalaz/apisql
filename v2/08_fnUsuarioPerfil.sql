@@ -1,9 +1,9 @@
 DELIMITER //
 USE score //
 DROP FUNCTION IF EXISTS fnUsuarioPerfil //
-CREATE FUNCTION fnUsuarioPerfil( prm_cEmail VARCHAR(200), prm_cPerfil VARCHAR(100) ) RETURNS BOOLEAN
+CREATE FUNCTION fnUsuarioPerfil( prm_cEmail VARCHAR(200) CHARSET utf8, prm_cPerfil VARCHAR(100) CHARSET utf8) RETURNS BOOLEAN
 BEGIN
-	DECLARE nCount INTEGER;
+	DECLARE nCount INTEGER DEFAULT 0;
     
     IF ifnull(prm_cPerfil,'*') = '*' THEN
 		SELECT	count(*) INTO nCount
