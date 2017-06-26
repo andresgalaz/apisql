@@ -19,9 +19,13 @@ BEGIN
 		END IF;
 		SET nombreCorto = CONCAT(nombreCorto, ', ' );
 	END IF;
-	IF prm_state = 'Ciudad Autónoma de Buenos Aires' THEN
+	IF prm_state = 'Ciudad Autónoma de Buenos Aires' OR prm_substate like 'Comuna %' THEN
 		IF IFNULL(prm_town,'') <> '' THEN
 			SET nombreCorto = CONCAT(nombreCorto, prm_town, ', CABA, ' );
+		ELSEIF IFNULL(prm_city,'') <> '' THEN
+			SET nombreCorto = CONCAT(nombreCorto, prm_city, ', CABA, ' );
+		ELSEIF IFNULL(prm_substate,'') <> '' THEN
+			SET nombreCorto = CONCAT(nombreCorto, prm_substate, ', CABA, ' );
 		ELSE
 			SET nombreCorto = CONCAT(nombreCorto, 'CABA, ' );
 		END IF;
