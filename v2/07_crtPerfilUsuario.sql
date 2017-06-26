@@ -20,3 +20,6 @@ CREATE TABLE `tUsuarioPerfil` (
 INSERT INTO `tUsuarioPerfil` (`pUsuario`,`pPerfil`) VALUES (23,1);
 INSERT INTO `tUsuarioPerfil` (`pUsuario`,`pPerfil`) VALUES (77,1);
 INSERT INTO `tUsuarioPerfil` (`pUsuario`,`pPerfil`) VALUES (117,1);
+-- Mobiltonic
+INSERT INTO `tUsuarioPerfil` (`pUsuario`,`pPerfil`) VALUES (165,1);
+INSERT INTO `tUsuarioPerfil` (`pUsuario`,`pPerfil`) VALUES (33,1);
