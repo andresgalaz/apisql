@@ -14,10 +14,10 @@ BEGIN
 	-- La aceleración( o desaceleración) es el valorG, está en milesimas de la gravedad (m/s2), se pasa a KM/(hr * seg)
     DECLARE vnAcel DOUBLE DEFAULT prmValorG * ( 9.8 / 1000 ) * ( 3600 / 1000 );
     IF prmTpEvento = kEventoAceleracion THEN
-		RETURN CONCAT('Aceleración de ', ROUND( vnAcel * kLapsoTiempo, 0 ), ' [km/h] en un segundo' );
+		RETURN CONCAT('Aceleración de ', ROUND( vnAcel * kLapsoTiempo, 0 ), 'km/h en un segundo' );
 	END IF;
     IF prmTpEvento = kEventoFrenada THEN
-		RETURN CONCAT('Frenada de ', ROUND( vnAcel * kLapsoTiempo, 0 ), ' [km/h] en un segundo' );
+		RETURN CONCAT('Frenada de ', ROUND( vnAcel * kLapsoTiempo, 0 ), 'km/h en un segundo' );
 	END IF;
 	RETURN '';
 END //
