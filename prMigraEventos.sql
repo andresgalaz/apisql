@@ -11,10 +11,11 @@ BEGIN
 			JOIN tUsuario		AS	u	ON	u.pUsuario		= w.fUsuario
 			JOIN tVehiculo		AS	v	ON	v.pVehiculo		= w.fVehiculo
 			JOIN wEvento		AS	fin	ON	fin.nIdViaje	= w.nIdViaje
+										AND fin.fTpEvento	= 2
 										AND	fin.nValor		> prm.nDistanciaMin
     WHERE	w.tEvento >= '2017-01-01';
 	-- WHERE w.tEvento >= '2016-08-01';
-	-- SELECT '200 Crea tabla temporal', now();
+	-- SELECT '200 Crea tabla temporal', count(*) from tmpEvento;
     
     -- Elimina los viajes que ya se habían migrado, dado que vienen nuevos eventos
     -- para el mismo viaje. Esto ocurre cuando pasa mucho tiempo entre un evento y otro
@@ -34,6 +35,7 @@ BEGIN
 
 	-- SELECT '400 Inserta eventos', now();
 	BEGIN
+		DECLARE vnCount		integer DEFAULT 0;
 		-- Claves
 		DECLARE vnIdViaje	integer;
 		-- Cursor Eventos por Viaje
@@ -43,12 +45,16 @@ BEGIN
 			FROM   tmpEvento w;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '510 Abre cursor', now();
+	-- SELECT '510 Abre cursor', now();
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vnIdViaje;
-		-- SELECT '520 Inicio cursor', now();
+	-- SELECT '520 Inicio cursor', now();
 		WHILE NOT eofCurEvento DO
 			-- Calcula Score diario
+			-- SET vnCount = vnCount + 1;
+			-- IF vnCount % 100 = 0 THEN
+				-- SELECT '530 Inicio cursor', now(), vnIdViaje, vnCount;
+			-- END IF;
 			CALL prCalculaScoreViaje( vnIdViaje );
 			FETCH CurEvento INTO vnIdViaje;
 		END WHILE;
@@ -80,7 +86,7 @@ BEGIN
 		END WHILE;
 		CLOSE CurEvento;
 	END; -- Fin cursor eventos
-    -- SELECT '830 Fin cursor', now();
+	-- SELECT '830 Fin cursor', now();
   
 	-- Limpia tabla temporal
     DELETE FROM wEvento WHERE 1 = 1; 
