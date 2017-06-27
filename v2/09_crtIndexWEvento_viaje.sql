@@ -1,0 +1,1 @@
+create index idWEvento_idViaje on wEvento( nIdViaje )
