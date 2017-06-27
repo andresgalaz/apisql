@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prResetScore;
+DROP PROCEDURE IF EXISTS prResetScore;
 DELIMITER //
 CREATE PROCEDURE prResetScore( in prm_dInicio DATE)
 BEGIN
@@ -14,6 +14,7 @@ BEGIN
 
 	SET vdDia = prm_dInicio;
     
+    /*
     WHILE vdDia < now() DO
         SELECT 'MES', now(), vdDia;
         CALL prCalculaScoreMesInicio( vdDia );
@@ -21,5 +22,6 @@ BEGIN
         CALL prCalculaScoreMesConductorInicio( vdDia );
 	    SET vdDia = ADDDATE( vdDia, INTERVAL 1 MONTH);
     END WHILE;
+    */
 END //
 DELIMITER ;
