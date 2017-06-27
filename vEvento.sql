@@ -19,4 +19,4 @@ where	-- ev.fTpEvento in ('3','4','5') and
 						where	we.trip_id				= ev.nIdViaje 
 						and		we.prefix_observation	= tp.cPrefijo
 						and		we.from_time			= date_add(ev.tEvento,interval 3 hour)
-					)
+					);

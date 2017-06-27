@@ -1,4 +1,4 @@
-﻿-- drop view score.vEventosDetalle;
+-- drop view score.vEventosDetalle;
 create view score.vEventosDetalle as
 select t.id id_viaje, t.from_date, t.to_date, t.distance / 1000 ditancia_km
      , IFNULL(o.prefix_observation, 'Sin eventos') tipoEvento, o.from_time, o.permited_value, o.observed_value

@@ -84,15 +84,20 @@ BEGIN
 			w.nDiasUso			, w.nDiasPunta,
 			-- w.nQFrenada			, w.nQAceleracion		, w.nQVelocidad			, w.nQCurva,
 			w.nQViajes,
-			(	SELECT	max(e.tEvento)
-				FROM	tEvento e
-				WHERE	e.fVehiculo = w.pVehiculo	)		AS tUltimoRegistro,
+			(	SELECT	max(trips.to_date) + INTERVAL -3 HOUR
+				FROM	snapcar.trips 
+						JOIN snapcar.clients ON clients.id = trips.client_id
+                WHERE	clients.vehicle_id = w.pVehiculo )	AS tUltimoRegistro,
 			(	SELECT	max(it.tRegistroActual)
 				FROM	tInicioTransferencia it
 				WHERE	it.fVehiculo = v.pVehiculo	)		AS tUltimaSincro,
+			(	SELECT	fnEstadoSincro(max(trips.to_date) + INTERVAL -3 HOUR)
+				FROM	snapcar.trips 
+						JOIN snapcar.clients ON clients.id = trips.client_id
+                WHERE	clients.vehicle_id = w.pVehiculo )	AS cEstadoSincroTrips,
 			(	SELECT	fnEstadoSincro(max(it.tRegistroActual))
 				FROM	tInicioTransferencia it
-				WHERE	it.fVehiculo = v.pVehiculo	)		AS cEstadoSincro
+				WHERE	it.fVehiculo = v.pVehiculo	)		AS cEstadoSincroTrans
 	FROM	wMemoryScoreVehiculo	w
 			JOIN score.tVehiculo	v	ON v.pVehiculo = w.pVehiculo
 			JOIN score.tUsuario		ut	ON ut.pUsuario = v.fUsuarioTitular;

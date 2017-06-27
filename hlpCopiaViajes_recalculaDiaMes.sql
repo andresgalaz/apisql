@@ -1,4 +1,4 @@
-﻿-- call prResetScore( '2017-04-01' );
+-- call prResetScore( '2017-04-01' );
 -- Busca Viajes ordena por kilometros
 select (select count(*) from tEvento t2 where t2.nIdViaje=t.nIdViaje) cantEventos, t.* from tEvento t where t.fTpEvento=2 and t.nValor between 20 and 50 order by t.nValor desc;
 

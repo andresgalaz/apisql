@@ -1,4 +1,4 @@
-﻿DROP TABLE IF EXISTS wMemoryScoreVehiculo;
+DROP TABLE IF EXISTS wMemoryScoreVehiculo;
 
 use score;
 set @dIni=date('2017-05-01');

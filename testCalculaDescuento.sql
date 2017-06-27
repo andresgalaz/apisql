@@ -1,4 +1,3 @@
-﻿
 SET @diasUso=30;
 SET @diasPunta=9;
 call prCalculaDescuento(3001, @diasUso, @diasPunta, 30, 30, 30,

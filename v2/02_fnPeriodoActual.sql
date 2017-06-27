@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP FUNCTION IF EXISTS fnPeriodoActual //
 CREATE FUNCTION fnPeriodoActual(prm_dIni DATE, prm_nPeriodo INTEGER) RETURNS DATE
 BEGIN

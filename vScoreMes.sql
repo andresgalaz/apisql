@@ -6,4 +6,4 @@ select s.pScoreMes			, s.fCuenta			, s.dPeriodo	, s.nSumaFrenada
 	 , uv.pUsuario fUsuario	, uv.fUsuarioTitular, s.fVehiculo	, v.cPatente
 from   tScoreMes s
 	   inner join tUsuarioVehiculo	uv	on	uv.pVehiculo	= s.fVehiculo
-	   inner join tVehiculo			v	on	v.pVehiculo		= s.fVehiculo
+	   inner join tVehiculo			v	on	v.pVehiculo		= s.fVehiculo;

@@ -1,4 +1,4 @@
-﻿select trips.id, trips.from_date, trips.to_date, trips.distance, trips.main_street_id, streets.name, trips.status
+select trips.id, trips.from_date, trips.to_date, trips.distance, trips.main_street_id, streets.name, trips.status
 , usr.pUsuario
 , usr.cEmail, usr.cNombre
 , veh.pVehiculo

@@ -1,4 +1,4 @@
-﻿DROP VIEW IF EXISTS vViaje;
+DROP VIEW IF EXISTS vViaje;
 CREATE VIEW vViaje AS
 SELECT	v.pVehiculo			AS	fVehiculo		,	v.cPatente	AS	cPatente
 	 ,	v.fUsuarioTitular	AS	fUsuarioTitular
@@ -22,4 +22,4 @@ FROM	tParamCalculo				AS	prm
 										   AND	uv.pUsuario		=	ini.fUsuario
 		INNER JOIN tUsuario			AS	ut	ON	ut.pUsuario		=	v.fUsuarioTitular
 		LEFT JOIN  tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
-ORDER BY ini.tEvento DESC
+ORDER BY ini.tEvento DESC;

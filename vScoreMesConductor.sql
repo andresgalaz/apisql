@@ -8,4 +8,4 @@ select s.pScoreMesConductor	, s.fVehiculo		, s.dPeriodo	, s.nSumaFrenada
 from   tScoreMesConductor s
 	   inner join tVehiculo	v	on	v.pVehiculo		= s.fVehiculo
 	   inner join tUsuario	ut	on	ut.pUsuario		= v.fUsuarioTitular
-	   inner join tUsuario	uu	on	uu.pUsuario		= s.fUsuario
+	   inner join tUsuario	uu	on	uu.pUsuario		= s.fUsuario;

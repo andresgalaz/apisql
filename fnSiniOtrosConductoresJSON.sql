@@ -28,5 +28,3 @@ BEGIN
 
 	RETURN CONCAT('[',cJson,']');
 END //
-DELIMITER ;
-select fnSiniOtrosConductoresJSON(127);

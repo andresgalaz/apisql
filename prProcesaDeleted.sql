@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prProcesaDeleted;
+DROP PROCEDURE IF EXISTS prProcesaDeleted;
 DELIMITER //
 CREATE PROCEDURE prProcesaDeleted ()
 BEGIN

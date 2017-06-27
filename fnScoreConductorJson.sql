@@ -20,19 +20,16 @@ BEGIN
 	DECLARE vnPtjCurva			DECIMAL(10,2);
 	DECLARE vnScore				DECIMAL(10,2);
 
-	SELECT	SUM( IF( eve.fTpEvento = kEventoAceleracion	, eve.nPuntaje, 0 ))	AS nSumaAceleracion	,
-			SUM( IF( eve.fTpEvento = kEventoVelocidad	, eve.nPuntaje, 0 ))	AS nSumaVelocidad	,
-			SUM( IF( eve.fTpEvento = kEventoFrenada		, eve.nPuntaje, 0 ))	AS nSumaFrenada		,
-			SUM( IF( eve.fTpEvento = kEventoCurva		, eve.nPuntaje, 0 ))	AS nSumaCurva		,
-			SUM( fin.nValor	)													AS nKms
+	SELECT	SUM( IF( eve.fTpEvento = kEventoAceleracion	, eve.nPuntaje	, 0 ))	AS nSumaAceleracion	,
+			SUM( IF( eve.fTpEvento = kEventoVelocidad	, eve.nPuntaje	, 0 ))	AS nSumaVelocidad	,
+			SUM( IF( eve.fTpEvento = kEventoFrenada		, eve.nPuntaje	, 0 ))	AS nSumaFrenada		,
+			SUM( IF( eve.fTpEvento = kEventoCurva		, eve.nPuntaje	, 0 ))	AS nSumaCurva		,
+			SUM( IF( eve.fTpEvento = kEventoFin			, eve.nValor	, 0 ))	AS nKms
 	INTO    vnPtjAceleracion, vnPtjVelocidad, vnPtjFrenada, vnPtjCurva, vnKms
-	FROM	tParamCalculo	AS	prm
-			JOIN tEvento 	AS	ini	ON	1 = 1
+	FROM	tEvento 		AS	ini
 			JOIN tEvento	AS	fin ON	fin.nIdViaje	=	ini.nIdViaje
 									AND	fin.fTpEvento	=	kEventoFin
-                                    AND fin.nValor		>=	prm.nDistanciaMin
 			JOIN tEvento	AS	eve	ON	eve.nIdViaje	=	ini.nIdViaje
-									AND eve.fTpEvento not in ( kEventoInicio, kEventoFin )
 	WHERE	ini.ftpEvento	=	kEventoInicio
 	AND		ini.fUsuario	=	prm_pUsuario
 	AND		ini.fVehiculo	=	prm_pVehiculo
@@ -69,5 +66,5 @@ BEGIN
 		SET vnScore 		= 100;
 	END IF;
 
-	RETURN CONCAT('{ "nKms":', ROUND(vnKms,0), ', "nScore":', ROUND(vnScore,0), '}');
+	RETURN CONCAT('{ "nKms":', ROUND(vnKms,2), ', "nScore":', ROUND(vnScore,0), '}');
 END //

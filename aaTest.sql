@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS aaTest//
 CREATE PROCEDURE aaTest(in prm_ini integer, in prm_fin integer)
 BEGIN

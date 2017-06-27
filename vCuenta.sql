@@ -22,4 +22,4 @@ GROUP BY cta.pCuenta
        , IFNULL(cta.nAseguradoDoc, usr.nDNI )
        , cta.cPoliza
        , cta.dIniVigencia, cta.dFinVigencia
-       , veh.pVehiculo, veh.cPatente, veh.bVigente
+       , veh.pVehiculo, veh.cPatente, veh.bVigente;

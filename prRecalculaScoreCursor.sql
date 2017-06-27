@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prRecalculaScoreCursor;
+DROP PROCEDURE IF EXISTS prRecalculaScoreCursor;
 DELIMITER //
 CREATE PROCEDURE prRecalculaScoreCursor( in prm_dInicio DATE )
 BEGIN

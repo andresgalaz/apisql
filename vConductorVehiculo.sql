@@ -22,4 +22,4 @@ from	tVehiculo v
         inner join tUsuario				uu	on uu.pUsuario	= uv.pUsuario
 		inner join tScoreMesConductor	s	on s.fVehiculo	= v.pVehiculo
 										   and s.fUsuario	= uv.pUsuario
-where	v.bVigente = '1'
+where	v.bVigente = '1';

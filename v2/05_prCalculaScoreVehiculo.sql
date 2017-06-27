@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS prCalculaScoreVehiculo //
 CREATE PROCEDURE prCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
@@ -128,7 +128,7 @@ BEGIN
 	CALL prCalculaDescuento( vnKms, vnDiasUso, vnDiasPunta, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicio ),
 							 vnDescuento, vnDescuentoKM, vnDescDiaSinUso, vnDescNoHoraPunta, vnFactorDias );
 
-	-- Se espera que la exista la tabla wMemoryScoreVehiculo, la cual es creada por prCreaTmpScoreVehiculo
+	-- Se espera que ya exista la tabla wMemoryScoreVehiculo, la cual es creada por prCreaTmpScoreVehiculo
 	-- Inserta en tabla temporal
 	INSERT INTO wMemoryScoreVehiculo 
 			( pVehiculo 		, dInicio			, dFin				, nKms				, nScore

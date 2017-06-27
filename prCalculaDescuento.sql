@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prCalculaDescuento;
+DROP PROCEDURE IF EXISTS prCalculaDescuento;
 DELIMITER //
 CREATE PROCEDURE prCalculaDescuento (in prmKms integer, inout prmDiasUso integer, inout prmDiasPunta integer, in prmScore integer, in prmDiasMes integer, in prmDiasVigencia integer,
 	                                 out vo_nDescuento decimal(10,2), out vo_nDescuentoKM decimal(10,2), out vo_nDescDiaSinUso decimal(10,2), out vo_nDescNoHoraPunta decimal(10,2), out vo_nFactorDias float )

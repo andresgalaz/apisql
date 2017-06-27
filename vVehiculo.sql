@@ -1,6 +1,6 @@
-﻿DROP VIEW IF EXISTS vVehiculo;
-create VIEW vVehiculo AS
-select	  v.pVehiculo			AS fVehiculo
+DROP VIEW IF EXISTS vVehiculo;
+CREATE VIEW vVehiculo AS
+SELECT	  v.pVehiculo			AS fVehiculo
 		, v.cPatente			AS cPatente
 		, v.cMarca				AS cMarca
 		, v.cModelo				AS cModelo
@@ -16,10 +16,10 @@ select	  v.pVehiculo			AS fVehiculo
 		, s.nKms				AS nKms
 		, s.nScore				AS nScore
 		, s.nDescuento			AS nDescuento
-from	tVehiculo v
+FROM	tVehiculo v
         inner join tUsuario			ut	on ut.pUsuario			= v.fUsuarioTitular
 		-- Trae todos los usuarios que pueden usar el vehículo
 		inner join tUsuarioVehiculo uv	on uv.pVehiculo			= v.pVehiculo
         inner join tUsuario			uu	on uu.pUsuario			= uv.pUsuario
 		inner join tScoreMes		s	on s.fVehiculo			= v.pVehiculo
-where	v.bVigente = '1'
+WHERE	v.bVigente = '1';

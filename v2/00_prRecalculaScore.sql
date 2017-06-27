@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prRecalculaScore;
+DROP PROCEDURE IF EXISTS prRecalculaScore;
 DELIMITER //
 CREATE PROCEDURE prRecalculaScore( in prm_dInicio DATE, in prm_fVehiculo INTEGER, in prm_fUsuario INTEGER)
 BEGIN

@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP TRIGGER IF EXISTS trgVehiculoIns //
 CREATE TRIGGER trgVehiculoIns AFTER INSERT
     ON tVehiculo FOR EACH ROW

@@ -1,4 +1,4 @@
-﻿-- drop table if exists score.agv;
+-- drop table if exists score.agv;
 -- create table score.agv as 
 select od.*, o.id id_g, o.from_time from_time_g, t.id trip_id, c.vehicle_id vehicle_id_g, c.driver_id driver_id_g
 from trip_observations_deleted od

@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prCalculaScoreDia;
+DROP PROCEDURE IF EXISTS prCalculaScoreDia;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreDia	(	in prmDia		DATE
 									,	in prmVehiculo	INTEGER
@@ -115,5 +115,3 @@ BEGIN
 		END IF;
 	END;
 END //
-DELIMITER ;
--- call prCalculaScoreDia(now());

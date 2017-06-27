@@ -1,4 +1,4 @@
--- ﻿USE snapcar;
+USE snapcar;
 DROP VIEW  IF EXISTS snapcar.trip_observations_view;
 create view snapcar.trip_observations_view as
 select t.id                     AS trip_id          , t.client_id              AS client_id

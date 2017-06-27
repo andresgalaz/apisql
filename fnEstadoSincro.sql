@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP FUNCTION IF EXISTS fnEstadoSincro //
 CREATE FUNCTION fnEstadoSincro(prm_tUltimo TIMESTAMP) RETURNS VARCHAR(20)
 BEGIN
@@ -9,5 +9,5 @@ BEGIN
 	IF nDias < 6 THEN
 		RETURN 'Desactualizado';
 	END IF;
-	RETURN 'Critico'
+	RETURN 'Critico';
 END //

@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS prCalculaScoreDiaInicio;
+DROP PROCEDURE IF EXISTS prCalculaScoreDiaInicio;
 DELIMITER //
 CREATE PROCEDURE prCalculaScoreDiaInicio (in prmDia date)
 BEGIN
