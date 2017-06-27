@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS prScoreVehiculoRangoFecha //
 CREATE PROCEDURE prScoreVehiculoRangoFecha ( IN prm_pUsuario INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
@@ -66,58 +66,73 @@ BEGIN
 		END WHILE;
 		CLOSE CurVeh;
 	END;
-
+    
 	-- CURSOR 1: Entrega un cursor con los totales globales del Usuario
 	IF vnKmsTotal <= 0 THEN
 		SELECT 0 AS kmsTotal, 100 AS scoreGlobal; 
 	ELSE
 		SELECT vnKmsTotal AS nKmsTotal, round( vnScoreGlobal / vnKmsTotal, 0 ) AS nScoreGlobal; 
 	END IF;
+    
 	-- CURSOR 2: Entrega un cursor con el detalle por vehículo
 	SELECT	w.pVehiculo			, v.cPatente,
-			v.fUsuarioTitular	, ut.cNombre			AS cUsuarioTitular,
-			SUBSTRING(dInicio				, 1, 10 )	AS dInicio,
-			SUBSTRING(dFin + INTERVAL -1 DAY, 1, 10 )	AS dFin,
+			v.fUsuarioTitular	, ut.cNombre				AS cUsuarioTitular,
+			SUBSTRING(w.dInicio					, 1, 10 )	AS dInicio,
+			SUBSTRING(w.dFin + INTERVAL -1 DAY	, 1, 10 )	AS dFin,
 			w.nKms				, w.nScore,
 			w.nDescuento		, w.nDiasTotal,
 			w.nDiasUso			, w.nDiasPunta,
-			w.nQFrenada			, w.nQAceleracion		, w.nQVelocidad			, w.nQCurva,
+			-- w.nQFrenada			, w.nQAceleracion		, w.nQVelocidad			, w.nQCurva,
 			w.nQViajes,
 			(	SELECT	max(e.tEvento)
 				FROM	tEvento e
-				WHERE	e.fVehiculo = w.pVehiculo	)	AS tUltimoRegistro,
+				WHERE	e.fVehiculo = w.pVehiculo	)		AS tUltimoRegistro,
 			(	SELECT	max(it.tRegistroActual)
 				FROM	tInicioTransferencia it
-				WHERE	it.fVehiculo = v.pVehiculo	)	AS tUltimaSincro,
+				WHERE	it.fVehiculo = v.pVehiculo	)		AS tUltimaSincro,
 			(	SELECT	fnEstadoSincro(max(it.tRegistroActual))
 				FROM	tInicioTransferencia it
-				WHERE	it.fVehiculo = v.pVehiculo	)	AS cEstadoSincro
+				WHERE	it.fVehiculo = v.pVehiculo	)		AS cEstadoSincro
 	FROM	wMemoryScoreVehiculo	w
 			JOIN score.tVehiculo	v	ON v.pVehiculo = w.pVehiculo
 			JOIN score.tUsuario		ut	ON ut.pUsuario = v.fUsuarioTitular;
-	-- CURSOR 3: Entrega un cursor con los conductores que pueden usar los vehiculos 
+            
+	-- CURSOR 3: Entrega los eventos graves por vehículo
+	SELECT	w.pVehiculo,
+			SUM( IF( e.fTpEvento = kEventoAceleracion	, 1, 0 )) nQAceleracion,
+			SUM( IF( e.fTpEvento = kEventoFrenada		, 1, 0 )) nQFrenada,
+			SUM( IF( e.fTpEvento = kEventoVelocidad		, 1, 0 )) nQVelocidad,
+			SUM( IF( e.fTpEvento = kEventoCurva			, 1, 0 )) nQCurva
+	FROM	wMemoryScoreVehiculo w
+			INNER JOIN tEvento e ON e.fVehiculo	=	w.pVehiculo
+								AND e.tEvento	>=	w.dInicio
+								AND e.tEvento	<	w.dFin
+	WHERE	e.nNivelApp >= 3
+	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva )
+    GROUP BY w.pVehiculo;
+
+	-- CURSOR 4: Entrega un cursor con los conductores que pueden usar los vehiculos 
 	-- 			 que este usuario puede usar
-	SELECT	uv2.pVehiculo, uv2.pUsuario, u.cNombre cUsuario
-		 ,	SUM( t.nKms )	nKms
-	FROM	tUsuarioVehiculo uv1 
-			INNER JOIN tUsuarioVehiculo		uv2	ON	uv2.pVehiculo	=	uv1.pVehiculo
-			INNER JOIN tUsuario				u	ON	u.pUsuario		=	uv2.pUsuario
-			INNER JOIN wMemoryScoreVehiculo	w	ON	w.pVehiculo		=	uv1.pVehiculo
-			INNER JOIN tScoreDia			t	ON	t.fUsuario		=	uv2.pUsuario
-												AND	t.dFecha		>=	w.dInicio
-												AND	t.dFecha		<	w.dFin
-	WHERE	uv1.pUsuario =	prm_pUsuario
-	GROUP BY uv2.pVehiculo, uv2.pUsuario, u.cNombre;
-	-- CURSOR 4: Resumen final, cuenta todos los eventos de usuario
-	SELECT	SUM( t.nQFrenada		)	nQFrenada
-		 ,	SUM( t.nQAceleracion	)	nQAceleracion
-		 ,	SUM( t.nQVelocidad		)	nQVelocidad
-		 ,	SUM( t.nQCurva			)	nQCurva
+	SELECT	uv.pUsuario, uv.pVehiculo, u.cNombre cUsuario
+		 ,	fnScoreConductorJson( uv.pUsuario, uv.pVehiculo, w.dInicio, w.dFin ) cJsonKmScore
 	FROM	wMemoryScoreVehiculo	w
-			INNER JOIN tScoreDia	t	ON	t.fUsuario		=	prm_pUsuario
-										AND	t.dFecha		>=	w.dInicio
-										AND	t.dFecha		<	w.dFin;
-	-- CURSOR 5: Detalle de los viajes del usuario
+			JOIN tUsuarioVehiculo	uv	ON	uv.pVehiculo	=	w.pVehiculo
+			JOIN tUsuario			u	ON	u.pUsuario		=	uv.pUsuario;
+
+	-- CURSOR 5: Resumen final, cuenta todos los eventos de usuario
+    -- Resumen de los eventos del CURSOR-3
+	SELECT	SUM( IF( e.fTpEvento = kEventoAceleracion	, 1, 0 )) nQAceleracion,
+			SUM( IF( e.fTpEvento = kEventoFrenada		, 1, 0 )) nQFrenada,
+			SUM( IF( e.fTpEvento = kEventoVelocidad		, 1, 0 )) nQVelocidad,
+			SUM( IF( e.fTpEvento = kEventoCurva			, 1, 0 )) nQCurva
+	FROM	wMemoryScoreVehiculo w
+			INNER JOIN tEvento e ON e.fVehiculo	=	w.pVehiculo
+								AND e.tEvento	>=	w.dInicio
+								AND e.tEvento	<	w.dFin
+	WHERE	e.nNivelApp >= 3
+	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva );
+                                        
+	-- CURSOR 6: Detalle de los viajes del usuario
 	SELECT	v.pVehiculo				AS	fVehiculo		,	v.cPatente				AS	cPatente
 		 ,	v.fUsuarioTitular		AS	fUsuarioTitular ,	ut.cNombre				AS	cNombreTitular
 		 ,	ini.fUsuario			AS	fUsuario	 	,	IFNULL(uu.cNombre,'Desconocido') AS cNombreConductor
@@ -125,26 +140,28 @@ BEGIN
 		 ,	ini.cCalle				AS	cCalleInicio	,	fin.cCalle				AS	cCalleFin
 		 ,	ini.tEvento				AS	tInicio			,	fin.tEvento				AS	tFin
 		 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)							AS	nDuracionSeg
-		 ,	ROUND(ini.nValor,0)	AS	nScore			,	ROUND(fin.nValor,2)	AS	nKms
-		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoAceleracion	THEN 1 ELSE 0 END ) AS	nQAceleracion
-		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoFrenada		THEN 1 ELSE 0 END ) AS	nQFrenada
-		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoVelocidad		THEN 1 ELSE 0 END ) AS	nQVelocidad
-		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoCurva			THEN 1 ELSE 0 END ) AS	nQCurva
+		 ,	ROUND(ini.nValor,0)		AS	nScore			,	ROUND(fin.nValor,2)		AS	nKms
+		 ,	SUM( IF( eve.fTpEvento = kEventoAceleracion	, 1, 0 )) AS	nQAceleracion
+		 ,	SUM( IF( eve.fTpEvento = kEventoFrenada		, 1, 0 )) AS	nQFrenada
+		 ,	SUM( IF( eve.fTpEvento = kEventoVelocidad	, 1, 0 )) AS	nQVelocidad
+		 ,	SUM( IF( eve.fTpEvento = kEventoCurva		, 1, 0 )) AS	nQCurva
 	FROM	tParamCalculo					AS	prm
+			INNER JOIN wMemoryScoreVehiculo	AS	w	ON	1 = 1
 			-- Inicio del Viaje
-			INNER JOIN tEvento				AS	ini ON	ini.fTpEvento	=	kEventoInicio
-			INNER JOIN wMemoryScoreVehiculo	AS	w	ON	w.pVehiculo		=	ini.fVehiculo
+			INNER JOIN tEvento				AS	ini ON	ini.fVehiculo	= 	w.pVehiculo
+													AND	ini.fTpEvento	=	kEventoInicio
 			-- Fin del Viaje
 			INNER JOIN tEvento				AS	fin	ON	fin.nIdViaje	=	ini.nIdViaje
 										 			AND	fin.fTpEvento	=	kEventoFin
 											 		AND	fin.nValor		> 	prm.nDistanciaMin
-			-- Eventos
+			-- Eventos, solo muestra viajes que tienen al menos un evento grave
 			INNER JOIN	tEvento				AS	eve ON	eve.nIdViaje	=	ini.nIdViaje
 													AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
-			INNER JOIN	tVehiculo			AS 	v	ON	v.pVehiculo		= 	ini.fVehiculo
+													AND eve.nNivelApp	>=	3
 			-- Solo muestra los viajes de los usuario relacionados. Pueden existir viajes de usuario no identificados
 			INNER JOIN	tUsuarioVehiculo	AS	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
 													AND	uv.pUsuario		=	ini.fUsuario
+			INNER JOIN	tVehiculo			AS 	v	ON	v.pVehiculo		= 	w.pVehiculo
 			INNER JOIN	tUsuario			AS	ut	ON	ut.pUsuario		=	v.fUsuarioTitular
 			LEFT JOIN	tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
 	WHERE	ini.fUsuario	=	prm_pUsuario

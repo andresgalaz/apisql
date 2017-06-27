@@ -1,4 +1,4 @@
-﻿truncate table tScoreMes;
+truncate table tScoreMes;
 ALTER TABLE tScoreMes AUTO_INCREMENT=1;
 truncate table tScoreMesConductor;
 ALTER TABLE tScoreMesConductor AUTO_INCREMENT=1;
@@ -37,3 +37,17 @@ ALTER TABLE tScoreDia AUTO_INCREMENT=1;
 call prResetScore( '2017-01-01' );
 call prRecalculaScoreCursor( '2017-01-01' );
 */
+
+-- Corrige fechas de tEvento, talque la fecha inicial no puede ser mayor a la fecha de los eventos posteriores
+drop table agv;
+create table agv as 
+select ini.pEvento, ini.nIdViaje, ini.tEvento tEventoIni, ini.cCalle, fin.tEvento tEventoFin, fin.cCalle cCalleFin, min(eve.tEvento) tEvento
+from tEvento ini 
+inner join tEvento fin ON ini.nIdViaje = fin.nIdViaje and fin.ftpevento=2
+inner join tEvento eve ON eve.nIdViaje = ini.nIdViaje
+ where ini.ftpevento=1
+ and ini.tEvento > fin.tEvento
+group by ini.pEvento, ini.nIdViaje, ini.tEvento, ini.cCalle, fin.tEvento, fin.cCalle;
+select * from agv;
+update tEvento set tEvento = (select agv.tEvento from agv where agv.pEvento = tEvento.pEvento)
+where tEvento.pEvento in ( select agv.pEvento from agv );

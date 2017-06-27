@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS prCreaTmpScoreVehiculo //
 CREATE PROCEDURE prCreaTmpScoreVehiculo ()
 BEGIN
