@@ -7,7 +7,7 @@ BEGIN
 	Este procedimiento es solo un Sub-Cursor del procedimiento principal:
 		prScoreVehiculoRangoFecha
 	Tiene 2 tipos de salidas:
-		Explicitas por los par{ametros OUT
+		Explicitas por los par√°metros OUT
 		Implicitas por los registros insertados en la tabla temporal wMemoryScoreVehiculo
 	*/
 	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
@@ -84,7 +84,7 @@ BEGIN
 			END IF;
 
 			-- Calcula Score Usuario
-			-- De acuerdo al tipo de evento, se hace la conversiÛn usando la tablas de rangos por puntaje
+			-- De acuerdo al tipo de evento, se hace la conversi√≥n usando la tablas de rangos por puntaje
 			SELECT	nValor INTO vnPtjFrenadaUsr FROM tRangoPuntaje
 			WHERE	fTpevento = kEventoFrenada AND nInicio <= vnPtjFrenadaUsr AND vnPtjFrenadaUsr < nFin;
 
@@ -97,7 +97,7 @@ BEGIN
 			SELECT	nValor INTO vnPtjCurvaUsr FROM tRangoPuntaje
 			WHERE	fTpevento = kEventoCurva AND nInicio <= vnPtjCurvaUsr AND vnPtjCurvaUsr < nFin;
 
-			-- Par·metros de ponderaciÛn por tipo de evento
+			-- Par√°metros de ponderaci√≥n por tipo de evento
 			SELECT	( vnPtjFrenadaUsr		* nPorcFrenada		/ 100 )
 				+	( vnPtjAceleracionUsr	* nPorcAceleracion	/ 100 )
 				+	( vnPtjVelocidadUsr		* nPorcVelocidad	/ 100 )
@@ -105,8 +105,8 @@ BEGIN
 			INTO	vnScoreUsr
 			FROM	tParamCalculo;
 
-			-- Si no es el titular, se muestran los KM y Viajes del usuario solamente, no los del vehÌculo
-			-- por eso se actualiza la tabla temporal que generÛ prCalculaScoreVehiculo
+			-- Si no es el titular, se muestran los KM y Viajes del usuario solamente, no los del veh√≠culo
+			-- por eso se actualiza la tabla temporal que gener√≥ prCalculaScoreVehiculo
 			IF prm_pUsuario <> vfUsuarioTitular THEN
 				-- Kimoletros totales del usuario y Score Global por Kilometro
 				SET prm_nKmsTotal		= prm_nKmsTotal	+ vnKmsUsr;
@@ -132,7 +132,7 @@ BEGIN
 					,	nQCurva			= vnQCurvaUsr
 				WHERE	pVehiculo	= prm_pVehiculo;
 			ELSE
-				-- Acumula los totales del vehÌculo
+				-- Acumula los totales del veh√≠culo
 				SELECT	nKms + prm_nKmsTotal	, nScore * nKms + prm_nScoreGlobal
 				INTO	prm_nKmsTotal			, prm_nScoreGlobal
 				FROM	wMemoryScoreVehiculo
