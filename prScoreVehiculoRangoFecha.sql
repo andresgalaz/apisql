@@ -112,7 +112,7 @@ BEGIN
 			INNER JOIN tEvento e ON e.fVehiculo	=	w.pVehiculo
 								AND e.tEvento	>=	w.dInicio
 								AND e.tEvento	<	w.dFin
-	WHERE	e.nNivelApp >= 3
+	WHERE	e.nNivelApp >= 2
 	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva )
     GROUP BY w.pVehiculo;
 
@@ -134,7 +134,7 @@ BEGIN
 			INNER JOIN tEvento e ON e.fVehiculo	=	w.pVehiculo
 								AND e.tEvento	>=	w.dInicio
 								AND e.tEvento	<	w.dFin
-	WHERE	e.nNivelApp >= 3
+	WHERE	e.nNivelApp >= 2
 	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva );
                                         
 	-- CURSOR 6: Detalle de los viajes del usuario
@@ -162,7 +162,7 @@ BEGIN
 			-- Eventos, solo muestra viajes que tienen al menos un evento grave
 			INNER JOIN	tEvento				AS	eve ON	eve.nIdViaje	=	ini.nIdViaje
 													AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
-													AND eve.nNivelApp	>=	3
+													AND eve.nNivelApp	>=	2
 			-- Solo muestra los viajes de los usuario relacionados. Pueden existir viajes de usuario no identificados
 			INNER JOIN	tUsuarioVehiculo	AS	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
 													AND	uv.pUsuario		=	ini.fUsuario
