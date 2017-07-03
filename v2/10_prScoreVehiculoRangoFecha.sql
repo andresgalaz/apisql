@@ -1,6 +1,6 @@
 DELIMITER //
 DROP PROCEDURE IF EXISTS prScoreVehiculoRangoFecha //
-CREATE PROCEDURE prScoreVehiculoRangoFecha ( IN prm_pUsuario INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
+CREATE PROCEDURE prScoreVehiculoRangoFecha ( IN prm_pUsuario INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE, IN prm_fVehiculo INTEGER, IN prm_fConductor INTEGER )
 BEGIN
 	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
 	DECLARE kEventoFin			INTEGER	DEFAULT 2;
@@ -11,6 +11,9 @@ BEGIN
 	
 	DECLARE vnKmsTotal			DECIMAL(10,2)	DEFAULT 0.0;
 	DECLARE vnScoreGlobal		DECIMAL(10,2)	DEFAULT 0.0;
+	DECLARE vnUsuario			INTEGER;
+    
+    SET vnUsuario = IFNULL( prm_fConductor, prm_pUsuario );
 
 	-- Crea tabla temporal, si existe la limpia
 	CALL prCreaTmpScoreVehiculo();
@@ -28,7 +31,8 @@ BEGIN
 			SELECT	uv.pVehiculo, v.dIniVigencia
 			FROM	tUsuarioVehiculo uv
 					INNER JOIN tVehiculo v ON v.pVehiculo = uv.pVehiculo
-			WHERE	uv.pUsuario = prm_pUsuario;
+			WHERE	uv.pUsuario		= vnUsuario
+            AND		uv.pVehiculo	= IFNULL( prm_fVehiculo, uv.pVehiculo );
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurVeh = 1;
 
 		-- Si no se indicó periodo, se trae la misma fecha para todos los vehículos
@@ -58,7 +62,7 @@ BEGIN
 			-- Calcula score y descuento del vehículo
 			CALL prCalculaScoreVehiculo( vpVehiculo, vdIni, vdFin );
 			-- Calcula score del usuario por cada vehículo
-			CALL prScoreVehiculoRangoSub( prm_pUsuario, vpVehiculo, vdIni, vdFin, vnKms, vnScore );
+			CALL prScoreVehiculoRangoSub( vnUsuario, vpVehiculo, vdIni, vdFin, vnKms, vnScore );
 			SET vnKmsTotal		= vnKmsTotal	+ vnKms;
 			SET vnScoreGlobal	= vnScoreGlobal + vnScore;
 		
@@ -137,44 +141,48 @@ BEGIN
 	WHERE	e.nNivelApp >= 2
 	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva );
                                         
-	-- CURSOR 6: Detalle de los viajes del usuario
-	SELECT	v.pVehiculo				AS	fVehiculo		,	v.cPatente				AS	cPatente
-		 ,	v.fUsuarioTitular		AS	fUsuarioTitular ,	ut.cNombre				AS	cNombreTitular
-		 ,	ini.fUsuario			AS	fUsuario	 	,	IFNULL(uu.cNombre,'Desconocido') AS cNombreConductor
-		 ,	ini.nIdViaje			AS	nIdViaje
-		 ,	ini.cCalle				AS	cCalleInicio	,	fin.cCalle				AS	cCalleFin
-		 ,	ini.tEvento				AS	tInicio			,	fin.tEvento				AS	tFin
-		 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)							AS	nDuracionSeg
-		 ,	ROUND(ini.nValor,0)		AS	nScore			,	ROUND(fin.nValor,2)		AS	nKms
-		 ,	SUM( IF( eve.fTpEvento = kEventoAceleracion	, 1, 0 )) AS	nQAceleracion
-		 ,	SUM( IF( eve.fTpEvento = kEventoFrenada		, 1, 0 )) AS	nQFrenada
-		 ,	SUM( IF( eve.fTpEvento = kEventoVelocidad	, 1, 0 )) AS	nQVelocidad
-		 ,	SUM( IF( eve.fTpEvento = kEventoCurva		, 1, 0 )) AS	nQCurva
-	FROM	tParamCalculo					AS	prm
-			INNER JOIN wMemoryScoreVehiculo	AS	w	ON	1 = 1
-			-- Inicio del Viaje
-			INNER JOIN tEvento				AS	ini ON	ini.fVehiculo	= 	w.pVehiculo
-													AND	ini.fTpEvento	=	kEventoInicio
-			-- Fin del Viaje
-			INNER JOIN tEvento				AS	fin	ON	fin.nIdViaje	=	ini.nIdViaje
-										 			AND	fin.fTpEvento	=	kEventoFin
-											 		AND	fin.nValor		> 	prm.nDistanciaMin
-			-- Eventos, solo muestra viajes que tienen al menos un evento grave
-			INNER JOIN	tEvento				AS	eve ON	eve.nIdViaje	=	ini.nIdViaje
-													AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
-													AND eve.nNivelApp	>=	2
-			-- Solo muestra los viajes de los usuario relacionados. Pueden existir viajes de usuario no identificados
-			INNER JOIN	tUsuarioVehiculo	AS	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
-													AND	uv.pUsuario		=	ini.fUsuario
-			INNER JOIN	tVehiculo			AS 	v	ON	v.pVehiculo		= 	w.pVehiculo
-			INNER JOIN	tUsuario			AS	ut	ON	ut.pUsuario		=	v.fUsuarioTitular
-			LEFT JOIN	tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
-	WHERE	ini.fUsuario	=	prm_pUsuario
-	AND		ini.tEvento		>=	w.dInicio
-	AND		fin.tEvento		<	w.dFin
-	GROUP BY	v.pVehiculo	,	v.cPatente	,	v.fUsuarioTitular	,	ut.cNombre
-		 	,	ini.fUsuario,	uu.cNombre	,	ini.nIdViaje		,	ini.cCalle
-			,	fin.cCalle 	,	ini.tEvento	,	fin.tEvento			,	ini.nValor
-			,	fin.nValor	
-	ORDER BY ini.tEvento DESC;
+	-- CURSOR 6: Detalle de los viajes del usuario. Solo si se especificó prm_fVehiculo ó prm_fConductor
+    IF prm_fVehiculo is not null OR prm_fConductor is not null THEN
+		SELECT	v.pVehiculo				AS	fVehiculo		,	v.cPatente				AS	cPatente
+			 ,	v.fUsuarioTitular		AS	fUsuarioTitular ,	ut.cNombre				AS	cNombreTitular
+			 ,	ini.fUsuario			AS	fUsuario	 	,	IFNULL(uu.cNombre,'Desconocido') AS cNombreConductor
+			 ,	ini.nIdViaje			AS	nIdViaje
+			 ,	ini.cCalle				AS	cCalleInicio	,	fin.cCalle				AS	cCalleFin
+			 ,	ini.tEvento				AS	tInicio			,	fin.tEvento				AS	tFin
+			 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)							AS	nDuracionSeg
+			 ,	ROUND(ini.nValor,0)		AS	nScore			,	ROUND(fin.nValor,2)		AS	nKms
+			 ,	SUM( IF( eve.fTpEvento = kEventoAceleracion	, 1, 0 )) AS	nQAceleracion
+			 ,	SUM( IF( eve.fTpEvento = kEventoFrenada		, 1, 0 )) AS	nQFrenada
+			 ,	SUM( IF( eve.fTpEvento = kEventoVelocidad	, 1, 0 )) AS	nQVelocidad
+			 ,	SUM( IF( eve.fTpEvento = kEventoCurva		, 1, 0 )) AS	nQCurva
+		FROM	tParamCalculo					AS	prm
+				INNER JOIN wMemoryScoreVehiculo	AS	w	ON	1 = 1
+				-- Inicio del Viaje
+				INNER JOIN tEvento				AS	ini ON	ini.fVehiculo	= 	w.pVehiculo
+														AND	ini.fTpEvento	=	kEventoInicio
+				-- Fin del Viaje
+				INNER JOIN tEvento				AS	fin	ON	fin.nIdViaje	=	ini.nIdViaje
+														AND	fin.fTpEvento	=	kEventoFin
+														AND	fin.nValor		> 	prm.nDistanciaMin
+				-- Eventos, solo muestra viajes que tienen al menos un evento grave
+				INNER JOIN	tEvento				AS	eve ON	eve.nIdViaje	=	ini.nIdViaje
+														AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
+														AND eve.nNivelApp	>=	2
+				-- Solo muestra los viajes de los usuario relacionados. Pueden existir viajes de usuario no identificados
+				INNER JOIN	tUsuarioVehiculo	AS	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
+														AND	uv.pUsuario		=	ini.fUsuario
+				INNER JOIN	tVehiculo			AS 	v	ON	v.pVehiculo		= 	w.pVehiculo
+				INNER JOIN	tUsuario			AS	ut	ON	ut.pUsuario		=	v.fUsuarioTitular
+				LEFT JOIN	tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
+		WHERE	ini.fUsuario	=	vnUsuario
+        AND		ini.fVehiculo	= IFNULL( prm_fVehiculo, ini.fVehiculo )
+		AND		ini.tEvento		>=	w.dInicio
+		AND		fin.tEvento		<	w.dFin
+		GROUP BY	v.pVehiculo	,	v.cPatente	,	v.fUsuarioTitular	,	ut.cNombre
+				,	ini.fUsuario,	uu.cNombre	,	ini.nIdViaje		,	ini.cCalle
+				,	fin.cCalle 	,	ini.tEvento	,	fin.tEvento			,	ini.nValor
+				,	fin.nValor	
+		ORDER BY ini.tEvento DESC;
+	END IF;
+    
 END //
