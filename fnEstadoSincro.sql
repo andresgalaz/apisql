@@ -9,5 +9,5 @@ BEGIN
 	IF nDias < 6 THEN
 		RETURN 'Desactualizado';
 	END IF;
-	RETURN 'Critico';
+	RETURN 'Crítico';
 END //
