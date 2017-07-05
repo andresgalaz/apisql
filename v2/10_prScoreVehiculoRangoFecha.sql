@@ -8,11 +8,13 @@ BEGIN
 	DECLARE kEventoFrenada		INTEGER	DEFAULT 4;
 	DECLARE kEventoVelocidad	INTEGER	DEFAULT 5;
 	DECLARE kEventoCurva		INTEGER	DEFAULT 6;
+
+	DECLARE kNivelApp_minimo    INTEGER DEFAULT 1;
 	
 	DECLARE vnKmsTotal			DECIMAL(10,2)	DEFAULT 0.0;
 	DECLARE vnScoreGlobal		DECIMAL(10,2)	DEFAULT 0.0;
 	DECLARE vnUsuario			INTEGER;
-    
+
     SET vnUsuario = IFNULL( prm_fConductor, prm_pUsuario );
 
 	-- Crea tabla temporal, si existe la limpia
@@ -116,7 +118,7 @@ BEGIN
 			INNER JOIN tEvento e ON e.fVehiculo	=	w.pVehiculo
 								AND e.tEvento	>=	w.dInicio
 								AND e.tEvento	<	w.dFin
-	WHERE	e.nNivelApp >= 2
+	WHERE	e.nNivelApp >= kNivelApp_minimo
 	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva )
     GROUP BY w.pVehiculo;
 
@@ -138,7 +140,7 @@ BEGIN
 			INNER JOIN tEvento e ON e.fVehiculo	=	w.pVehiculo
 								AND e.tEvento	>=	w.dInicio
 								AND e.tEvento	<	w.dFin
-	WHERE	e.nNivelApp >= 2
+	WHERE	e.nNivelApp >= kNivelApp_minimo
 	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva );
                                         
 	-- CURSOR 6: Detalle de los viajes del usuario. Solo si se especificó prm_fVehiculo ó prm_fConductor
@@ -168,7 +170,7 @@ BEGIN
 				-- Eventos, solo muestra viajes que tienen al menos un evento grave
 				INNER JOIN	tEvento				AS	eve ON	eve.nIdViaje	=	ini.nIdViaje
 														AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
-														AND eve.nNivelApp	>=	2
+														AND eve.nNivelApp	>=	kNivelApp_minimo
 				-- Solo muestra los viajes de los usuario relacionados. Pueden existir viajes de usuario no identificados
 				INNER JOIN	tUsuarioVehiculo	AS	uv	ON	uv.pVehiculo	= 	ini.fVehiculo
 														AND	uv.pUsuario		=	ini.fUsuario
