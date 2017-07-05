@@ -143,18 +143,19 @@ BEGIN
                                         
 	-- CURSOR 6: Detalle de los viajes del usuario. Solo si se especificó prm_fVehiculo ó prm_fConductor
     IF prm_fVehiculo is not null OR prm_fConductor is not null THEN
-		SELECT	v.pVehiculo				AS	fVehiculo		,	v.cPatente				AS	cPatente
-			 ,	v.fUsuarioTitular		AS	fUsuarioTitular ,	ut.cNombre				AS	cNombreTitular
-			 ,	ini.fUsuario			AS	fUsuario	 	,	IFNULL(uu.cNombre,'Desconocido') AS cNombreConductor
+		SELECT	v.pVehiculo				AS	fVehiculo			,	v.cPatente				AS	cPatente
+			 ,	v.fUsuarioTitular		AS	fUsuarioTitular 	,	ut.cNombre				AS	cNombreTitular
+			 ,	ini.fUsuario			AS	fUsuario		 	,	IFNULL(uu.cNombre,'Desconocido') AS cNombreConductor
 			 ,	ini.nIdViaje			AS	nIdViaje
-			 ,	ini.cCalle				AS	cCalleInicio	,	fin.cCalle				AS	cCalleFin
-			 ,	ini.tEvento				AS	tInicio			,	fin.tEvento				AS	tFin
-			 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)							AS	nDuracionSeg
-			 ,	ROUND(ini.nValor,0)		AS	nScore			,	ROUND(fin.nValor,2)		AS	nKms
-			 ,	SUM( IF( eve.fTpEvento = kEventoAceleracion	, 1, 0 )) AS	nQAceleracion
-			 ,	SUM( IF( eve.fTpEvento = kEventoFrenada		, 1, 0 )) AS	nQFrenada
-			 ,	SUM( IF( eve.fTpEvento = kEventoVelocidad	, 1, 0 )) AS	nQVelocidad
-			 ,	SUM( IF( eve.fTpEvento = kEventoCurva		, 1, 0 )) AS	nQCurva
+			 ,	ini.cCalle				AS	cCalleInicio		,	fin.cCalle				AS	cCalleFin
+			 ,	ini.cCalleCorta			AS	cCalleCortaInicio	,	fin.cCalleCorta			AS	cCalleCortaFin
+			 ,	ini.tEvento				AS	tInicio				,	fin.tEvento				AS	tFin
+			 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)								AS	nDuracionSeg
+			 ,	ROUND(ini.nValor,0)		AS	nScore				,	ROUND(fin.nValor,2)		AS	nKms
+			 ,	SUM( IF( eve.fTpEvento = kEventoAceleracion		, 1, 0 )) AS	nQAceleracion
+			 ,	SUM( IF( eve.fTpEvento = kEventoFrenada			, 1, 0 )) AS	nQFrenada
+			 ,	SUM( IF( eve.fTpEvento = kEventoVelocidad		, 1, 0 )) AS	nQVelocidad
+			 ,	SUM( IF( eve.fTpEvento = kEventoCurva			, 1, 0 )) AS	nQCurva
 		FROM	tParamCalculo					AS	prm
 				INNER JOIN wMemoryScoreVehiculo	AS	w	ON	1 = 1
 				-- Inicio del Viaje
@@ -178,9 +179,10 @@ BEGIN
         AND		ini.fVehiculo	= IFNULL( prm_fVehiculo, ini.fVehiculo )
 		AND		ini.tEvento		>=	w.dInicio
 		AND		fin.tEvento		<	w.dFin
-		GROUP BY	v.pVehiculo	,	v.cPatente	,	v.fUsuarioTitular	,	ut.cNombre
-				,	ini.fUsuario,	uu.cNombre	,	ini.nIdViaje		,	ini.cCalle
-				,	fin.cCalle 	,	ini.tEvento	,	fin.tEvento			,	ini.nValor
+		GROUP BY	v.pVehiculo		,	v.cPatente		,	v.fUsuarioTitular	,	ut.cNombre
+				,	ini.fUsuario	,	uu.cNombre		,	ini.nIdViaje		,	ini.cCalle
+				,	ini.cCalleCorta	,	fin.cCalleCorta
+				,	fin.cCalle		,	ini.tEvento		,	fin.tEvento			,	ini.nValor
 				,	fin.nValor	
 		ORDER BY ini.tEvento DESC;
 	END IF;

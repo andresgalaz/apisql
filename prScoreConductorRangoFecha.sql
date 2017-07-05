@@ -218,12 +218,13 @@ BEGIN
 	AND		t.dFecha			<	vdFin;
 
 	-- CURSOR 5: Detalle de los viajes del usuario
-	SELECT	uv.pVehiculo								,	v.cPatente				AS	cPatente
-		 ,	v.fUsuarioTitular		AS	fUsuarioTitular ,	ut.cNombre				AS	cNombreTitular
-		 ,	ini.fUsuario			AS	fUsuario	 	,	uu.cNombre				AS	cNombreConductor
+	SELECT	uv.pVehiculo									,	v.cPatente				AS	cPatente
+		 ,	v.fUsuarioTitular		AS	fUsuarioTitular 	,	ut.cNombre				AS	cNombreTitular
+		 ,	ini.fUsuario			AS	fUsuario		 	,	uu.cNombre				AS	cNombreConductor
 		 ,	ini.nIdViaje			AS	nIdViaje
-		 ,	ini.cCalle				AS	cCalleInicio	,	fin.cCalle				AS	cCalleFin
-		 ,	ini.tEvento				AS	tInicio			,	fin.tEvento				AS	tFin
+		 ,	ini.cCalle				AS	cCalleInicio		,	fin.cCalle				AS	cCalleFin
+		 ,	ini.cCalleCorta			AS	cCalleCortaInicio	,	fin.cCalleCorta			AS	cCalleCortaFin
+		 ,	ini.tEvento				AS	tInicio				,	fin.tEvento				AS	tFin
 		 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)							AS	nDuracionSeg
 		 ,	ROUND(ini.nValor,0)	AS	nScore			,	ROUND(fin.nValor,2)	AS	nKms
 		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoAceleracion	THEN 1 ELSE 0 END ) AS	nQAceleracion
@@ -249,10 +250,10 @@ BEGIN
 	WHERE	uv.fUsuarioTitular	=	prm_pUsuario
 	AND		ini.tEvento			>=	vdIni
 	AND		fin.tEvento			<	vdFin
-	GROUP BY	v.pVehiculo	,	v.cPatente	,	v.fUsuarioTitular	,	ut.cNombre
-		 	,	ini.fUsuario,	uu.cNombre	,	ini.nIdViaje		,	ini.cCalle
-			,	fin.cCalle 	,	ini.tEvento	,	fin.tEvento			,	ini.nValor
-			,	fin.nValor	
+	GROUP BY	v.pVehiculo		,	v.cPatente		,	v.fUsuarioTitular	,	ut.cNombre
+		 	,	ini.fUsuario	,	uu.cNombre		,	ini.nIdViaje		,	ini.cCalle
+			,	ini.cCalleCorta	,	fin.cCalle 		,	fin.cCalleCorta		,	ini.tEvento
+            ,	fin.tEvento		,	ini.nValor		,	fin.nValor	
 	ORDER BY ini.tEvento DESC;
 
 END //

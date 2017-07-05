@@ -71,16 +71,17 @@ BEGIN
 	IF vnRegs > 0 THEN
 		SET vnRegIni	= ( vnPagina - 1 ) * kPageSize;
 		-- CURSOR 2: Listado de viajes del usuario
-		SELECT	uv.pVehiculo			AS	fVehiculo		,	v.cPatente				AS	cPatente
+		SELECT	uv.pVehiculo			AS	fVehiculo			,	v.cPatente				AS	cPatente
 			 ,	ini.nIdViaje			AS	nIdViaje
-			 ,	ini.cCalle				AS	cCalleInicio	,	fin.cCalle				AS	cCalleFin
-			 ,	ini.tEvento				AS	tInicio			,	fin.tEvento				AS	tFin
-			 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)							AS	nDuracionSeg
-			 ,	ROUND(ini.nValor,0)		AS	nScore			,	ROUND(fin.nValor,2)		AS	nKms
-			 ,	SUM( IF( eve.fTpEvento = kEventoAceleracion	, 1, 0 )) AS	nQAceleracion
-			 ,	SUM( IF( eve.fTpEvento = kEventoFrenada		, 1, 0 )) AS	nQFrenada
-			 ,	SUM( IF( eve.fTpEvento = kEventoVelocidad	, 1, 0 )) AS	nQVelocidad
-			 ,	SUM( IF( eve.fTpEvento = kEventoCurva		, 1, 0 )) AS	nQCurva
+			 ,	ini.cCalle				AS	cCalleInicio		,	fin.cCalle				AS	cCalleFin
+			 ,	ini.cCalleCorta			AS	cCalleCortaInicio	,	fin.cCalleCorta			AS	cCalleCortaFin
+			 ,	ini.tEvento				AS	tInicio				,	fin.tEvento				AS	tFin
+			 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)								AS	nDuracionSeg
+			 ,	ROUND(ini.nValor,0)		AS	nScore				,	ROUND(fin.nValor,2)		AS	nKms
+			 ,	SUM( IF( eve.fTpEvento = kEventoAceleracion		, 1, 0 )) AS	nQAceleracion
+			 ,	SUM( IF( eve.fTpEvento = kEventoFrenada			, 1, 0 )) AS	nQFrenada
+			 ,	SUM( IF( eve.fTpEvento = kEventoVelocidad		, 1, 0 )) AS	nQVelocidad
+			 ,	SUM( IF( eve.fTpEvento = kEventoCurva			, 1, 0 )) AS	nQCurva
 		FROM	tUsuarioVehiculo				AS	uv
 				INNER JOIN	tVehiculo			AS 	v	ON	v.pVehiculo		= 	uv.pVehiculo
 				-- Inicio del Viaje
@@ -95,8 +96,9 @@ BEGIN
 		WHERE	uv.pUsuario		=	prm_pUsuario
 		AND		ini.tEvento		>=	vdIni
 		AND		fin.tEvento		<	vdFin
-		GROUP BY	uv.pVehiculo	, v.cPatente		, ini.nIdViaje		 , ini.cCalle	,
-					fin.cCalle		, ini.tEvento		, fin.tEvento		 , ini.nValor	,
+		GROUP BY	uv.pVehiculo	, v.cPatente		, ini.nIdViaje		,
+					ini.cCalle		, fin.cCalle		, ini.cCalleCorta	, fin.cCalleCorta	,
+                    ini.tEvento		, fin.tEvento		, ini.nValor		,
 					fin.nValor
 		ORDER BY 	ini.tEvento DESC
         LIMIT		vnRegIni, kPageSize;
