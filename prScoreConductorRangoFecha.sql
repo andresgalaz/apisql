@@ -225,14 +225,13 @@ BEGIN
 		 ,	ini.cCalle				AS	cCalleInicio		,	fin.cCalle				AS	cCalleFin
 		 ,	ini.cCalleCorta			AS	cCalleCortaInicio	,	fin.cCalleCorta			AS	cCalleCortaFin
 		 ,	ini.tEvento				AS	tInicio				,	fin.tEvento				AS	tFin
-		 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)							AS	nDuracionSeg
-		 ,	ROUND(ini.nValor,0)	AS	nScore			,	ROUND(fin.nValor,2)	AS	nKms
-		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoAceleracion	THEN 1 ELSE 0 END ) AS	nQAceleracion
-		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoFrenada		THEN 1 ELSE 0 END ) AS	nQFrenada
-		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoVelocidad		THEN 1 ELSE 0 END ) AS	nQVelocidad
-		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoCurva			THEN 1 ELSE 0 END ) AS	nQCurva
+		 ,	TIMESTAMPDIFF(SECOND, ini.tEvento, fin.tEvento)								AS	nDuracionSeg
+		 ,	ROUND(ini.nValor,0)		AS	nScore				,	ROUND(fin.nValor,2)		AS	nKms
+		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoAceleracion	THEN 1 ELSE 0 END ) 	AS	nQAceleracion
+		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoFrenada		THEN 1 ELSE 0 END ) 	AS	nQFrenada
+		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoVelocidad		THEN 1 ELSE 0 END ) 	AS	nQVelocidad
+		 ,	SUM( CASE WHEN eve.fTpEvento = kEventoCurva			THEN 1 ELSE 0 END ) 	AS	nQCurva
 	FROM	tUsuarioVehiculo 			AS	uv
-			INNER JOIN tParamCalculo	AS	prm	ON	1 = 1
 			-- Inicio del Viaje
 			INNER JOIN tEvento			AS	ini ON	ini.fUsuario	=	uv.pUsuario
 												AND	ini.fVehiculo	=	uv.pVehiculo
@@ -240,16 +239,15 @@ BEGIN
 			-- Fin del Viaje
 			INNER JOIN tEvento			AS	fin	ON	fin.nIdViaje	=	ini.nIdViaje
 										 		AND	fin.fTpEvento	=	kEventoFin
-											 	AND	fin.nValor		> 	prm.nDistanciaMin
 			-- Eventos
 			INNER JOIN tEvento			AS	eve ON	eve.nIdViaje	=	ini.nIdViaje
 												AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
 			INNER JOIN tVehiculo		AS 	v	ON	v.pVehiculo		= 	uv.pVehiculo
 			INNER JOIN tUsuario			AS	ut	ON	ut.pUsuario		=	uv.fUsuarioTitular
 			INNER JOIN tUsuario			AS	uu	ON	uu.pUsuario		=	uv.pUsuario
-	WHERE	uv.fUsuarioTitular	=	prm_pUsuario
-	AND		ini.tEvento			>=	vdIni
-	AND		fin.tEvento			<	vdFin
+	WHERE	uv.pUsuario =	prm_pUsuario
+	AND		ini.tEvento >=	vdIni
+	AND		fin.tEvento <	vdFin
 	GROUP BY	v.pVehiculo		,	v.cPatente		,	v.fUsuarioTitular	,	ut.cNombre
 		 	,	ini.fUsuario	,	uu.cNombre		,	ini.nIdViaje		,	ini.cCalle
 			,	ini.cCalleCorta	,	fin.cCalle 		,	fin.cCalleCorta		,	ini.tEvento
