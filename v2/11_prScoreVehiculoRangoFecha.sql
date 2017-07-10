@@ -144,7 +144,7 @@ BEGIN
 	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva );
                                         
 	-- CURSOR 6: Detalle de los viajes del usuario. Solo si se especificó prm_fVehiculo ó prm_fConductor
-    IF NOT( prm_fVehiculo is not null OR prm_fConductor is not null ) THEN
+    IF prm_fVehiculo is null AND prm_fConductor is null THEN
 		SELECT	v.pVehiculo				AS	fVehiculo			,	v.cPatente				AS	cPatente
 			 ,	v.fUsuarioTitular		AS	fUsuarioTitular 	,	ut.cNombre				AS	cNombreTitular
 			 ,	ini.fUsuario			AS	fUsuario		 	,	IFNULL(uu.cNombre,'Desconocido') AS cNombreConductor
