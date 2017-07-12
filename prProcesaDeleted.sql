@@ -1,7 +1,15 @@
-DROP PROCEDURE IF EXISTS prProcesaDeleted;
 DELIMITER //
+DROP PROCEDURE IF EXISTS prProcesaDeleted //
 CREATE PROCEDURE prProcesaDeleted ()
 BEGIN
+	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryLog (
+		pLog	INTEGER UNSIGNED AUTO_INCREMENT NOT NULL,
+		cLinea	VARCHAR(500) NOT NULL ,
+        PRIMARY KEY (pLog)
+	);
+    DELETE FROM wMemoryLog;
+        
+
 	BEGIN
 		-- Claves
 		DECLARE vnIdViaje	integer;
@@ -20,7 +28,7 @@ BEGIN
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vnIdViaje;
 		WHILE NOT eofCurEvento DO
-            -- SELECT 'Calcula viaje',vnIdViaje;
+            INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('Calcula viaje:',vnIdViaje));
 			-- Calcula Score diario
 			CALL prCalculaScoreViaje( vnIdViaje );
 			FETCH CurEvento INTO vnIdViaje;
@@ -47,12 +55,14 @@ BEGIN
             GROUP BY ev.fVehiculo, ev.fUsuario, date(ev.tEvento);
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '610 Abre cursor', now();
+        INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('610 Abre cursor', now()));
+        
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vpVehiculo, vpUsuario, vdFecha;
-        -- SELECT '620 Inicio cursor', now();
+        INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('620 Inicio cursor', now()));
 		WHILE NOT eofCurEvento DO
-            SELECT 'Calcula dia', vpVehiculo, vpUsuario, vdFecha;
+			INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('Calcula dia', vpVehiculo, vpUsuario, vdFecha));
+            
 			-- Calcula Score diario
 			CALL prCalculaScoreDia( vdFecha, vpVehiculo, vpUsuario );
 			FETCH CurEvento INTO vpVehiculo, vpUsuario, vdFecha;
@@ -80,12 +90,13 @@ BEGIN
             group by ev.fVehiculo, substr(ev.tEvento,1,7);
         DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '710 Abre cursor', now();
+		INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('710 Abre cursor', now()));
+        
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vpVehiculo, vcPeriodo;
-        -- SELECT '720 Inicio cursor', now();
+        INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('720 Inicio cursor', now()));
 		WHILE NOT eofCurEvento DO
-            SELECT 'Calcula mes', vpVehiculo, vcPeriodo;
+			INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('Calcula mes', vpVehiculo, vcPeriodo));
 			-- Calcula Score Mensual
 			CALL prCalculaScoreMes( vcPeriodo, vpVehiculo );
 			FETCH CurEvento INTO vpVehiculo, vcPeriodo;
@@ -114,19 +125,22 @@ BEGIN
             GROUP BY ev.fVehiculo, ev.fUsuario, substr(ev.tEvento,1,7);
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurEvento = 1;
 
-        -- SELECT '810 Abre cursor', now();
+		INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('810 Abre cursor', now()));
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vpVehiculo, vpUsuario, vcPeriodo;
-        -- SELECT '820 Inicio cursor', now();
+        
+		INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('820 Inicio cursor', now()));
+        
 		WHILE NOT eofCurEvento DO
-            SELECT 'Calcula mes conductor', vpVehiculo, vpUsuario, vcPeriodo;
+            INSERT INTO wMemoryLog ( cLinea ) VALUES (CONCAT('Calcula mes conductor', vpVehiculo, vpUsuario, vcPeriodo));
 			-- Calcula Score Mes por Condductor
 			CALL prCalculaScoreMesConductor( vcPeriodo, vpVehiculo, vpUsuario );
 			FETCH CurEvento INTO vpVehiculo, vpUsuario, vcPeriodo;
 		END WHILE;
 		CLOSE CurEvento;
 	END; -- Fin cursor eventos
-    
+
+	SELECT pLog, cLinea FROM wMemoryLog ORDER BY pLog;
 END //
 DELIMITER ;
 
