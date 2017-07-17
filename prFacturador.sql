@@ -3,6 +3,7 @@ DROP PROCEDURE IF EXISTS prFacturador //
 CREATE PROCEDURE prFacturador ()
 BEGIN
 
+/*
 	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryVehiculosFacturar (
 		pVehiculo		INTEGER		 UNSIGNED	 NOT NULL,
 		cPatente 		VARCHAR(20)				 NOT NULL,
@@ -36,6 +37,7 @@ BEGIN
 	WHERE	v.fTpDispositivo = 3
 	AND		v.cIdDispositivo is not null
 	AND		v.bVigente in ('1');
+*/
     
 	-- Crea tabla temporal para procesar cada vehículo, si existe la limpia
 	CALL prCreaTmpScoreVehiculo();
@@ -58,8 +60,8 @@ BEGIN
 			SELECT	v.pVehiculo				, v.cPatente				, v.cIdDispositivo			, v.bVigente				,
 					v.fTpDispositivo		, v.fCuenta					, v.fUsuarioTitular			, v.tModif					,
 					v.dIniVigencia			,
-					score.fnPeriodoActual( v.dIniVigencia, 0 ) dIniCierre,
-					score.fnPeriodoActual( v.dIniVigencia, 1 ) dFinCierre
+					score.fnPeriodoActual( v.dIniVigencia, -2 ) dIniCierre,
+					score.fnPeriodoActual( v.dIniVigencia, -1 ) dFinCierre
 			FROM	score.tVehiculo v
 			WHERE	v.fTpDispositivo = 3
 			AND		v.cIdDispositivo is not null
@@ -72,17 +74,8 @@ BEGIN
 							vfUsuarioTitular, vtModif			, vdIniVigencia		,
 							vdIniCierre		, vdFinCierre;
 		WHILE NOT eofCurVeh DO
-			IF prm_nPeriodo IS NOT NULL THEN
-				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(NOW()));
-				SET vdIni = fnPeriodoActual( vdIniVigencia, prm_nPeriodo - 1);
-				SET vdFin = fnPeriodoActual( vdIniVigencia, prm_nPeriodo);
-			END IF;
 			-- Calcula score y descuento del vehículo
-			CALL prCalculaScoreVehiculo( vpVehiculo, vdIni, vdFin );
-			-- Calcula score del usuario por cada vehículo
-			CALL prScoreVehiculoRangoSub( vnUsuario, vpVehiculo, vdIni, vdFin, vnKms, vnScore );
-			SET vnKmsTotal		= vnKmsTotal	+ vnKms;
-			SET vnScoreGlobal	= vnScoreGlobal + vnScore;
+			CALL prCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre );
 		
 			FETCH curVeh INTO	vpVehiculo		, vcPatente			, vcIdDispositivo	,
 								vbVigente		, vfTpDispositivo	, vfCuenta			,
@@ -91,6 +84,7 @@ BEGIN
 		END WHILE;
 		CLOSE curVeh;
 	END;
-    
+  
+	SELECT * FROM wMemoryScoreVehiculo;
 
 END //
