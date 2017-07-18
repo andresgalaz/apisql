@@ -22,7 +22,7 @@ BEGIN
 		SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAY(now()) - 1 DAY));
 		SET vdIni = fnPeriodoActual( vdIni, prm_nPeriodo);
 		SET vdFin = fnPeriodoActual( vdIni, prm_nPeriodo + 1);
-	ELSE
+	ELSEIF prm_dIni IS NOT NULL AND prm_dFin IS NOT NULL THEN
 		IF prm_dIni IS NULL THEN
 			SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAYOFMONTH(now()) - 1 DAY));
 		ELSE
@@ -35,6 +35,9 @@ BEGIN
 			SET vdFin = prm_dFin;
 		END IF;
 		SET vdFin = ADDDATE(vdFin, INTERVAL 1 DAY);
+	ELSE
+		SET vdIni = DATE('2000-01-01');
+        SET vdFin = DATE('2999-12-31');
 	END IF;
 
 	-- Cuenta cantidad de registros para poder paginar
@@ -62,11 +65,17 @@ BEGIN
 	END IF;
     
 	-- CURSOR 1: Rango de fechas de la consulta y las páginas
-	SELECT 	SUBSTRING(vdIni, 1, 10 )							AS dInicio,
-			SUBSTRING(DATE_SUB(vdFin, INTERVAL 1 DAY), 1, 10 )	AS dFin,
-            vnRegs			AS nRegs,
-            vnPagina		AS nPagina,
-            vnPaginas		AS nPaginas;
+    IF vdIni = '2000-01-01' THEN
+		SELECT	vnRegs			AS nRegs,
+				vnPagina		AS nPagina,
+				vnPaginas		AS nPaginas;
+    ELSE
+		SELECT 	SUBSTRING(vdIni, 1, 10 )							AS dInicio,
+				SUBSTRING(DATE_SUB(vdFin, INTERVAL 1 DAY), 1, 10 )	AS dFin,
+				vnRegs			AS nRegs,
+				vnPagina		AS nPagina,
+				vnPaginas		AS nPaginas;
+	END IF;
  
 	IF vnRegs > 0 THEN
 		SET vnRegIni	= ( vnPagina - 1 ) * kPageSize;
