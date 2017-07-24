@@ -90,6 +90,6 @@ BEGIN
   
 	-- Limpia tabla temporal
     DELETE FROM wEvento WHERE 1 = 1; 
-    
+
 END //
 

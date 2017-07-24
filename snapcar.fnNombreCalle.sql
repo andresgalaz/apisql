@@ -11,51 +11,55 @@ BEGIN
 		'C' : Devuelve el nombre corto
 	*/
     
-	DECLARE nombreCorto VARCHAR(500) DEFAULT '';
+	DECLARE cCalle VARCHAR(500) DEFAULT '';
 	IF PRM_TIPO = 'L' AND IFNULL(prm_name,'') <> '' THEN
-		SET nombreCorto = CONCAT(nombreCorto, prm_name );
+		SET cCalle = CONCAT(cCalle, prm_name );
 		IF IFNULL(prm_street_number,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, ' ', prm_street_number );
+			SET cCalle = CONCAT(cCalle, ' ', prm_street_number );
 		END IF;
-		SET nombreCorto = CONCAT(nombreCorto, ', ' );
+		SET cCalle = CONCAT(cCalle, ', ' );
 	END IF;
 	IF prm_state = 'Ciudad Autónoma de Buenos Aires' OR prm_substate like 'Comuna %' THEN
 		IF IFNULL(prm_town,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_town, ', CABA, ' );
+			SET cCalle = CONCAT(cCalle, prm_town, ', CABA, ' );
 		ELSEIF IFNULL(prm_city,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_city, ', CABA, ' );
+			SET cCalle = CONCAT(cCalle, prm_city, ', CABA, ' );
 		ELSEIF IFNULL(prm_substate,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_substate, ', CABA, ' );
+			SET cCalle = CONCAT(cCalle, prm_substate, ', CABA, ' );
 		ELSE
-			SET nombreCorto = CONCAT(nombreCorto, 'CABA, ' );
+			SET cCalle = CONCAT(cCalle, 'CABA, ' );
 		END IF;
 	ELSEIF prm_state = 'Buenos Aires' THEN
 		IF IFNULL(prm_city,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_city, ', ' );
+			SET cCalle = CONCAT(cCalle, prm_city, ', ' );
 		END IF;
 		IF IFNULL(prm_substate,'') <> '' AND IFNULL(prm_substate,'') <> IFNULL(prm_city,'') THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_substate, ', ' );
+			SET cCalle = CONCAT(cCalle, prm_substate, ', ' );
 		END IF;
-		SET nombreCorto = CONCAT(nombreCorto, 'Bs.As., '  );
+		SET cCalle = CONCAT(cCalle, 'Bs.As., '  );
 	ELSE
 		IF IFNULL(prm_town,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_town, ', ' );
+			SET cCalle = CONCAT(cCalle, prm_town, ', ' );
 		END IF;
 		IF IFNULL(prm_city,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_city, ', ' );
+			SET cCalle = CONCAT(cCalle, prm_city, ', ' );
 		END IF;
 		IF IFNULL(prm_substate,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_substate, ', ' );
+			SET cCalle = CONCAT(cCalle, prm_substate, ', ' );
 		END IF;
 		IF IFNULL(prm_state,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_state, ', ' );
+			SET cCalle = CONCAT(cCalle, prm_state, ', ' );
 		END IF;
 		IF IFNULL(prm_country,'') <> '' THEN
-			SET nombreCorto = CONCAT(nombreCorto, prm_country, ', ' );
+			SET cCalle = CONCAT(cCalle, prm_country, ', ' );
 		END IF;
 	END IF;
 	
-	RETURN SUBSTRING(nombreCorto, 1, CHAR_LENGTH(nombreCorto)-2);
+	SET cCalle = SUBSTRING(cCalle, 1, CHAR_LENGTH(cCalle)-2);
+    IF cCalle = '' THEN
+		RETURN NULL;
+	END IF;
+    RETURN cCalle;
 	
 END //
 

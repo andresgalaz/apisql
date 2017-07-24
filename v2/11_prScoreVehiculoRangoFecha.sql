@@ -178,7 +178,7 @@ BEGIN
 				INNER JOIN	tUsuario			AS	ut	ON	ut.pUsuario		=	v.fUsuarioTitular
 				LEFT JOIN	tUsuario			AS	uu	ON	uu.pUsuario		=	ini.fUsuario
 		WHERE	ini.fUsuario	=	vnUsuario
-        AND		ini.fVehiculo	= IFNULL( prm_fVehiculo, ini.fVehiculo )
+        AND		( prm_fVehiculo IS NULL OR ini.fVehiculo = prm_fVehiculo )
 		AND		ini.tEvento		>=	w.dInicio
 		AND		fin.tEvento		<	w.dFin
 		GROUP BY	v.pVehiculo		,	v.cPatente		,	v.fUsuarioTitular	,	ut.cNombre
