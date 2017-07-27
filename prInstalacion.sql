@@ -53,6 +53,10 @@ LB_PRINCIPAL:BEGIN
 	AND		v.bVigente = '1';
     
 	IF prm_cAccion = 'consultar' THEN
+		IF prm_cId IS NULL AND prm_cPatente IS NULL THEN
+			SELECT 3547 nCodigo, 'Debe indicar dispositivo o patente' cMensaje;
+			LEAVE LB_PRINCIPAL;
+		END IF;
 		-- Consultar: muestra o la patente actualmente asociada al dispositivo, o el dispositivo que tiene la petente
         IF prm_cId IS NULL THEN
 			SELECT 0 AS nCodigo, vcIdDispositivo AS cIdDispositivo;
@@ -109,17 +113,23 @@ LB_PRINCIPAL:BEGIN
         -- Actualiza dispositivo del vehículo
 		UPDATE tVehiculo SET cIdDispositivo = prm_cId, fTpDispositivo = 3 WHERE pVehiculo = vpVehiculo;
 
-	ELSEIF prm_cAccion in ('iniciar','finalizar') THEN
+	ELSEIF prm_cAccion in ('iniciar','finalizar','cancelar') THEN
 		-- Resignar: Debe indicar patente y Debe estar asignado a otra
 		IF prm_cPatente IS NULL THEN
 			SELECT 3558 nCodigo, 'Debe indicar patente' cMensaje;
 			LEAVE LB_PRINCIPAL;
 		END IF;
 
-		IF prm_cEstado IS NULL THEN
+		IF prm_cEstado IS NULL AND prm_cAccion in ('iniciar','finalizar') THEN
 			SELECT 3560 nCodigo, 'Debe indicar estado' cMensaje;
 			LEAVE LB_PRINCIPAL;
 		END IF;
+        
+        IF NOT EXISTS( SELECT 1 FROM tVehiculo WHERE cPatente = prm_cPatente AND cIdDispositivo = prm_cId AND fTpDispositivo = 3 ) THEN
+			SELECT 3562 nCodigo, 'El Virloc no está asociado a la patente' cMensaje;
+			LEAVE LB_PRINCIPAL;
+        END IF;
+        
 	END IF;
 
     -- Registra acción en la APP del instalador
