@@ -4,8 +4,7 @@ CREATE PROCEDURE prInstalacion (	IN prm_pUsuario	INTEGER,
 									IN prm_cAccion	VARCHAR(20),
                                     IN prm_cId		VARCHAR(50),
                                     IN prm_cPatente	VARCHAR(20),
-                                    IN prm_cEstado	VARCHAR(20),
-                                    IN prm_cNumInst	VARCHAR(20) )
+                                    IN prm_cEstado	VARCHAR(20) )
 LB_PRINCIPAL:BEGIN
 	DECLARE	vpVehiculo			INTEGER;
 	DECLARE	vnTpDispositivo		INTEGER;
@@ -16,7 +15,7 @@ LB_PRINCIPAL:BEGIN
 		SELECT 3540 nCodigo, 'Usuario no logeado' cMensaje;
 		LEAVE LB_PRINCIPAL;
 	END IF;
-	IF prm_cAccion IS NULL OR prm_cAccion NOT IN ('consultar','blanquear','asignar','reasignar','iniciar','finalizar','cancelar') THEN
+	IF prm_cAccion IS NULL OR prm_cAccion NOT IN ('consultar','blanquear','asignar','reasignar','iniciar','finalizar','codigo','cancelar') THEN
 		SELECT 3542 nCodigo, 'Acción no válida' cMensaje;
 		LEAVE LB_PRINCIPAL;
 	END IF;
@@ -53,6 +52,10 @@ LB_PRINCIPAL:BEGIN
 	AND		v.bVigente = '1';
     
 	IF prm_cAccion = 'consultar' THEN
+		IF prm_cId IS NULL AND prm_cPatente IS NULL THEN
+			SELECT 3547 nCodigo, 'Debe indicar dispositivo o patente' cMensaje;
+			LEAVE LB_PRINCIPAL;
+		END IF;
 		-- Consultar: muestra o la patente actualmente asociada al dispositivo, o el dispositivo que tiene la petente
         IF prm_cId IS NULL THEN
 			SELECT 0 AS nCodigo, vcIdDispositivo AS cIdDispositivo;
@@ -109,27 +112,31 @@ LB_PRINCIPAL:BEGIN
         -- Actualiza dispositivo del vehículo
 		UPDATE tVehiculo SET cIdDispositivo = prm_cId, fTpDispositivo = 3 WHERE pVehiculo = vpVehiculo;
 
-	ELSEIF prm_cAccion in ('iniciar','finalizar') THEN
+	ELSEIF prm_cAccion in ('iniciar','finalizar','cancelar') THEN
 		-- Resignar: Debe indicar patente y Debe estar asignado a otra
 		IF prm_cPatente IS NULL THEN
 			SELECT 3558 nCodigo, 'Debe indicar patente' cMensaje;
 			LEAVE LB_PRINCIPAL;
 		END IF;
 
-		IF prm_cEstado IS NULL THEN
+		IF prm_cEstado IS NULL AND prm_cAccion not in ('cancelar') THEN
 			SELECT 3560 nCodigo, 'Debe indicar estado' cMensaje;
 			LEAVE LB_PRINCIPAL;
 		END IF;
+        
+        IF NOT EXISTS( SELECT 1 FROM tVehiculo WHERE cPatente = prm_cPatente AND cIdDispositivo = prm_cId AND fTpDispositivo = 3 ) THEN
+			SELECT 3562 nCodigo, 'El Virloc no está asociado a la patente' cMensaje;
+			LEAVE LB_PRINCIPAL;
+        END IF;
+        
 	END IF;
 
     -- Registra acción en la APP del instalador
 	INSERT INTO tInstalacion
 			( fUsuario			, fVehiculo			, cAccion			, 
-              cPatente			, cIdDispositivo	, cNumInstalacion 	,
-              cEstado			)
+              cPatente			, cIdDispositivo	, cEstado			)
 	VALUES	( prm_pUsuario		, vpVehiculo		, prm_cAccion		, 
-			  prm_cPatente		, prm_cId			, prm_cNumInst		,
-              prm_cEstado		);
+			  prm_cPatente		, prm_cId			, prm_cEstado		);
     
 	SELECT 0 nCodigo, 'Ok' cMensaje;
 

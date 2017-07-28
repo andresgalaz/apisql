@@ -22,3 +22,4 @@ select t.id                     AS trip_id          , t.client_id              A
        left join g_streets st                        on st.id           = t.main_street_id
        left join trip_details d                      on d.trip_id       = t.id 
                                                     and d.event_date    = o.from_time
+ where t.status = 'S'                                                    
