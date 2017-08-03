@@ -82,11 +82,15 @@ BEGIN
 		) ENGINE=MEMORY;
 		
 		DELETE FROM wMemoryScoreVehiculoCount;
-		-- Por cada fecha solo interesa si uso, por eso se busca el máximo por día
+		-- Por cada fecha solo interesa si uso, por eso se busca el máximo por día, sin embargo
+        -- Si no hay medición, es igual que si lo hubiese usado en hora punta/nocturna, es decir,
+        -- no tiene descuento.
 		INSERT INTO wMemoryScoreVehiculoCount 
-		SELECT	dFecha, MAX(bUso), MAX(bHoraPunta)
+		SELECT	dFecha, MAX(bUso OR bSinMedicion), MAX(bHoraPunta OR bSinMedicion)
 		FROM	tScoreDia
-		WHERE	fVehiculo = prm_pVehiculo AND dFecha >= prm_dIni AND dFecha < prm_dFin
+		WHERE	fVehiculo	=	prm_pVehiculo
+        AND		dFecha		>=	prm_dIni
+        AND		dFecha		<	prm_dFin
 		GROUP BY dFecha;
 		-- Con el máximo por día se suma la cantidad de días de uso
 		SELECT	COUNT(*)	, SUM(nDiasUso)	, SUM(nDiasPunta)

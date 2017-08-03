@@ -1,6 +1,6 @@
 DROP PROCEDURE IF EXISTS prCalculaDescuento;
 DELIMITER //
-CREATE PROCEDURE prCalculaDescuento (in prmKms integer, inout prmDiasUso integer, inout prmDiasPunta integer, in prmScore integer, in prmDiasMes integer, in prmDiasVigencia integer,
+CREATE PROCEDURE prCalculaDescuento (in prmKms integer, inout prmDiasUso integer, inout prmDiasPunta integer, in prmDiasSinMedicion integer, in prmScore integer, in prmDiasMes integer, in prmDiasVigencia integer,
 	                                 out vo_nDescuento decimal(10,2), out vo_nDescuentoKM decimal(10,2), out vo_nDescDiaSinUso decimal(10,2), out vo_nDescNoHoraPunta decimal(10,2), out vo_nFactorDias float )
 BEGIN
 	-- Normalmente prmDiasMes y prmDiasVigencia son iguales, excpeto para las cuentas 
@@ -13,6 +13,8 @@ BEGIN
     DECLARE kParamNoHoraPunta   decimal(5,2) DEFAULT 0.33;
 
 	DECLARE vnKmsPond			integer;
+    DECLARE vnDiasUso			integer;
+    DECLARE vnDiasPunta			integer;
 
 	IF prmDiasMes      IS NULL THEN 
 		SET prmDiasMes = 30;
@@ -25,9 +27,22 @@ BEGIN
     IF prmDiasUso > prmDiasMes THEN
         SET prmDiasUso = prmDiasMes;
     END IF;
+	-- Ajusta la NO Medición
+    SET vnDiasUso = prmDiasUso + prmDiasSinMedicion;
+    IF vnDiasUso > prmDiasMes THEN
+		SET vnDiasUso = prmDiasMes ;
+    END IF;
+    SET vnDiasPunta = prmDiasPunta + prmDiasSinMedicion;
+    IF vnDiasPunta > prmDiasMes THEN
+		SET vnDiasPunta = prmDiasMes;
+    END IF;
+    
     -- La cantidad de días de uso en hora punta o nocturno, no puede ser mayor a la cantidad de días de uso
     IF prmDiasPunta > prmDiasUso THEN
         SET prmDiasPunta = prmDiasUso;
+    END IF;
+    IF vnDiasPunta > vnDiasUso THEN
+        SET vnDiasPunta = vnDiasUso;
     END IF;
     
 	-- Se considera la fracción de días desde el inicio de actividad del vehículo
@@ -48,11 +63,11 @@ BEGIN
 	-- Ajusta el descuento a la fracción del mes
 	SET vo_nDescuento = round(vo_nDescuentoKM * vo_nFactorDias, 0);
 	-- Descuento por días sin uso
-	SET vo_nDescDiaSinUso = round(( prmDiasMes - prmDiasUso ) * kParamDiaSinUso, 0);
+	SET vo_nDescDiaSinUso = round(( prmDiasMes - vnDiasUso ) * kParamDiaSinUso, 0);
 	SET vo_nDescuento = vo_nDescuento + vo_nDescDiaSinUso;
 
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
-	SET vo_nDescNoHoraPunta = round(( prmDiasUso - prmDiasPunta ) * kParamNoHoraPunta,0);
+	SET vo_nDescNoHoraPunta = round(( vnDiasUso - vnDiasPunta ) * kParamNoHoraPunta,0);
 	SET vo_nDescuento = vo_nDescuento + vo_nDescNoHoraPunta;
 	-- Ajusta por el puntaje
 	IF vo_nDescuento > 0 THEN
