@@ -49,7 +49,7 @@ BEGIN
 	WHERE	t.fVehiculo =	prm_pVehiculo
 	AND		t.dFecha	>=	prm_dIni
 	AND		t.dFecha	<	prm_dFin;
-	
+
 	IF IFNULL(vnKms,0) = 0 THEN
 		SET vnDiasUso			= 0;
 		SET vnDiasPunta			= 0;
@@ -74,41 +74,41 @@ BEGIN
 			SET vnPtjVelocidad		= vnSumaVelocidad		* 100 / vnKms;
 			SET vnPtjCurva			= vnSumaCurva			* 100 / vnKms;
 		END IF;
-
-		-- Tabla temporal de cantidad de días totales y de uso
-		CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryScoreVehiculoCount (
-			dFecha				DATE					NOT NULL,
-			nDiasUso			INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
-			nDiasPunta			INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
-			nDiasSinMedicion	INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
-			PRIMARY KEY (dFecha)
-		) ENGINE=MEMORY;
-		
-		DELETE FROM wMemoryScoreVehiculoCount;
-		-- Por cada fecha solo interesa si uso, por eso se busca el máximo por día, sin embargo
-        -- Si no hay medición, es igual que si lo hubiese usado en hora punta/nocturna, es decir,
-        -- no tiene descuento.
-		INSERT INTO wMemoryScoreVehiculoCount 
-		SELECT	dFecha, MAX(bUso), MAX(bHoraPunta), MAX( bSinMedicion )
-		FROM	tScoreDia
-		WHERE	fVehiculo	=	prm_pVehiculo
-        AND		dFecha		>=	prm_dIni
-        AND		dFecha		<	prm_dFin
-		GROUP BY dFecha;
-		-- Con el máximo por día se suma la cantidad de días de uso
-		SELECT	COUNT(*)	, SUM(nDiasUso)	, SUM(nDiasPunta)	, SUM(nDiasSinMedicion)
-		INTO	vnDiasTotal	, vnDiasUso		, vnDiasPunta		, vnDiasSinMedicion
-		FROM	wMemoryScoreVehiculoCount;
-
-		SELECT	COUNT(*) INTO vnQViajes
-		FROM	tEvento e
-				INNER JOIN tParamCalculo p ON 1 = 1
-		WHERE	e.fVehiculo =	prm_pVehiculo
-		AND		e.tEvento	>=	prm_dIni
-		AND		e.tEvento	<	prm_dFin
-		AND		e.fTpEvento =	kEventoFin
-		AND		e.nValor	>	p.nDistanciaMin;
 	END IF;
+
+	-- Tabla temporal de cantidad de días totales y de uso
+	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryScoreVehiculoCount (
+		dFecha				DATE					NOT NULL,
+		nDiasUso			INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
+		nDiasPunta			INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
+		nDiasSinMedicion	INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
+		PRIMARY KEY (dFecha)
+	) ENGINE=MEMORY;
+	
+	DELETE FROM wMemoryScoreVehiculoCount;
+	-- Por cada fecha solo interesa si uso, por eso se busca el máximo por día, sin embargo
+	-- Si no hay medición, es igual que si lo hubiese usado en hora punta/nocturna, es decir,
+	-- no tiene descuento.
+	INSERT INTO wMemoryScoreVehiculoCount 
+	SELECT	dFecha, MAX(bUso), MAX(bHoraPunta), MIN( bSinMedicion )
+	FROM	tScoreDia
+	WHERE	fVehiculo	=	prm_pVehiculo
+	AND		dFecha		>=	prm_dIni
+	AND		dFecha		<	prm_dFin
+	GROUP BY dFecha;
+	-- Con el máximo por día se suma la cantidad de días de uso
+	SELECT	COUNT(*)	, SUM(nDiasUso)	, SUM(nDiasPunta)	, SUM(nDiasSinMedicion)
+	INTO	vnDiasTotal	, vnDiasUso		, vnDiasPunta		, vnDiasSinMedicion
+	FROM	wMemoryScoreVehiculoCount;
+
+	SELECT	COUNT(*) INTO vnQViajes
+	FROM	tEvento e
+			INNER JOIN tParamCalculo p ON 1 = 1
+	WHERE	e.fVehiculo =	prm_pVehiculo
+	AND		e.tEvento	>=	prm_dIni
+	AND		e.tEvento	<	prm_dFin
+	AND		e.fTpEvento =	kEventoFin
+	AND		e.nValor	>	p.nDistanciaMin;
 
 	-- Calcula Score y Descuento Vehículo
 	-- De acuerdo al tipo de evento, se hace la conversión usando la tablas de rangos por puntaje

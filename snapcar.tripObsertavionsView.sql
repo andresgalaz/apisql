@@ -12,6 +12,8 @@ select t.id                     AS trip_id          , t.client_id              A
 	 , snapcar.fnNombreCalle( 'C', so.name, so.street_number, so.town, so.city, so.substate, so.state, so.country ) AS calle_corta
 	 , snapcar.fnNombreCalle( 'L', st.name, st.street_number, st.town, st.city, st.substate, st.state, st.country ) AS calle_inicio
 	 , snapcar.fnNombreCalle( 'C', st.name, st.street_number, st.town, st.city, st.substate, st.state, st.country ) AS calle_inicio_corta
+	 , snapcar.fnNombreCalle( 'L', se.name, se.street_number, se.town, se.city, se.substate, se.state, se.country ) AS calle_fin
+	 , snapcar.fnNombreCalle( 'C', se.name, se.street_number, se.town, se.city, se.substate, se.state, se.country ) AS calle_fin_corta
      , d.latitude               AS latitude         , d.longitude              AS longitude
      , t.updated_at             AS ts_modif 
   from trips t
@@ -19,7 +21,8 @@ select t.id                     AS trip_id          , t.client_id              A
        left join trip_observations_no_deleted_view o on o.trip_id       = t.id
        left join virloc_observation_ranges r         on r.id            = o.observation_range_id
        left join g_streets so                        on so.id           = o.street_id
-       left join g_streets st                        on st.id           = t.main_street_id
+       left join g_streets st                        on st.id           = t.start_street_id
+       left join g_streets se                        on se.id           = t.end_street_id
        left join trip_details d                      on d.trip_id       = t.id 
                                                     and d.event_date    = o.from_time
  where t.status = 'S'                                                    

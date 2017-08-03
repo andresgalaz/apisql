@@ -1,0 +1,28 @@
+DROP table AGV;
+create table AGV as 
+select e.nIdViaje, e.pEvento, 'INICIO' tp,e.cCalle, t.start_street_id, snapcar.fnNombreCalle( 'L', s.name, s.street_number, s.town, s.city, s.substate, s.state, s.country ) calle
+     , snapcar.fnNombreCalle( 'C', s.name, s.street_number, s.town, s.city, s.substate, s.state, s.country ) calle_corta
+from tEvento e 
+	left join snapcar.trips t on t.id = e.nIdViaje
+    left join snapcar.g_streets s on s.id = t.start_street_id
+where fTpEvento in (1)
+union all
+select e.nIdViaje, e.pEvento, 'FIN' tp, e.cCalle, t.end_street_id, snapcar.fnNombreCalle( 'L', s.name, s.street_number, s.town, s.city, s.substate, s.state, s.country ) calle
+      , snapcar.fnNombreCalle( 'C', s.name, s.street_number, s.town, s.city, s.substate, s.state, s.country ) calle_corta
+from tEvento e 
+	left join snapcar.trips t on t.id = e.nIdViaje
+    left join snapcar.g_streets s on s.id = t.end_street_id
+where fTpEvento in (2);
+create index I_AGV on AGV ( pEvento );
+
+-- Actualiza las que quedaron nulas
+select * from AGV where calle is not null and cCalle is null;
+update tEvento set cCalle=(select calle from AGV where AGV.pEvento = tEvento.pEvento ),  cCalleCorta=(select calle_corta from AGV where AGV.pEvento = tEvento.pEvento )
+WHERE pEvento in ( select AGV.pEvento from AGV where calle is not null and cCalle is null);
+
+-- Actualiza las diferencias
+select * from AGV where calle is not null and cCalle <>calle;
+update tEvento set cCalle=(select calle from AGV where AGV.pEvento = tEvento.pEvento ),  cCalleCorta=(select calle_corta from AGV where AGV.pEvento = tEvento.pEvento )
+WHERE pEvento in ( select AGV.pEvento from AGV where calle is not null and cCalle <>calle);
+
+select * from AGV where cCalle <>calle;

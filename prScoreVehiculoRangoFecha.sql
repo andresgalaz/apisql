@@ -58,8 +58,8 @@ BEGIN
 		WHILE NOT eofCurVeh DO
 			IF prm_nPeriodo IS NOT NULL THEN
 				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(NOW()));
-				SET vdIni = fnPeriodoActual( vdIniVigencia, prm_nPeriodo - 1);
-				SET vdFin = fnPeriodoActual( vdIniVigencia, prm_nPeriodo);
+				SET vdIni = fnPeriodoActual( vdIniVigencia, prm_nPeriodo);
+				SET vdFin = fnPeriodoActual( vdIniVigencia, prm_nPeriodo + 1);
 			END IF;
 			-- Calcula score y descuento del vehículo
 			CALL prCalculaScoreVehiculo( vpVehiculo, vdIni, vdFin );

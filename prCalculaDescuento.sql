@@ -1,7 +1,11 @@
 DROP PROCEDURE IF EXISTS prCalculaDescuento;
 DELIMITER //
-CREATE PROCEDURE prCalculaDescuento (in prmKms integer, inout prmDiasUso integer, inout prmDiasPunta integer, in prmDiasSinMedicion integer, in prmScore integer, in prmDiasMes integer, in prmDiasVigencia integer,
-	                                 out vo_nDescuento decimal(10,2), out vo_nDescuentoKM decimal(10,2), out vo_nDescDiaSinUso decimal(10,2), out vo_nDescNoHoraPunta decimal(10,2), out vo_nFactorDias float )
+CREATE PROCEDURE prCalculaDescuento ( in  prmKms			 integer      , inout prmDiasUso integer, inout prmDiasPunta integer
+                                    , in  prmDiasSinMedicion integer      , in    prmScore   integer, in    prmDiasMes   integer
+                                    , in  prmDiasVigencia 	 integer
+                                    , out vo_nDescuento      decimal(10,2), out   vo_nDescuentoKM     decimal(10,2)
+                                    , out vo_nDescDiaSinUso  decimal(10,2), out   vo_nDescNoHoraPunta decimal(10,2)
+                                    , out vo_nFactorDias     float )
 BEGIN
 	-- Normalmente prmDiasMes y prmDiasVigencia son iguales, excpeto para las cuentas 
 	-- que son creadas en el mes en curso.
@@ -19,7 +23,7 @@ BEGIN
 	IF prmDiasMes      IS NULL THEN 
 		SET prmDiasMes = 30;
 	END IF;
-	IF prmDiasVigencia IS NULL THEN
+	IF prmDiasVigencia IS NULL OR prmDiasVigencia >= prmDiasMes THEN
 		SET prmDiasVigencia = prmDiasMes;
 	END IF;
 	
@@ -96,7 +100,7 @@ BEGIN
 	END IF;
 	SET vo_nDescuento = round(vo_nDescuento, 0);
 
--- select prmKms, prmDiasUso, prmDiasPunta, prmScore, prmDiasMes, prmDiasVigencia, vo_nDescuento, vo_nDescuentoKM, vo_nDescDiaSinUso, vo_nDescNoHoraPunta, vo_nFactorDias;
+-- select vnKmsPond, vnDiasUso, vnDiasPunta, prmScore, prmDiasMes, prmDiasVigencia, vo_nDescuento, vo_nDescuentoKM, vo_nDescDiaSinUso, vo_nDescNoHoraPunta, vo_nFactorDias;
 	 
 END //
 DELIMITER ;
