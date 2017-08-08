@@ -24,8 +24,8 @@ BEGIN
 			SELECT	v.pVehiculo				, v.cPatente				, v.cIdDispositivo			, v.bVigente				,
 					v.fTpDispositivo		, v.fCuenta					, v.fUsuarioTitular			, v.tModif					,
 					v.dIniVigencia			,
-					score.fnPeriodoActual( v.dIniVigencia, -2 ) dIniCierre,
-					score.fnPeriodoActual( v.dIniVigencia, -1 ) dFinCierre
+					score.fnPeriodoActual( v.dIniVigencia, -1 ) dIniCierre,
+					score.fnPeriodoActual( v.dIniVigencia, 0 ) dFinCierre
 			FROM	score.tVehiculo v
 			WHERE	v.fTpDispositivo = 3
 			AND		v.cIdDispositivo is not null

@@ -7,7 +7,7 @@ LB_PRINCIPAL: BEGIN
 
 	IF prm_nPeriodo IS NOT NULL THEN
 		-- Rango de fechas a partir de la fecha de vigencia
-		SELECT 	fnPeriodoActual( dIniVigencia, prm_nPeriodo-1), fnPeriodoActual( dIniVigencia, prm_nPeriodo)
+		SELECT 	fnPeriodoActual( dIniVigencia, prm_nPeriodo), fnPeriodoActual( dIniVigencia, prm_nPeriodo+1)
         INTO	vdIni, vdFin
 		FROM	tVehiculo
         WHERE 	pVehiculo = prm_pVehiculo;

@@ -35,6 +35,8 @@ BEGIN
 	DECLARE vnDescuento			DECIMAL(10,2);
 	DECLARE vnFactorDias		float;
 	
+-- SELECT CONCAT('CALL prCalculaScoreVehiculo(', prm_pVehiculo,',''', prm_dIni, ''',''', prm_dFin, '''' ) as `CALL`;
+    
 	SELECT	MIN( t.dFecha )				dInicio			, SUM( t.nKms )				nKms
 		 ,	SUM( t.nFrenada )			nSumaFrenada	, SUM( t.nAceleracion )		nSumaAceleracion
 		 ,	SUM( t.nVelocidad )			nSumaVelocidad	, SUM( t.nCurva )			nSumaCurva
@@ -49,7 +51,19 @@ BEGIN
 	WHERE	t.fVehiculo =	prm_pVehiculo
 	AND		t.dFecha	>=	prm_dIni
 	AND		t.dFecha	<	prm_dFin;
-
+    
+-- Depura
+/*
+SELECT	MIN( t.dFecha )				dInicio			, SUM( t.nKms )				nKms
+	 ,	SUM( t.nFrenada )			nSumaFrenada	, SUM( t.nAceleracion )		nSumaAceleracion
+	 ,	SUM( t.nVelocidad )			nSumaVelocidad	, SUM( t.nCurva )			nSumaCurva
+	 ,	SUM( t.nQFrenada )			nQFrenada		, SUM( t.nQAceleracion )	nQAceleracion
+	 ,	SUM( t.nQVelocidad )		nQVelocidad		, SUM( t.nQCurva )			nQCurva
+FROM	tScoreDia t
+WHERE	t.fVehiculo =	prm_pVehiculo
+AND		t.dFecha	>=	prm_dIni
+AND		t.dFecha	<	prm_dFin;
+*/
 	IF IFNULL(vnKms,0) = 0 THEN
 		SET vnDiasUso			= 0;
 		SET vnDiasPunta			= 0;
@@ -96,6 +110,7 @@ BEGIN
 	AND		dFecha		>=	prm_dIni
 	AND		dFecha		<	prm_dFin
 	GROUP BY dFecha;
+    
 	-- Con el máximo por día se suma la cantidad de días de uso
 	SELECT	COUNT(*)	, SUM(nDiasUso)	, SUM(nDiasPunta)	, SUM(nDiasSinMedicion)
 	INTO	vnDiasTotal	, vnDiasUso		, vnDiasPunta		, vnDiasSinMedicion
@@ -131,7 +146,7 @@ BEGIN
 		+	( vnPtjCurva		* nPorcCurva		/ 100 )
 	INTO	vnScore
 	FROM	tParamCalculo;
-
+    
 	CALL prCalculaDescuento( vnKms, vnDiasUso, vnDiasPunta, vnDiasSinMedicion, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicio ),
 							 vnDescuento, vnDescuentoKM, vnDescDiaSinUso, vnDescNoHoraPunta, vnFactorDias );
 
