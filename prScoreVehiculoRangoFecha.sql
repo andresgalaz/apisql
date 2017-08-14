@@ -1,6 +1,6 @@
 DELIMITER //
 DROP PROCEDURE IF EXISTS prScoreVehiculoRangoFecha //
-CREATE PROCEDURE prScoreVehiculoRangoFecha ( IN prm_pUsuario INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE, IN prm_fVehiculo INTEGER, IN prm_fConductor INTEGER )
+CREATE PROCEDURE prScoreVehiculoRangoFecha ( IN prm_pUsuario INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE, IN prm_fVehiculo INTEGER, IN prm_fConductor INTEGER, IN prm_bNoViajes BOOLEAN )
 BEGIN
 	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
 	DECLARE kEventoFin			INTEGER	DEFAULT 2;
@@ -16,10 +16,13 @@ BEGIN
 	DECLARE vnUsuario			INTEGER;
 
     SET vnUsuario = IFNULL( prm_fConductor, prm_pUsuario );
+    SET prm_bNoViajes = IFNULL( prm_bNoViajes, FALSE );
 
 	-- Crea tabla temporal, si existe la limpia
 	CALL prCreaTmpScoreVehiculo();
-
+-- SELECT CONCAT('prScoreVehiculoRangoFecha (',ifnull(prm_pUsuario,'NULL') ,',', ifnull(prm_nPeriodo,'NULL') ,','
+--              , ifnull(prm_dIni,'NULL') ,',', ifnull(prm_dFin,'NULL') ,',', ifnull(prm_fVehiculo,'NULL') ,','
+--              , ifnull(prm_fConductor,'NULL') ,',', ifnull(prm_bNoViajes,'NULL'), ')') as `CALL`;
 	BEGIN
 		DECLARE vpVehiculo		INTEGER;
 		DECLARE vdIniVigencia	DATE;
@@ -144,7 +147,7 @@ BEGIN
 	AND		e.fTpEvento IN ( kEventoAceleracion, kEventoFrenada, kEventoVelocidad, kEventoCurva );
                                         
 	-- CURSOR 6: Detalle de los viajes del usuario. Solo si se especificó prm_fVehiculo ó prm_fConductor
-    IF prm_fVehiculo is not null OR prm_fConductor is not null THEN
+    IF NOT prm_bNoViajes AND ( prm_fVehiculo is not null OR prm_fConductor is not null ) THEN
 		SELECT	v.pVehiculo				AS	fVehiculo			,	v.cPatente				AS	cPatente
 			 ,	v.fUsuarioTitular		AS	fUsuarioTitular 	,	ut.cNombre				AS	cNombreTitular
 			 ,	ini.fUsuario			AS	fUsuario		 	,	IFNULL(uu.cNombre,'Desconocido') AS cNombreConductor

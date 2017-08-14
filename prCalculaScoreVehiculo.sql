@@ -1,6 +1,6 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS prCalculaScoreVehiculo //
-CREATE PROCEDURE prCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
+DROP PROCEDURE IF EXISTS ZprCalculaScoreVehiculo //
+CREATE PROCEDURE ZprCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
 	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
 	DECLARE kEventoFin			INTEGER	DEFAULT 2;
@@ -34,8 +34,9 @@ BEGIN
 	DECLARE vnDescuentoKM		DECIMAL(10,2);
 	DECLARE vnDescuento			DECIMAL(10,2);
 	DECLARE vnFactorDias		float;
-	
--- SELECT CONCAT('CALL prCalculaScoreVehiculo(', prm_pVehiculo,',''', prm_dIni, ''',''', prm_dFin, '''' ) as `CALL`;
+
+-- DEBUG
+-- SELECT CONCAT('CALL prCalculaScoreVehiculo(', prm_pVehiculo,',''', prm_dIni, ''',''', prm_dFin, ''' );' ) as `CALL`;
     
 	SELECT	MIN( t.dFecha )				dInicio			, SUM( t.nKms )				nKms
 		 ,	SUM( t.nFrenada )			nSumaFrenada	, SUM( t.nAceleracion )		nSumaAceleracion
@@ -52,7 +53,7 @@ BEGIN
 	AND		t.dFecha	>=	prm_dIni
 	AND		t.dFecha	<	prm_dFin;
     
--- Depura
+-- DEBUG
 /*
 SELECT	MIN( t.dFecha )				dInicio			, SUM( t.nKms )				nKms
 	 ,	SUM( t.nFrenada )			nSumaFrenada	, SUM( t.nAceleracion )		nSumaAceleracion
@@ -93,9 +94,9 @@ AND		t.dFecha	<	prm_dFin;
 	-- Tabla temporal de cantidad de días totales y de uso
 	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryScoreVehiculoCount (
 		dFecha				DATE					NOT NULL,
-		nDiasUso			INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
-		nDiasPunta			INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
-		nDiasSinMedicion	INTEGER		UNSIGNED	NOT NULL	DEFAULT '0',
+		bUso				TINYINT(1)	UNSIGNED	NOT NULL	DEFAULT '0',
+		bHoraPunta			TINYINT(1)	UNSIGNED	NOT NULL	DEFAULT '0',
+		-- bDiasSinMedicion	TINYINT(1)	UNSIGNED	NOT NULL	DEFAULT '0',
 		PRIMARY KEY (dFecha)
 	) ENGINE=MEMORY;
 	
@@ -104,17 +105,30 @@ AND		t.dFecha	<	prm_dFin;
 	-- Si no hay medición, es igual que si lo hubiese usado en hora punta/nocturna, es decir,
 	-- no tiene descuento.
 	INSERT INTO wMemoryScoreVehiculoCount 
-	SELECT	dFecha, MAX(bUso), MAX(bHoraPunta), MIN( bSinMedicion )
+	SELECT	dFecha, MAX(bUso), MAX(bHoraPunta) -- , MIN( bSinMedicion )
 	FROM	tScoreDia
 	WHERE	fVehiculo	=	prm_pVehiculo
 	AND		dFecha		>=	prm_dIni
 	AND		dFecha		<	prm_dFin
 	GROUP BY dFecha;
-    
+
 	-- Con el máximo por día se suma la cantidad de días de uso
-	SELECT	COUNT(*)	, SUM(nDiasUso)	, SUM(nDiasPunta)	, SUM(nDiasSinMedicion)
-	INTO	vnDiasTotal	, vnDiasUso		, vnDiasPunta		, vnDiasSinMedicion
+	SELECT	COUNT(*)	, SUM(bUso)	, SUM(bHoraPunta)	-- 	, SUM(nDiasSinMedicion)
+	INTO	vnDiasTotal	, vnDiasUso	, vnDiasPunta		-- 	, vnDiasSinMedicion
 	FROM	wMemoryScoreVehiculoCount;
+    
+    -- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición
+    SELECT	DATEDIFF( prm_dFin, IFNULL(MAX( dFecha ), prm_dIni))
+    INTO	vnDiasSinMedicion
+	FROM	tScoreDia
+	WHERE	fVehiculo		=	prm_pVehiculo
+	AND		dFecha			>=	prm_dIni
+-- 	AND		dFecha			<	prm_dFin
+    AND		bSinMedicion	= '0';
+
+    IF vnDiasSinMedicion < 0 THEN
+		SET vnDiasSinMedicion = 0;
+    END IF;
 
 	SELECT	COUNT(*) INTO vnQViajes
 	FROM	tEvento e
@@ -146,20 +160,27 @@ AND		t.dFecha	<	prm_dFin;
 		+	( vnPtjCurva		* nPorcCurva		/ 100 )
 	INTO	vnScore
 	FROM	tParamCalculo;
+
+	IF vnDiasTotal > 0 AND vnDiasUso IS NOT NULL THEN
     
-	CALL prCalculaDescuento( vnKms, vnDiasUso, vnDiasPunta, vnDiasSinMedicion, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicio ),
-							 vnDescuento, vnDescuentoKM, vnDescDiaSinUso, vnDescNoHoraPunta, vnFactorDias );
+		CALL ZprCalculaDescuento( vnKms, vnDiasUso, vnDiasPunta, vnDiasSinMedicion, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicio ),
+								 vnDescuento, vnDescuentoKM, vnDescDiaSinUso, vnDescNoHoraPunta, vnFactorDias );
 
-	-- Se espera que ya exista la tabla wMemoryScoreVehiculo, la cual es creada por prCreaTmpScoreVehiculo
-	-- Inserta en tabla temporal
-	INSERT INTO wMemoryScoreVehiculo 
-			( pVehiculo 		, dInicio			, dFin				, nKms				, nScore
-			, nQViajes			, nDescuento		, nDiasTotal		, nDiasUso			, nDiasPunta
-			, nQFrenada			, nQAceleracion		, nQVelocidad		, nQCurva			, nDiasSinMedicion
-			)
-	VALUES	( prm_pVehiculo		, prm_dIni			, prm_dFin			, vnKms				, vnScore
-			, vnQViajes			, vnDescuento		, vnDiasTotal		, vnDiasUso			, vnDiasPunta 
-			, vnQFrenada		, vnQAceleracion	, vnQVelocidad		, vnQCurva			, vnDiasSinMedicion
-			);
-
+		-- Se espera que ya exista la tabla wMemoryScoreVehiculo, la cual es creada por prCreaTmpScoreVehiculo
+		-- Inserta en tabla temporal
+		INSERT INTO wMemoryScoreVehiculo 
+				( pVehiculo 		, dInicio			, dFin				, nKms				, nScore
+				, nQViajes			, nDescuento		, nDiasTotal		, nDiasUso			, nDiasPunta
+				, nQFrenada			, nQAceleracion		, nQVelocidad		, nQCurva			, nDiasSinMedicion
+				, nDescuentoKM		, nDescuentoSinUso	, nDescuentoPunta
+				)
+		VALUES	( prm_pVehiculo		, prm_dIni			, prm_dFin			, vnKms				, vnScore
+				, vnQViajes			, vnDescuento		, vnDiasTotal		, vnDiasUso			, vnDiasPunta 
+				, vnQFrenada		, vnQAceleracion	, vnQVelocidad		, vnQCurva			, vnDiasSinMedicion
+				, vnDescuentoKM		, vnDescDiaSinUso	, vnDescNoHoraPunta
+				);
+ELSE
+-- DEBUG
+SELECT prm_pVehiculo, vnKms, vnDiasUso, vnDiasPunta, vnDiasSinMedicion, vnScore, vnDiasTotal;
+	END IF;
 END //
