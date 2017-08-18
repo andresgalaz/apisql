@@ -39,7 +39,7 @@ BEGIN
 							vdIniCierre		, vdFinCierre;
 		WHILE NOT eofCurVeh DO
 			-- Calcula score y descuento del vehículo
-			CALL ZprCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
+			CALL prCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
 		
 			FETCH curVeh INTO	vpVehiculo		, vcPatente			, vcIdDispositivo	,
 								vbVigente		, vfTpDispositivo	, vfCuenta			,

@@ -87,6 +87,12 @@ BEGIN
 		CLOSE CurEvento;
 	END; -- Fin cursor eventos
 	-- SELECT '830 Fin cursor', now();
+
+	-- Crea una tabla de bitacora de los registros migrados
+	SET @tLog=CONCAT('create table integrity.wEvento_',date_format(now(),'%Y%m%d_%H%i'),' as select * from wEvento');
+	PREPARE stmt FROM @tLog;
+	EXECUTE stmt;
+	DEALLOCATE PREPARE stmt;
   
 	-- Limpia tabla temporal
     DELETE FROM wEvento WHERE 1 = 1; 

@@ -10,7 +10,10 @@ BEGIN
 		pUsuario				INTEGER			UNSIGNED	NOT NULL	DEFAULT '0',
 		dInicio					DATE						NOT NULL,
 		dFin					DATE						NOT NULL,
+        tUltimoViaje			DATETIME,
+        tUltimaSincro			DATETIME,
 		nKms					DECIMAL(10,2)	UNSIGNED	NOT NULL	DEFAULT '0.0',
+		nKmsPond				DECIMAL(10,2)	UNSIGNED	NOT NULL	DEFAULT '0.0',
 		nScore					DECIMAL(10,2)	UNSIGNED	NOT NULL	DEFAULT '0.0',
 		nQViajes				INTEGER			UNSIGNED	NOT NULL	DEFAULT '0',
 		nQFrenada				INTEGER			UNSIGNED	NOT NULL	DEFAULT '0',
@@ -28,5 +31,8 @@ BEGIN
 		PRIMARY KEY (pVehiculo, pUsuario)
 	) ENGINE=MEMORY;
 	DELETE FROM wMemoryScoreVehiculo;
+    
+    CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryScoreVehiculoSinMulta LIKE wMemoryScoreVehiculo;
+	DELETE FROM wMemoryScoreVehiculoSinMulta;
 
 END //
