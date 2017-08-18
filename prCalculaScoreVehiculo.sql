@@ -1,4 +1,5 @@
-DROP PROCEDURE IF EXISTS score.prCalculaScoreVehiculo;
+DELIMITER //
+DROP PROCEDURE IF EXISTS score.prCalculaScoreVehiculo //
 CREATE PROCEDURE score.prCalculaScoreVehiculo(IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
 	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
@@ -119,7 +120,7 @@ AND		t.dFecha	<	prm_dFin;
     
     -- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición, 
 	-- hasta el fin del periodo o la fecha actual, dependiendo si la fecha final es futura
-    SELECT	DATEDIFF( LEAST(prm_dFin,DATE(NOW())), IFNULL(MAX( dFecha ), prm_dIni))
+    SELECT	DATEDIFF( LEAST(prm_dFin + INTERVAL -1 DAY,DATE(NOW())), IFNULL(MAX( dFecha ), prm_dIni))
     INTO	vnDiasSinMedicion
 	FROM	tScoreDia
 	WHERE	fVehiculo		=	prm_pVehiculo
@@ -129,6 +130,12 @@ AND		t.dFecha	<	prm_dFin;
 
 -- DEBUG
 /*
+SELECT	dFecha, min(bSinMedicion) bSinMedicion
+FROM	tScoreDia
+WHERE	fVehiculo		=	prm_pVehiculo
+AND		dFecha			>=	prm_dIni
+AND		dFecha			<	prm_dFin
+group by dFecha order by 1;
 SELECT	prm_dFin, MAX( dFecha) maxDFecha, prm_dIni, LEAST(prm_dFin,DATE(NOW())), DATEDIFF( prm_dFin, IFNULL(MAX( dFecha ), prm_dIni))
 FROM	tScoreDia
 WHERE	fVehiculo		=	prm_pVehiculo
@@ -238,5 +245,5 @@ AND		bSinMedicion	= '0';
 -- DEBUG
 -- SELECT * FROM wMemoryScoreVehiculo;
 
-END;
+END //
 

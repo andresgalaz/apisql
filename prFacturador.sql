@@ -1,6 +1,6 @@
 DELIMITER //
 DROP PROCEDURE IF EXISTS prFacturador //
-CREATE PROCEDURE prFacturador ()
+CREATE PROCEDURE prFacturador (IN prm_pVehiculo INTEGER)
 BEGIN
 
 	-- Crea tabla temporal para procesar cada vehículo, si existe la limpia
@@ -29,7 +29,9 @@ BEGIN
 			FROM	score.tVehiculo v
 			WHERE	v.fTpDispositivo = 3
 			AND		v.cIdDispositivo is not null
-			AND		v.bVigente in ('1');
+			AND		v.bVigente in ('1')
+			AND		( prm_pVehiculo is null or v.pVehiculo=prm_pVehiculo );
+
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurVeh = 1;
 
 		OPEN curVeh;
@@ -39,7 +41,7 @@ BEGIN
 							vdIniCierre		, vdFinCierre;
 		WHILE NOT eofCurVeh DO
 			-- Calcula score y descuento del vehículo
-			CALL ZprCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
+			CALL prCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
 		
 			FETCH curVeh INTO	vpVehiculo		, vcPatente			, vcIdDispositivo	,
 								vbVigente		, vfTpDispositivo	, vfCuenta			,

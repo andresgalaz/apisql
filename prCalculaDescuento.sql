@@ -1,11 +1,11 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS ZprCalculaDescuento //
-CREATE PROCEDURE ZprCalculaDescuento ( in	prmKms				INTEGER, inout	prmDiasUso	INTEGER, inout	prmDiasPunta	INTEGER
+DROP PROCEDURE IF EXISTS prCalculaDescuento //
+CREATE PROCEDURE prCalculaDescuento ( in	prmKms				INTEGER, inout	prmDiasUso	INTEGER, inout	prmDiasPunta	INTEGER
 									, in	prmDiasSinMedicion	INTEGER, in		prmScore	INTEGER, in		prmDiasMes		INTEGER
 									, in	prmDiasVigencia		INTEGER
 									, out	vo_nDescuento		DECIMAL(10,2)	, out vo_nDescuentoKM		DECIMAL(10,2)
 									, out	vo_nDescDiaSinUso	DECIMAL(10,2)	, out vo_nDescNoHoraPunta	DECIMAL(10,2)
-									, out	vo_nFactorDias		float )
+									, out	vo_nFactorDias		float 			, out vo_kmsPond			INTEGER )
 BEGIN
 	-- Normalmente prmDiasMes y prmDiasVigencia son iguales, excpeto para las cuentas 
 	-- que son creadas en el mes en curso.
@@ -18,7 +18,7 @@ BEGIN
 	DECLARE kParamDescuentoByScore	DECIMAL(5,2)	DEFAULT 1.50;
 	DECLARE kParamRecargoByScore	DECIMAL(5,2)	DEFAULT 2.00;
 
-	DECLARE vnKmsPond		INTEGER;
+--  DECLARE vnKmsPond		INTEGER;
 	DECLARE vnDiasUso		INTEGER;
 	DECLARE vnDiasPunta		INTEGER;
     DECLARE bDescNoAplica	BOOLEAN DEFAULT FALSE;
@@ -63,7 +63,7 @@ BEGIN
 			DECLARE F FLOAT DEFAULT ( prmDiasVigencia - prmDiasSinMedicion ) / prmDiasMes;
    			-- La condición con F==0 es que desde que inició nunca midió, y si F < 0 debería ser una inconsistencia
 			IF F > 0 THEN
-				SET vnKmsPond = prmKms / F;
+				SET vo_kmsPond = round(prmKms / F,0);
 			ELSEIF prmKms = 0 THEN
 				-- Quiere decir que no hay información y que los días de no medición son iguales o mas a los días del periodo
 				-- luego se puede considerar no descuento
@@ -76,18 +76,18 @@ BEGIN
 		END IF;
     END IF;
         
-	IF vnKmsPond IS NULL THEN
-		SET vnKmsPond = prmKms / vo_nFactorDias;
+	IF vo_kmsPond IS NULL THEN
+		SET vo_kmsPond = round(prmKms / vo_nFactorDias,0);
 	END IF;                
         
 
 	SELECT	d.nValor INTO vo_nDescuentoKM
 	FROM	tRangoDescuento d
-	WHERE	d.cTpDescuento = 'KM' AND d.nInicio <= vnKmsPond AND vnKmsPond < d.nFin;
+	WHERE	d.cTpDescuento = 'KM' AND d.nInicio <= vo_kmsPond AND vo_kmsPond < d.nFin;
     
 -- DEBUG
 -- IF vo_nDescuentoKM IS NULL THEN
--- SELECT vnKmsPond;
+-- SELECT vo_kmsPond;
 -- END IF;    
 
 	-- Se considera la fracción de días desde el inicio de actividad del vehículo
@@ -102,23 +102,24 @@ BEGIN
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
 	SET vo_nDescNoHoraPunta = ( vnDiasUso - vnDiasPunta ) * kParamNoHoraPunta;
 	SET vo_nDescuento = vo_nDescuentoKM + vo_nDescDiaSinUso + vo_nDescNoHoraPunta;
+    
 	-- Ajusta por el puntaje
 	IF vo_nDescuento > 0 THEN
 		-- Descuento
-		IF prmScore > 60 THEN
-			SET vo_nDescuento = vo_nDescuento * prmScore / 100;
+		IF prmScore >= 60 THEN
+			SET vo_nDescuento = vo_nDescuento * ( 100 - ( 100 - prmScore ) * kParamDescuentoByScore ) / 100;
 		ELSE
 			SET vo_nDescuento = 0;
 		END IF;
 	ELSE
 		-- Recargo, si maneja bien se disminuye el recargo
-		IF prmScore > 60 THEN
-			SET vo_nDescuento = vo_nDescuento * ( 100 - prmScore * kParamDescuentoByScore ) / 100;
+		IF prmScore >= 60 THEN
+			SET vo_nDescuento = vo_nDescuento * ( 100 - prmScore ) * kParamRecargoByScore / 100;
 		END IF;
 	END IF;
 	IF prmScore < 40 THEN
 		-- Se recarga kParamRecargoByScore puntos por cada score bajo 40
-		SET vo_nDescuento = vo_nDescuento - ( 40 - prmScore ) * kParamRecargoByScore;
+		SET vo_nDescuento = vo_nDescuento - ( 40 - prmScore );
 	END IF;
 
 	IF vo_nDescuento > kDescLimite THEN
