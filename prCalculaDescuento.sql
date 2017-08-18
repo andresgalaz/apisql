@@ -102,6 +102,7 @@ BEGIN
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
 	SET vo_nDescNoHoraPunta = ( vnDiasUso - vnDiasPunta ) * kParamNoHoraPunta;
 	SET vo_nDescuento = vo_nDescuentoKM + vo_nDescDiaSinUso + vo_nDescNoHoraPunta;
+    
 	-- Ajusta por el puntaje
 	IF vo_nDescuento > 0 THEN
 		-- Descuento

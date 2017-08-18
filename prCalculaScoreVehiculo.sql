@@ -118,8 +118,9 @@ AND		t.dFecha	<	prm_dFin;
 	INTO	vnDiasTotal	, vnDiasUso	, vnDiasPunta		-- 	, vnDiasSinMedicion
 	FROM	wMemoryScoreVehiculoCount;
     
-    -- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición
-    SELECT	DATEDIFF( prm_dFin, IFNULL(MAX( dFecha ), prm_dIni))
+    -- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición, 
+	-- hasta el fin del periodo o la fecha actual, dependiendo si la fecha final es futura
+    SELECT	DATEDIFF( LEAST(prm_dFin + INTERVAL -1 DAY,DATE(NOW())), IFNULL(MAX( dFecha ), prm_dIni))
     INTO	vnDiasSinMedicion
 	FROM	tScoreDia
 	WHERE	fVehiculo		=	prm_pVehiculo
@@ -127,6 +128,20 @@ AND		t.dFecha	<	prm_dFin;
 -- 	AND		dFecha			<	prm_dFin
     AND		bSinMedicion	= '0';
 
+-- DEBUG
+/*
+SELECT	dFecha, min(bSinMedicion) bSinMedicion
+FROM	tScoreDia
+WHERE	fVehiculo		=	prm_pVehiculo
+AND		dFecha			>=	prm_dIni
+AND		dFecha			<	prm_dFin
+group by dFecha order by 1;
+SELECT	prm_dFin, MAX( dFecha) maxDFecha, prm_dIni, LEAST(prm_dFin,DATE(NOW())), DATEDIFF( prm_dFin, IFNULL(MAX( dFecha ), prm_dIni))
+FROM	tScoreDia
+WHERE	fVehiculo		=	prm_pVehiculo
+AND		dFecha			>=	prm_dIni
+AND		bSinMedicion	= '0';
+*/
     IF vnDiasSinMedicion < 0 THEN
 		SET vnDiasSinMedicion = 0;
     END IF;
@@ -227,4 +242,8 @@ AND		t.dFecha	<	prm_dFin;
 					);
 		END;
 	END IF;
+-- DEBUG
+-- SELECT * FROM wMemoryScoreVehiculo;
+
 END //
+
