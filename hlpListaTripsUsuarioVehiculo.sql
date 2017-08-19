@@ -4,6 +4,7 @@ select trips.id, trips.client_id, trips.from_date, trips.to_date, trips.distance
 , usr.cEmail, usr.cNombre
 , veh.pVehiculo, veh.dIniVigencia
 , veh.cPatente, veh.bVigente, veh.fTpDispositivo
+
 from snapcar.trips
     inner join snapcar.clients on clients.id = trips.client_id
     left outer join snapcar.streets on streets.id = trips.main_street_id

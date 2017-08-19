@@ -1,5 +1,5 @@
 -- DETECCIÓN
-DROP table AGV;
+DROP table IF EXISTS AGV;
 create table AGV as 
 select e.nIdViaje, e.pEvento, 'INICIO' tp,e.cCalle, t.start_street_id, snapcar.fnNombreCalle( 'L', s.name, s.street_number, s.town, s.city, s.substate, s.state, s.country ) calle
      , snapcar.fnNombreCalle( 'C', s.name, s.street_number, s.town, s.city, s.substate, s.state, s.country ) calle_corta
@@ -32,7 +32,3 @@ WHERE pEvento in ( select AGV.pEvento from AGV where calle is not null and cCall
 select * from AGV where calle is not null and cCalle <>calle and nIdViaje=11369;
 update tEvento set cCalle=(select calle from AGV where AGV.pEvento = tEvento.pEvento ),  cCalleCorta=(select calle_corta from AGV where AGV.pEvento = tEvento.pEvento )
 WHERE pEvento in ( select AGV.pEvento from AGV where calle is not null and cCalle <>calle);
-
-select * from AGV where cCalle <>calle;
-
-select * from tEvento e where e.nIdViaje=11369;

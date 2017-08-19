@@ -1,6 +1,6 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS score.prCalculaScoreVehiculo //
-CREATE PROCEDURE score.prCalculaScoreVehiculo(IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
+DROP PROCEDURE IF EXISTS prCalculaScoreVehiculo //
+CREATE PROCEDURE prCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
 	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
 	DECLARE kEventoFin			INTEGER	DEFAULT 2;
