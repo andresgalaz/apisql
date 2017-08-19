@@ -113,6 +113,9 @@ AND		t.dFecha	<	prm_dFin;
 	AND		dFecha		<	prm_dFin
 	GROUP BY dFecha;
 
+-- DEBUG
+-- SELECT * FROM wMemoryScoreVehiculoCount ;
+
 	-- Con el máximo por día se suma la cantidad de días de uso
 	SELECT	COUNT(*)	, SUM(bUso)	, SUM(bHoraPunta)	-- 	, SUM(nDiasSinMedicion)
 	INTO	vnDiasTotal	, vnDiasUso	, vnDiasPunta		-- 	, vnDiasSinMedicion
@@ -120,7 +123,7 @@ AND		t.dFecha	<	prm_dFin;
     
     -- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición, 
 	-- hasta el fin del periodo o la fecha actual, dependiendo si la fecha final es futura
-    SELECT	DATEDIFF( LEAST(prm_dFin + INTERVAL -1 DAY,DATE(NOW())), IFNULL(MAX( dFecha ), prm_dIni))
+    SELECT	DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(NOW())), IFNULL(MAX( dFecha ) + INTERVAL 1 DAY, prm_dIni))
     INTO	vnDiasSinMedicion
 	FROM	tScoreDia
 	WHERE	fVehiculo		=	prm_pVehiculo
@@ -136,7 +139,10 @@ WHERE	fVehiculo		=	prm_pVehiculo
 AND		dFecha			>=	prm_dIni
 AND		dFecha			<	prm_dFin
 group by dFecha order by 1;
-SELECT	prm_dFin, MAX( dFecha) maxDFecha, prm_dIni, LEAST(prm_dFin,DATE(NOW())), DATEDIFF( prm_dFin, IFNULL(MAX( dFecha ), prm_dIni))
+SELECT	prm_dIni, prm_dFin, MAX( dFecha) + INTERVAL 1 DAY maxDFecha, LEAST(prm_dFin,DATE(NOW())) fechaFinReal
+			, DATEDIFF( LEAST(prm_dFin,DATE(NOW())), IFNULL(MAX( dFecha ) + INTERVAL 1 DAY , prm_dIni)) diasSinMedicion
+            , vnDiasUso
+			, DATEDIFF( LEAST(prm_dFin,DATE(NOW())), IFNULL(MAX( dFecha ) + INTERVAL 1 DAY , prm_dIni)) + vnDiasUso diasMes
 FROM	tScoreDia
 WHERE	fVehiculo		=	prm_pVehiculo
 AND		dFecha			>=	prm_dIni

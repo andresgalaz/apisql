@@ -1,7 +1,7 @@
-
+-- Facturador
 call prFacturador(null);
-select 'Real', v.cPatente, v.dIniVigencia, u.cNombre, u.cEmail
-        , w.nScore,w.nKms,w.nKmsPond
+select 'Real', v.pVehiculo, v.cPatente, v.dIniVigencia, u.cNombre, u.cEmail
+        , w.dInicio, w.dFin, w.nScore,w.nKms,w.nKmsPond
         , w.nDescuentoKM,w.nDescuentoSinUso,w.nDescuentoPunta
         , w.nDescuentoKM+w.nDescuentoSinUso+w.nDescuentoPunta nDescuentoSinPond
         , w.nDescuento
@@ -10,8 +10,8 @@ from wMemoryScoreVehiculo w
 		left join tVehiculo v on v.pVehiculo = w.pVehiculo
         left join tUsuario u on u.pUsuario = v.fUsuarioTitular
 union all
-select 'Sin Multa', v.cPatente, v.dIniVigencia, u.cNombre, u.cEmail
-        , w.nScore,w.nKms,w.nKmsPond
+select 'Sin Multa',v.pVehiculo, v.cPatente, v.dIniVigencia, u.cNombre, u.cEmail
+        , w.dInicio, w.dFin, w.nScore,w.nKms,w.nKmsPond
         , w.nDescuentoKM,w.nDescuentoSinUso,w.nDescuentoPunta
         , w.nDescuentoKM+w.nDescuentoSinUso+w.nDescuentoPunta nDescuentoSinPond
         , w.nDescuento
