@@ -129,6 +129,14 @@ LB_PRINCIPAL:BEGIN
 			LEAVE LB_PRINCIPAL;
         END IF;
         
+        IF prm_cAccion = 'cancelar' AND prm_cId IS NOT NULL THEN
+			-- Pone nulo el id. de dispositivo para no tener que blaquear al volver a procesar
+			UPDATE	tVehiculo 
+			SET 	cIdDispositivo = null 
+			WHERE	cIdDispositivo = prm_cId 
+			AND		fTpDispositivo = 3; -- VIRLOC
+        END IF;
+        
 	END IF;
 
     -- Registra acción en la APP del instalador
