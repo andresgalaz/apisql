@@ -98,7 +98,7 @@ BEGIN
 	END;
 
 	-- Muestra el resultado
-	SELECT w.pVehiculo idVehiculo, w.cPatente, u.cEmail, u.cNombre
+	SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, u.cEmail, u.cNombre
 -- 		 , GREATEST(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
 		 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
 		 , w.dProximoCierre, DATEDIFF(w.dProximoCierre,NOW()) nDiasAlCierre

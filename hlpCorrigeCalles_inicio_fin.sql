@@ -24,11 +24,11 @@ select * from AGV where calle is not null and cCalle <>calle;
 
 -- CORRECCION
 -- Actualiza las que quedaron nulas
-select * from AGV where calle is not null and cCalle is null;
 update tEvento set cCalle=(select calle from AGV where AGV.pEvento = tEvento.pEvento ),  cCalleCorta=(select calle_corta from AGV where AGV.pEvento = tEvento.pEvento )
 WHERE pEvento in ( select AGV.pEvento from AGV where calle is not null and cCalle is null);
 
 -- Actualiza las diferencias
-select * from AGV where calle is not null and cCalle <>calle and nIdViaje=11369;
 update tEvento set cCalle=(select calle from AGV where AGV.pEvento = tEvento.pEvento ),  cCalleCorta=(select calle_corta from AGV where AGV.pEvento = tEvento.pEvento )
 WHERE pEvento in ( select AGV.pEvento from AGV where calle is not null and cCalle <>calle);
+
+DROP table IF EXISTS AGV;
