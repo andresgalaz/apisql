@@ -88,12 +88,23 @@ BEGIN
 	END; -- Fin cursor eventos
 	-- SELECT '830 Fin cursor', now();
 
+	INSERT INTO wEventoHist
+		 ( tProceso			, pEvento	, nIdViaje	, nIdTramo		, fTpEvento
+         , tEvento			, nLG		, nLT		, cCalle		, cCalleCorta
+         , nVelocidadMaxima	, nValor	, fVehiculo	, fUsuario		, nIdObservation
+         , nPuntaje			, nNivelApp	, tModif	)
+	SELECT now()			, pEvento	, nIdViaje	, nIdTramo		, fTpEvento
+         , tEvento			, nLG		, nLT		, cCalle		, cCalleCorta
+         , nVelocidadMaxima	, nValor	, fVehiculo	, fUsuario		, nIdObservation
+         , nPuntaje			, nNivelApp	, tModif
+	FROM   wEvento;
+    /*
 	-- Crea una tabla de bitacora de los registros migrados
 	SET @tLog=CONCAT('create table integrity.wEvento_',date_format(now(),'%Y%m%d_%H%i'),' as select * from wEvento');
 	PREPARE stmt FROM @tLog;
 	EXECUTE stmt;
 	DEALLOCATE PREPARE stmt;
-  
+	*/
 	-- Limpia tabla temporal
     DELETE FROM wEvento WHERE 1 = 1; 
 

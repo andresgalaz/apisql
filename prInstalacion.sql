@@ -146,6 +146,7 @@ LB_PRINCIPAL:BEGIN
 	VALUES	( prm_pUsuario		, vpVehiculo		, prm_cAccion		, 
 			  prm_cPatente		, prm_cId			, prm_cEstado		);
     
+    COMMIT;
 	SELECT 0 nCodigo, 'Ok' cMensaje;
 
 END //

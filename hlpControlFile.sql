@@ -1,6 +1,14 @@
-SET @USUARIO=102;
+SET @USUARIO=77;
+SET @VEH=295;
+
+select * from tVehiculo where pVehiculo=@VEH or cPatente='LTA765';
+SELECT * FROM score.tFirmwareEstado where fVehiculo=@VEH;
+
 SELECT @USUARIO;
-SELECT * FROM snapcar.control_files f join snapcar.clients c ON c.id=f.client_id where c.driver_id=@USUARIO;
+SELECT c.driver_id, c.vehicle_id, f.event_date + INTERVAL -3 hour FROM snapcar.control_files f join snapcar.clients c ON c.id=f.client_id 
+where c.driver_id=@USUARIO
+AND f.event_date > now() + INTERVAL -50 day
+ORDER BY f.event_date desc;
 SELECT * FROM snapcar.trips t join snapcar.clients c ON c.id=t.client_id where c.driver_id=@USUARIO;
 
 -- Estado del Firmware
