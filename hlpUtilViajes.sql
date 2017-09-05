@@ -11,7 +11,7 @@ SELECT t.id trip_id, t.client_id, c.vehicle_id, c.driver_id,
         INNER JOIN      snapcar.clients c on c.id = t.client_id 
         LEFT OUTER JOIN snapcar.trip_observations_no_deleted_view o ON o.trip_id = t.id 
  WHERE  round(t.distance/1000,2) > 0.3 
- AND    c.vehicle_id = 295 
+ AND    c.vehicle_id in (405,406,408)
 -- AND    c.driver_id  = 184 
 -- AND    t.from_date >= date_add( ?, interval 3 hour) 
 -- AND    t.from_date <  date_add(date_add( ?, interval 3 hour), interval 1 day) 

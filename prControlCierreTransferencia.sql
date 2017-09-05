@@ -101,6 +101,7 @@ BEGIN
 	SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, u.cEmail, u.cNombre
 -- 		 , GREATEST(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
 		 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
+		 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
 		 , w.dProximoCierre, DATEDIFF(w.dProximoCierre,NOW()) nDiasAlCierre
 	FROM	wMemoryCierreTransf w
 			JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
