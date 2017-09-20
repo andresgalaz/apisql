@@ -8,22 +8,13 @@ BEGIN
 
 	BEGIN
 		DECLARE vpVehiculo			INTEGER;
-		DECLARE vcPatente 			VARCHAR(20);
-		DECLARE vcIdDispositivo		VARCHAR(100);
-		DECLARE vbVigente			TINYINT(1);
-		DECLARE vfTpDispositivo		SMALLINT(5);
-		DECLARE vfCuenta			INTEGER;
-		DECLARE vfUsuarioTitular	INTEGER	;
-		DECLARE vtModif				DATETIME;
 		DECLARE vdIniVigencia		DATE;
 		DECLARE vdIniCierre			DATE;
 		DECLARE vdFinCierre			DATE;
         
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE curVeh CURSOR FOR
-			SELECT	v.pVehiculo				, v.cPatente				, v.cIdDispositivo			, v.bVigente				,
-					v.fTpDispositivo		, v.fCuenta					, v.fUsuarioTitular			, v.tModif					,
-					v.dIniVigencia			,
+			SELECT	v.pVehiculo, v.dIniVigencia,
 					score.fnPeriodoActual( v.dIniVigencia, -1 ) dIniCierre,
 					score.fnPeriodoActual( v.dIniVigencia, 0 ) dFinCierre
 			FROM	score.tVehiculo v
@@ -35,22 +26,59 @@ BEGIN
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurVeh = 1;
 
 		OPEN curVeh;
-		FETCH curVeh INTO	vpVehiculo		, vcPatente			, vcIdDispositivo	,
-							vbVigente		, vfTpDispositivo	, vfCuenta			,
-							vfUsuarioTitular, vtModif			, vdIniVigencia		,
-							vdIniCierre		, vdFinCierre;
+		FETCH curVeh INTO	vpVehiculo, vdIniVigencia, vdIniCierre, vdFinCierre;
 		WHILE NOT eofCurVeh DO
-			-- Calcula score y descuento del vehículo
-			CALL prCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
-		
-			FETCH curVeh INTO	vpVehiculo		, vcPatente			, vcIdDispositivo	,
-								vbVigente		, vfTpDispositivo	, vfCuenta			,
-								vfUsuarioTitular, vtModif			, vdIniVigencia		,
-								vdIniCierre		, vdFinCierre;
+			-- No factura periodos anteriores al de inicio de la vigencia
+			IF vdIniVigencia < vdFinCierre THEN
+-- DEBUG            
+-- SELECT vpVehiculo, vdIniVigencia, vdIniCierre, vdFinCierre;
+				-- Calcula score y descuento del vehículo
+				CALL prCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
+			END IF;
+			FETCH curVeh INTO	vpVehiculo, vdIniVigencia, vdIniCierre, vdFinCierre;
 		END WHILE;
 		CLOSE curVeh;
 	END;
-  
--- 	SELECT * FROM wMemoryScoreVehiculo;
+    IF prm_pVehiculo IS NOT NULL THEN
+		-- Registro de factura tpFactura = 1
+		INSERT INTO tFactura
+				( pVehiculo				, pPeriodo				, pTpFactura			,
+				  dInicio				, dFin					, dInstalacion			,
+				  tUltimoViaje			, tUltimaSincro			, nKms					,
+				  nKmsPond				, nScore				, nQViajes				,
+				  nQFrenada				, nQAceleracion			, nQVelocidad			,
+				  nQCurva				, nDescuento			, nDescuentoKM			,
+				  nDescuentoSinUso		, nDescuentoPunta		, nDiasTotal			,
+				  nDiasUso				, nDiasPunta			, nDiasSinMedicion		)
+		SELECT	  pVehiculo				, fnPeriodo(dInicio)	, 1						,
+				  dInicio				, dFin					, dInstalacion			,
+				  tUltimoViaje			, tUltimaSincro			, nKms					,
+				  nKmsPond				, nScore				, nQViajes				,
+				  nQFrenada				, nQAceleracion			, nQVelocidad			,
+				  nQCurva				, nDescuento			, nDescuentoKM			,
+				  nDescuentoSinUso		, nDescuentoPunta		, nDiasTotal			,
+				  nDiasUso				, nDiasPunta			, nDiasSinMedicion
+		FROM	wMemoryScoreVehiculo;
 
+		-- Registro de calculo sin multas tpFactura = 2
+		INSERT INTO tFactura
+				( pVehiculo				, pPeriodo				, pTpFactura			,
+				  dInicio				, dFin					, dInstalacion			,
+				  tUltimoViaje			, tUltimaSincro			, nKms					,
+				  nKmsPond				, nScore				, nQViajes				,
+				  nQFrenada				, nQAceleracion			, nQVelocidad			,
+				  nQCurva				, nDescuento			, nDescuentoKM			,
+				  nDescuentoSinUso		, nDescuentoPunta		, nDiasTotal			,
+				  nDiasUso				, nDiasPunta			, nDiasSinMedicion		)
+		SELECT	  pVehiculo				, fnPeriodo(dInicio)	, 2						,
+				  dInicio				, dFin					, dInstalacion			,
+				  tUltimoViaje			, tUltimaSincro			, nKms					,
+				  nKmsPond				, nScore				, nQViajes				,
+				  nQFrenada				, nQAceleracion			, nQVelocidad			,
+				  nQCurva				, nDescuento			, nDescuentoKM			,
+				  nDescuentoSinUso		, nDescuentoPunta		, nDiasTotal			,
+				  nDiasUso				, nDiasPunta			, nDiasSinMedicion
+		FROM	wMemoryScoreVehiculoSinMulta;
+	END IF;    
+    
 END //

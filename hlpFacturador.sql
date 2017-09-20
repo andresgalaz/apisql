@@ -1,7 +1,9 @@
 drop table wMemoryScoreVehiculo;
+drop table wMemoryScoreVehiculoSinMulta;
 drop table wMemoryScoreVehiculoCount;
-call prFacturador(null);
-select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, u.cEmail, u.pUsuario, u.cNombre, w.pVehiculo, w.dInicio, (w.dFin + INTERVAL -1 DAY ) dFin, w.nKms, w.nKmsPond, w.nScore
+call prFacturador(404);
+call prCreaTmpScoreVehiculo();call prCalculaScoreVehiculo(343,'2017-08-10','2017-09-10');
+select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, w.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, w.pVehiculo, w.dInicio, (w.dFin + INTERVAL -1 DAY ) dFin, w.nKms, w.nKmsPond, w.nScore
      , w.nDescuentoKM, w.nDescuentoSinUso, w.nDescuentoPunta
      , w.nDescuentoKM + w.nDescuentoSinUso + w.nDescuentoPunta as nDescSinPonderar, w.nDescuento
      , w.nQViajes, w.nQFrenada, w.nQAceleracion, w.nQVelocidad, w.nQCurva, w.nDiasTotal, w.nDiasUso, w.nDiasPunta, w.nDiasSinMedicion, w.tUltimoViaje, w.tUltimaSincro
@@ -10,7 +12,7 @@ join tVehiculo v on v.pVehiculo = w.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.dIniVigencia < w.dFin
 union all
-select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, u.cEmail, u.pUsuario, u.cNombre, w.pVehiculo, w.dInicio, (w.dFin + INTERVAL -1 DAY ) dFin, w.nKms, w.nKmsPond, w.nScore
+select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, w.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, w.pVehiculo, w.dInicio, (w.dFin + INTERVAL -1 DAY ) dFin, w.nKms, w.nKmsPond, w.nScore
      , w.nDescuentoKM, w.nDescuentoSinUso, w.nDescuentoPunta
      , w.nDescuentoKM + w.nDescuentoSinUso + w.nDescuentoPunta as nDescSinPonderar, w.nDescuento
      , w.nQViajes, w.nQFrenada, w.nQAceleracion, w.nQVelocidad, w.nQCurva, w.nDiasTotal, w.nDiasUso, w.nDiasPunta, w.nDiasSinMedicion, w.tUltimoViaje, w.tUltimaSincro

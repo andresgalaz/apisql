@@ -46,12 +46,13 @@ BEGIN
     END;
     
     -- No va a poder borrar si no están todos los vehículo borrados    
-    DELETE FROM tVehiculo        WHERE  fUsuarioTitular = prm_pUsuario;
-    DELETE FROM tEvento          WHERE  fUsuario        = prm_pUsuario;    
-    DELETE FROM tSiniestro       WHERE  fUsuario        = prm_pUsuario;
-    DELETE FROM tCuenta          WHERE  fUsuarioTitular = prm_pUsuario;
-    DELETE FROM tAppEstado       WHERE  fUsuario        = prm_pUsuario;
-    DELETE FROM tUsuario         WHERE  pUsuario        = prm_pUsuario;
+    DELETE FROM tNotificacionUsuario	WHERE  pUsuario		   = prm_pUsuario;
+    DELETE FROM tVehiculo        		WHERE  fUsuarioTitular = prm_pUsuario;
+    DELETE FROM tEvento       		   	WHERE  fUsuario        = prm_pUsuario;    
+    DELETE FROM tSiniestro       		WHERE  fUsuario        = prm_pUsuario;
+    DELETE FROM tCuenta          		WHERE  fUsuarioTitular = prm_pUsuario;
+    DELETE FROM tAppEstado       		WHERE  fUsuario        = prm_pUsuario;
+    DELETE FROM tUsuario        		WHERE  pUsuario        = prm_pUsuario;
 END //
 
 DELIMITER ;
