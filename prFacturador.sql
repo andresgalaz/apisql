@@ -40,6 +40,13 @@ BEGIN
 		CLOSE curVeh;
 	END;
     IF prm_pVehiculo IS NOT NULL THEN
+		-- Se borra la factura antes de insertar de nuevo
+		DELETE FROM tFactura 
+        WHERE exists (	SELECT	'1'
+						FROM	wMemoryScoreVehiculo w 
+                        WHERE	w.pVehiculo = tFactura.pVehiculo AND fnPeriodo(w.dInicio) = tFactura.pPeriodo 
+					 );
+                     
 		-- Registro de factura tpFactura = 1
 		INSERT INTO tFactura
 				( pVehiculo				, pPeriodo				, pTpFactura			,
