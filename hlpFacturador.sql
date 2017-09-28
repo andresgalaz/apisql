@@ -1,7 +1,7 @@
 drop table wMemoryScoreVehiculo;
 drop table wMemoryScoreVehiculoSinMulta;
 drop table wMemoryScoreVehiculoCount;
-call prFacturador(404);
+call prFacturador(null);
 call prCreaTmpScoreVehiculo();call prCalculaScoreVehiculo(343,'2017-08-10','2017-09-10');
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, w.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, w.pVehiculo, w.dInicio, (w.dFin + INTERVAL -1 DAY ) dFin, w.nKms, w.nKmsPond, w.nScore
      , w.nDescuentoKM, w.nDescuentoSinUso, w.nDescuentoPunta
@@ -31,3 +31,24 @@ FROM	score.tVehiculo v
 WHERE	v.fTpDispositivo = 3
 AND		v.cIdDispositivo is not null
 AND		v.bVigente in ('1');
+
+
+call prFacturador(392);
+select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
+     , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
+     , t.nDescuentoKM + t.nDescuentoSinUso + t.nDescuentoPunta as nDescSinPonderar, t.nDescuento
+     , t.nQViajes, t.nQFrenada, t.nQAceleracion, t.nQVelocidad, t.nQCurva, t.nDiasTotal, t.nDiasUso, t.nDiasPunta, t.nDiasSinMedicion, t.tUltimoViaje, t.tUltimaSincro
+from tFactura t
+join tVehiculo v on v.pVehiculo = t.pVehiculo
+join tUsuario  u on u.pUsuario = v.fUsuarioTitular
+where t.pTpFactura = 1 and v.dIniVigencia < t.dFin and cPatente <> 'NMZ478'
+union all
+select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
+     , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
+     , t.nDescuentoKM + t.nDescuentoSinUso + t.nDescuentoPunta as nDescSinPonderar, t.nDescuento
+     , t.nQViajes, t.nQFrenada, t.nQAceleracion, t.nQVelocidad, t.nQCurva, t.nDiasTotal, t.nDiasUso, t.nDiasPunta, t.nDiasSinMedicion, t.tUltimoViaje, t.tUltimaSincro
+from tFactura t
+join tVehiculo v on v.pVehiculo = t.pVehiculo
+join tUsuario  u on u.pUsuario = v.fUsuarioTitular
+where t.pTpFactura = 2 and v.dIniVigencia < t.dFin
+order by dIniVigencia, cPatente, cTpCalculo ; 

@@ -1,3 +1,4 @@
+USE score;
 DROP TABLE IF EXISTS tFactura;
 DROP TABLE IF EXISTS tTpFactura;
 CREATE TABLE tTpFactura (
@@ -37,4 +38,7 @@ CREATE TABLE tFactura (
 	PRIMARY KEY (pVehiculo, pPeriodo, pTpFactura),
 	CONSTRAINT fkFactura_vehiculo	FOREIGN KEY (pVehiculo)		REFERENCES tVehiculo	(pVehiculo),
 	CONSTRAINT fkFactura_tpFactura	FOREIGN KEY (pTpFactura)	REFERENCES tTpFactura	(pTpFactura)
-)
+);
+
+-- ALTER TABLE tFactura ADD CONSTRAINT fkFactura_vehiculo	FOREIGN KEY (pVehiculo)		REFERENCES tVehiculo	(pVehiculo);
+-- ALTER TABLE tFactura ADD CONSTRAINT fkFactura_tpFactura	FOREIGN KEY (pTpFactura)	REFERENCES tTpFactura	(pTpFactura);
