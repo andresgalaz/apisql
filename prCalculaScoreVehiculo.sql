@@ -1,7 +1,7 @@
 DELIMITER //
 DROP PROCEDURE IF EXISTS prCalculaScoreVehiculo //
 CREATE PROCEDURE prCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
-BEGIN
+LB_PRINCIPAL:BEGIN
 	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
 	DECLARE kEventoFin			INTEGER	DEFAULT 2;
 	DECLARE kEventoAceleracion	INTEGER	DEFAULT 3;
@@ -102,10 +102,30 @@ AND		t.dFecha	<	prm_dFin;
 
     IF prm_dIni < vdInstalacion THEN
 		SET vdInicio = vdInstalacion;
+		-- Si el vehículo paso el vencimiento del mes sin haber instalado
+		IF vdInicio >= prm_dFin THEN
+			SET vnDiasTotal = DATEDIFF(prm_dFin, prm_dIni);
+        
+			INSERT INTO wMemoryScoreVehiculo 
+					( pVehiculo 		, dInicio			, dFin				, nKms				, nScore
+					, nQViajes			, nDescuento		, nDiasTotal		, nDiasUso			, nDiasPunta
+					, nQFrenada			, nQAceleracion		, nQVelocidad		, nQCurva			, nDiasSinMedicion
+					, nDescuentoKM		, nDescuentoSinUso	, nDescuentoPunta	, nKmsPond
+					, tUltimaSincro		, tUltimoViaje		, dInstalacion
+					)
+			VALUES	( prm_pVehiculo		, prm_dIni			, prm_dFin			, 0					, 100
+					, 0					, 0					, vnDiasTotal		, 0					, 0 
+					, 0					, 0					, 0					, 0					, 0
+					, 0					, 0					, 0					, 0
+					, null			    , null				, vdInstalacion
+					);
+			-- Abandona
+			LEAVE LB_PRINCIPAL;
+		END IF;
 	ELSE
 		SET vdInicio = prm_dIni;
     END IF;
-
+    
 	-- Tabla temporal de cantidad de días totales y de uso
 	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryScoreVehiculoCount (
 		dFecha				DATE					NOT NULL,
@@ -138,11 +158,11 @@ AND		t.dFecha	<	prm_dFin;
     -- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición, 
 	-- hasta el fin del periodo o la fecha actual, dependiendo si la fecha final es futura.
     -- Se mide desde la vigencia de la poliza, no desde la instalación.
-    SELECT	DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(NOW())), IFNULL(MAX( dFecha ) + INTERVAL 1 DAY, prm_dIni))
+    SELECT	DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(NOW())), IFNULL(MAX( dFecha ) + INTERVAL 1 DAY, vdInicio))
     INTO	vnDiasSinMedicion
 	FROM	tScoreDia
 	WHERE	fVehiculo		=	prm_pVehiculo
-	AND		dFecha			>=	prm_dIni
+	AND		dFecha			>=	vdInicio
     AND		bSinMedicion	= '0';
 
 -- DEBUG
