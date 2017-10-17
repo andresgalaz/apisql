@@ -154,18 +154,46 @@ AND		t.dFecha	<	prm_dFin;
 	SELECT	COUNT(*)	, SUM(bUso)	, SUM(bHoraPunta)	-- 	, SUM(nDiasSinMedicion)
 	INTO	vnDiasTotal	, vnDiasUso	, vnDiasPunta		-- 	, vnDiasSinMedicion
 	FROM	wMemoryScoreVehiculoCount;
-    
-    -- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición, 
-	-- hasta el fin del periodo o la fecha actual, dependiendo si la fecha final es futura.
-    -- Se mide desde la vigencia de la poliza, no desde la instalación.
-    SELECT	DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(NOW())), IFNULL(MAX( dFecha ) + INTERVAL 1 DAY, vdInicio))
-    INTO	vnDiasSinMedicion
-	FROM	tScoreDia
-	WHERE	fVehiculo		=	prm_pVehiculo
-	AND		dFecha			>=	vdInicio
-    AND		bSinMedicion	= '0';
+
+	-- Calcula días sin medición
+    BEGIN
+		-- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición, hasta el fin de periodo de cálculo.
+		-- Se mide desde la vigencia de la poliza, no desde la instalación.
+		DECLARE vdUltMovim	DATE;
+		DECLARE eofCurUlt	INTEGER DEFAULT 0;
+		DECLARE curUlt		CURSOR FOR
+			-- Inicio de transferencia
+			SELECT	MAX(DATE(t.tRegistroActual  + INTERVAL -3 HOUR)) tUltMovim
+			FROM	score.tInicioTransferencia t
+			WHERE	t.fVehiculo			=	prm_pVehiculo
+			AND		t.tRegistroActual	>=	vdInicio
+			UNION ALL
+			-- Archivo de control sin actividad por hora
+			SELECT	MAX(DATE(f.event_date + INTERVAL -3 HOUR))
+			FROM	snapcar.control_files f JOIN snapcar.clients c on c.id=f.client_id 
+			WHERE	c.vehicle_id	=	prm_pVehiculo
+			AND		f.event_date	>=	vdInicio
+			UNION ALL
+			-- Viajes realizados o no (acepta los Status='N' y los que tienen 0 km
+			SELECT	MAX(DATE(f.from_date + INTERVAL -3 HOUR))
+			FROM	snapcar.trips f 
+					JOIN snapcar.clients c on c.id=f.client_id 
+			WHERE	c.vehicle_id	=	prm_pVehiculo
+			AND		f.from_date		>=	vdInicio
+            ORDER BY 1 DESC
+            LIMIT 1;
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurUlt = 1;
+		-- Ejecuta cursor y lee
+		OPEN curUlt;
+		FETCH curUlt INTO vdUltMovim;
+		CLOSE curUlt;
+        
+		-- Si el fin del periodo es mayor a la fecha actual se toma la fecha actual.
+		SET vnDiasSinMedicion = DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(NOW())), IFNULL(vdUltMovim + INTERVAL 1 DAY, vdInicio));
+    END;
 
 -- DEBUG
+
 /*
 SELECT	dFecha, min(bSinMedicion) bSinMedicion
 FROM	tScoreDia
