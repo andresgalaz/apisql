@@ -96,7 +96,12 @@ LB_PRINCIPAL:BEGIN
 		END IF;
         
         -- Actualiza dispositivo del vehículo
-		UPDATE tVehiculo SET cIdDispositivo = prm_cId, fTpDispositivo = 3 WHERE pVehiculo = vpVehiculo;
+		UPDATE	tVehiculo 
+        SET		cIdDispositivo = prm_cId
+			  , fTpDispositivo = 3
+              , dInstalacion   = now()
+		WHERE 	pVehiculo = vpVehiculo;
+
 	ELSEIF prm_cAccion = 'reasignar' THEN
 		-- Resignar: Debe indicar patente y Debe estar asignado a otra
 		IF prm_cPatente IS NULL THEN
@@ -110,7 +115,11 @@ LB_PRINCIPAL:BEGIN
 		END IF;
         
         -- Actualiza dispositivo del vehículo
-		UPDATE tVehiculo SET cIdDispositivo = prm_cId, fTpDispositivo = 3 WHERE pVehiculo = vpVehiculo;
+		UPDATE	tVehiculo
+        SET		cIdDispositivo = prm_cId
+			  , fTpDispositivo = 3
+              , dInstalacion   = now()
+		WHERE	pVehiculo = vpVehiculo;
 
 	ELSEIF prm_cAccion in ('iniciar','finalizar','cancelar') THEN
 		-- Resignar: Debe indicar patente y Debe estar asignado a otra

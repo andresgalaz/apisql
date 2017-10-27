@@ -16,6 +16,7 @@ BEGIN
         DELETE FROM tEvento                 WHERE  fVehiculo = prm_pVehiculo;
         DELETE FROM tInicioTransferencia    WHERE  fVehiculo = prm_pVehiculo;
         DELETE FROM tVehiculoDesconectado   WHERE  pVehiculo = prm_pVehiculo;
+        DELETE FROM tFirmwareEstado			WHERE  fVehiculo = prm_pVehiculo;
         BEGIN    
             DECLARE vpSiniestro integer;
             -- Cursor Siniestro

@@ -1,6 +1,6 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
-CREATE PROCEDURE prControlCierreTransferencia ()
+DROP PROCEDURE IF EXISTS prControlCierreTransferenciaInicio //
+CREATE PROCEDURE prControlCierreTransferenciaInicio ()
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryCierreTransf (
 		pVehiculo			INTEGER		UNSIGNED	NOT NULL,
@@ -96,7 +96,13 @@ BEGIN
 		END WHILE;
 		CLOSE cur;
 	END;
+END //
 
+DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
+CREATE PROCEDURE prControlCierreTransferencia ()
+BEGIN
+	-- Crea tabla temporal wMemoryCierreTransf
+	CALL prControlCierreTransferenciaInicio();
 	-- Muestra el resultado
 	SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, u.cEmail, u.cNombre
 -- 		 , GREATEST(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
@@ -108,3 +114,6 @@ BEGIN
 	ORDER BY nDiasAlCierre ;
 
 END //
+
+
+
