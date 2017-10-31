@@ -22,6 +22,10 @@ BEGIN
 	OPEN cur;    
 	FETCH cur INTO vpVehiculo, vdPeriodo, nDiasUltCicloFact;
 	WHILE NOT eofCur DO
+-- DEBUG    
+IF nDiasUltCicloFact <= 5 THEN
+	SELECT vpVehiculo, vdPeriodo, nDiasUltCicloFact;
+END IF;
 		-- Se factura dos días después de vencido el periodo
 		IF nDiasUltCicloFact = 2 THEN
             IF NOT EXISTS ( SELECT '1' FROM tFactura f WHERE f.pVehiculo = vpVehiculo and f.pPeriodo = vdPeriodo ) THEN

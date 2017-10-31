@@ -4,8 +4,11 @@ CREATE PROCEDURE prControlCierreTransferenciaInicio ()
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryCierreTransf (
 		pVehiculo			INTEGER		UNSIGNED	NOT NULL,
+        bVigente			BOOLEAN,
 		fUsuarioTitular		INTEGER		UNSIGNED	NOT NULL,
 		cPatente			VARCHAR(20)				NOT NULL,
+		cPoliza				VARCHAR(40),
+        dIniVigencia		DATE,
 		tUltTransferencia	DATETIME	DEFAULT NULL,
 		tUltViaje			DATETIME	DEFAULT NULL,
 		tUltControl			DATETIME	DEFAULT NULL,
@@ -16,15 +19,16 @@ BEGIN
 
 	-- Crea registro con la última transferencia
 	INSERT INTO wMemoryCierreTransf
-		  ( pVehiculo   , cPatente	, fUsuarioTitular	, dProximoCierre 
+		  ( pVehiculo  , bVigente	, cPatente	, cPoliza	, dIniVigencia	, fUsuarioTitular	, dProximoCierre 
           , tUltTransferencia )
-    SELECT 	it.fVehiculo, v.cPatente, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, 1 )
-		  , max(it.tRegistroActual) + INTERVAL -3 hour
-    FROM 	score.tInicioTransferencia it 
-			JOIN tVehiculo v ON v.pVehiculo = it.fVehiculo
-	WHERE	v.bVigente = '1'
-    GROUP BY it.fVehiculo, v.cPatente, v.fUsuarioTitular, v.dIniVigencia;
-    
+    SELECT 	v.pVehiculo, v.bVigente	, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular
+		  , fnPeriodoActual( v.dIniVigencia, 1 )
+		  , IFNULL( max(it.tRegistroActual) + INTERVAL -3 hour, v.dIniVigencia )
+	FROM 	tVehiculo v
+			LEFT JOIN score.tInicioTransferencia it  ON it.fVehiculo = v.pVehiculo
+-- 	WHERE	v.bVigente = '1' and v.cPoliza is not null
+    GROUP BY v.pVehiculo, v.bVigente, v.cPatente, v.cPoliza, v.fUsuarioTitular, v.dIniVigencia;
+        
     -- Crea o Actualiza registro con el último viaje
     BEGIN
 		DECLARE vnVehicleId	INTEGER;
@@ -44,13 +48,13 @@ BEGIN
 		WHILE NOT eofCur DO
 			IF vpVehiculo IS NULL THEN
 				INSERT INTO wMemoryCierreTransf
-					  ( pVehiculo   , cPatente	, fUsuarioTitular	, dProximoCierre	
+					  ( pVehiculo   , bVigente	, cPatente	, cPoliza	, dIniVigencia	, fUsuarioTitular	, dProximoCierre	
                       , tUltViaje	)
-				SELECT 	v.pVehiculo	, v.cPatente, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, 1 )
+				SELECT 	v.pVehiculo	, v.bVigente, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, 1 )
 					  , vtUltViaje
 				FROM 	tVehiculo v 
-                WHERE	v.pVehiculo = vnVehicleId
-				AND		v.bVigente = '1';
+                WHERE	v.pVehiculo = vnVehicleId;
+-- 				AND		v.bVigente = '1';
             ELSE
 				UPDATE	wMemoryCierreTransf
 				SET		tUltViaje = vtUltViaje
@@ -80,13 +84,13 @@ BEGIN
 		WHILE NOT eofCur DO
 			IF vpVehiculo IS NULL THEN
 				INSERT INTO wMemoryCierreTransf
-					  ( pVehiculo   , cPatente	, fUsuarioTitular	, dProximoCierre	
+					  ( pVehiculo   , bVigente	, cPatente	, cPoliza	, dIniVigencia	, fUsuarioTitular	, dProximoCierre	
                       , tUltControl	)
-				SELECT 	v.pVehiculo	, v.cPatente, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, 1 )
+				SELECT 	v.pVehiculo	, v.bVigente, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, 1 )
 					  , vtUltControl
 				FROM 	tVehiculo v 
-                WHERE	v.pVehiculo = vnVehicleId
-				AND		v.bVigente = '1';
+                WHERE	v.pVehiculo = vnVehicleId;
+-- 				AND		v.bVigente = '1';
             ELSE
 				UPDATE	wMemoryCierreTransf
 				SET		tUltControl = vtUltControl
@@ -99,21 +103,55 @@ BEGIN
 END //
 
 DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
-CREATE PROCEDURE prControlCierreTransferencia ()
+CREATE PROCEDURE prControlCierreTransferencia (IN prm_opcPoliza VARCHAR(40))
 BEGIN
+	/*
+	 * Opción póliza:
+	 * 'SI' : Se muestra los vehículos con póliza
+	 * 'NO' : Se muestra los vehículos sin póliza
+	 * 'TODOS' : Se muestra todos los vehículos
+	 */
+	IF prm_opcPoliza IS NULL THEN
+		SET prm_opcPoliza = 'TODOS';
+	END IF;
 	-- Crea tabla temporal wMemoryCierreTransf
 	CALL prControlCierreTransferenciaInicio();
-	-- Muestra el resultado
-	SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, u.cEmail, u.cNombre
--- 		 , GREATEST(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
-		 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
-		 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
-		 , w.dProximoCierre, DATEDIFF(w.dProximoCierre,NOW()) nDiasAlCierre
-	FROM	wMemoryCierreTransf w
-			JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
-	ORDER BY nDiasAlCierre ;
-
+    IF prm_opcPoliza = 'ANULADOS' THEN
+		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
+			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
+			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
+			 , w.dProximoCierre
+	--         Si la fecha de vigencia está dentro del mes que se está cerrando, no corresonde facturar aún, sino hasta el cierre, por eso se le suman los días
+	--         del mes actual
+			 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+		FROM	wMemoryCierreTransf w
+				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
+		WHERE 	w.bVigente = '0' 
+		ORDER BY nDiasAlCierre ;
+    ELSEIF prm_opcPoliza = 'TODOS' THEN
+		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
+			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
+			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
+			 , w.dProximoCierre
+	--         Si la fecha de vigencia está dentro del mes que se está cerrando, no corresonde facturar aún, sino hasta el cierre, por eso se le suman los días
+	--         del mes actual
+			 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+		FROM	wMemoryCierreTransf w
+				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular;
+    ELSE
+		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
+			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
+			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
+			 , w.dProximoCierre
+	--         Si la fecha de vigencia está dentro del mes que se está cerrando, no corresonde facturar aún, sino hasta el cierre, por eso se le suman los días
+	--         del mes actual
+			 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+		FROM	wMemoryCierreTransf w
+				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
+		WHERE 	w.bVigente = '1' 
+		AND     (  ( 'SI' = prm_opcPoliza AND w.cPoliza IS NOT NULL ) 
+				OR ( 'NO' = prm_opcPoliza AND w.cPoliza IS     NULL )
+				)
+		ORDER BY nDiasAlCierre ;
+	END IF;
 END //
-
-
-

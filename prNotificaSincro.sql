@@ -30,7 +30,7 @@ DECLARE vcPoliza			VARCHAR( 40);
 	FROM	wMemoryCierreTransf w
 		JOIN tUsuario	u ON u.pUsuario		= w.fUsuarioTitular
 		JOIN tVehiculo	v ON v.pVehiculo	= w.pVehiculo
--- 	WHERE	v.cPoliza IS NOT NULL
+ 	WHERE	v.bVigente = '1'
 	ORDER BY nDiasAlCierre ;
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCur = 1;
     

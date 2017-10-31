@@ -95,10 +95,15 @@ AND		t.dFecha	<	prm_dFin;
 		END IF;
 	END IF;
 
-	SELECT	GREATEST( dIniVigencia, IFNULL( dInstalacion, dIniVigencia )) dInstalacion
+	-- Toma la fecha mayor entre inicio de Vigencia e Instalación, sin embargo
+    -- si la fecha de Vigencia es mayor a hoy se toma la de hoy (NOW() );
+	SELECT	GREATEST( LEAST( DATE( NOW()), dIniVigencia), IFNULL( dInstalacion, dIniVigencia )) dInstalacion
     INTO	vdInstalacion
     FROM	tVehiculo
     WHERE	pVehiculo = prm_pVehiculo;
+
+-- DEBUG
+-- SELECT vdInstalacion, vdIniVigencia, vdInicio, prm_dIni, prm_dFin;
 
     IF prm_dIni < vdInstalacion THEN
 		SET vdInicio = vdInstalacion;
