@@ -48,7 +48,6 @@ BEGIN
 			AND		m.COD_TIPO_ESTADO in ( '04', '07' ) -- En Inspección y Póliza
       --    AND		m.POLIZA IS NOT NULL
       --    AND		m.COD_ENDOSO	= '00000'
- AND m.DESC_ENDOSO like 'Anula%'      
 			ORDER BY m.NRO_PATENTE, m.pMovim DESC;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurMovim = 1;
 

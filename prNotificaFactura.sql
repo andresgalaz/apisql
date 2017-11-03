@@ -14,6 +14,7 @@ BEGIN
 			  , datediff(now(),fnPeriodoActual( v.dIniVigencia, 0 ))	nDiasUltCicloFact
 		FROM	tVehiculo v
 		WHERE	v.cPoliza IS NOT NULL
+        AND		v.bVigente = '1'
 		ORDER BY 3;
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCur = 1;
     
@@ -22,31 +23,24 @@ BEGIN
 	OPEN cur;    
 	FETCH cur INTO vpVehiculo, vdPeriodo, nDiasUltCicloFact;
 	WHILE NOT eofCur DO
--- DEBUG    
-IF nDiasUltCicloFact <= 5 THEN
-	SELECT vpVehiculo, vdPeriodo, nDiasUltCicloFact;
-END IF;
+		-- DEBUG    
+		-- IF nDiasUltCicloFact = 2 THEN
+		-- 	SELECT vpVehiculo, vdPeriodo, nDiasUltCicloFact;
+		-- END IF;
+
 		-- Se factura dos días después de vencido el periodo
 		IF nDiasUltCicloFact = 2 THEN
             IF NOT EXISTS ( SELECT '1' FROM tFactura f WHERE f.pVehiculo = vpVehiculo and f.pPeriodo = vdPeriodo ) THEN
 				-- Factura
 				call prFacturador( vpVehiculo );
--- DEBUG    
-SELECT * FROM tFactura f WHERE f.pVehiculo = vpVehiculo and f.pPeriodo = vdPeriodo;
 				IF LENGTH( vcMensaje ) > 0 THEN
 					SET vcMensaje = CONCAT(vcMensaje, ',' );
 				END IF;
                 -- Factura real
 				SET vcMensaje = CONCAT(vcMensaje, fnNotificaFacturaDet( vpVehiculo, vdPeriodo, 1 ) );
--- DEBUG    
-SELECT vpVehiculo, vdPeriodo, nDiasUltCicloFact;
--- DEBUG    
-SELECT 1, vcMensaje;
                 -- Factura sin multa
                 BEGIN
 					DECLARE vcFactTp2 TEXT DEFAULT fnNotificaFacturaDet( vpVehiculo, vdPeriodo, 2 );
--- DEBUG    
-SELECT 2, vcFactTp2;
                     IF LENGTH( vcFactTp2 ) > 0 THEN
 						SET vcMensaje = CONCAT(vcMensaje, ', ', vcFactTp2 );
 					END IF;
@@ -60,7 +54,7 @@ SELECT 2, vcFactTp2;
 
 	IF LENGTH( vcMensaje ) > 0 THEN    
 		INSERT INTO tNotificacion ( cMensaje, fTpNotificacion )
-		VALUE (CONCAT('{ "facturados" : [ ', vcMensaje ,' ]'), 2);
+		VALUE (CONCAT('[ ', vcMensaje ,' ]'), 2);
     END IF;
 
 END //
@@ -159,7 +153,7 @@ BEGIN
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'idUsuario'		, vpUsuario );
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'nombre'			, vcNombre );
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'iniPeriodo'		, vdInicio );
-		SET vcMensaje = fnJsonAdd( vcMensaje, 'finperiodo'		, vdFin );
+		SET vcMensaje = fnJsonAdd( vcMensaje, 'finPeriodo'		, vdFin );
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'kms'				, vnKms );
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'kmsPond'			, vnKmsPond );
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'score'			, vnScore );
@@ -180,8 +174,10 @@ BEGIN
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'ultViaje'		, vtUltimoViaje );
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'ultSincro'		, vtUltimaSincro );
 		SET vcMensaje = fnJsonAdd( vcMensaje, 'fecFacturacion'	, vtFacturacion );
+		return CONCAT('{', vcMensaje ,'}' );
+	ELSE
+		return '';
     END IF;
-	return CONCAT('{', vcMensaje ,'}' );
 
 END //
 

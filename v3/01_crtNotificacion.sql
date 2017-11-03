@@ -1,10 +1,15 @@
+DROP TABLE IF EXISTS `tTpNotificacion`;
 CREATE TABLE `tTpNotificacion` (
   `pTpNotificacion` smallint(5) unsigned NOT NULL,
   `cDescripcion` varchar(20) NOT NULL,
   `cEmails` VARCHAR(90),
   PRIMARY KEY (`pTpNotificacion`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+# pTpFactura, cDescripcion, cEnviarA
 INSERT INTO `score`.`tTpNotificacion` (`pTpNotificacion`, `cDescripcion`) VALUES ('1', 'Crea Usuario');
+INSERT INTO `score`.`tTpNotificacion` (`pTpNotificacion`, `cDescripcion`) VALUES ('2', 'Factura', 'bruno.giel@snapcar.com.ar, andres.galaz@snapcar.com.ar');
+
 
 CREATE TABLE `tNotificacion` (
   `pNotificacion` int(10) unsigned NOT NULL AUTO_INCREMENT,
