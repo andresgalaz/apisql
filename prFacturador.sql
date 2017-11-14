@@ -1,7 +1,9 @@
-DELIMITER //
+﻿DELIMITER //
 DROP PROCEDURE IF EXISTS prFacturador //
 CREATE PROCEDURE prFacturador (IN prm_pVehiculo INTEGER)
 BEGIN
+	-- En caso de querer facturar un mes anterior poner -1, u otro mes mas antiguo -2, y así sucesivamente
+	SET @mesDesface = 0;
 
 	-- Crea tabla temporal para procesar cada vehículo, si existe la limpia
 	CALL prCreaTmpScoreVehiculo();
@@ -15,8 +17,8 @@ BEGIN
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE curVeh CURSOR FOR
 			SELECT	v.pVehiculo, v.dIniVigencia,
-					score.fnPeriodoActual( v.dIniVigencia, -1 ) dIniCierre,
-					score.fnPeriodoActual( v.dIniVigencia, 0 ) dFinCierre
+					score.fnPeriodoActual( v.dIniVigencia, -1 + @mesDesface ) dIniCierre,
+					score.fnPeriodoActual( v.dIniVigencia, 0 + @mesDesface ) dFinCierre
 			FROM	score.tVehiculo v
 			WHERE	v.fTpDispositivo = 3
 			AND		v.cIdDispositivo is not null
