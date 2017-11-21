@@ -12,7 +12,9 @@ BEGIN
 		tUltTransferencia	DATETIME	DEFAULT NULL,
 		tUltViaje			DATETIME	DEFAULT NULL,
 		tUltControl			DATETIME	DEFAULT NULL,
+        nDiasNoSincro		INTEGER		UNSIGNED	DEFAULT 0 NOT NULL,
 		dProximoCierre		DATE			 		NOT NULL,
+        nDiasAlCierre		INTEGER		UNSIGNED	DEFAULT 0 NOT NULL,
 		PRIMARY KEY (pVehiculo)
 	) ENGINE=MEMORY;
     DELETE FROM wMemoryCierreTransf;
@@ -100,6 +102,15 @@ BEGIN
 		END WHILE;
 		CLOSE cur;
 	END;
+
+	-- Calcula los dias sin sincronizar y los días al cierre
+    UPDATE	wMemoryCierreTransf
+    SET		nDiasNoSincro = DATEDIFF( DATE(NOW())
+                              , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
+                                        , IFNULL(DATE( tUltViaje        ), '0000-00-00')
+                                        , IFNULL(DATE( tUltControl      ), '0000-00-00')) )
+		,	nDiasAlCierre = DATEDIFF(dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END;
+
 END //
 
 DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
@@ -123,7 +134,8 @@ BEGIN
 			 , w.dProximoCierre
 	--         Si la fecha de vigencia está dentro del mes que se está cerrando, no corresonde facturar aún, sino hasta el cierre, por eso se le suman los días
 	--         del mes actual
-			 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+	-- 		 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
 		WHERE 	w.bVigente = '0' 
@@ -135,7 +147,8 @@ BEGIN
 			 , w.dProximoCierre
 	--         Si la fecha de vigencia está dentro del mes que se está cerrando, no corresonde facturar aún, sino hasta el cierre, por eso se le suman los días
 	--         del mes actual
-			 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+	-- 		 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular;
     ELSE
@@ -145,7 +158,8 @@ BEGIN
 			 , w.dProximoCierre
 	--         Si la fecha de vigencia está dentro del mes que se está cerrando, no corresonde facturar aún, sino hasta el cierre, por eso se le suman los días
 	--         del mes actual
-			 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+	-- 		 , DATEDIFF(w.dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,w.dIniVigencia, w.dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END    nDiasAlCierre
+			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
 		WHERE 	w.bVigente = '1' 
