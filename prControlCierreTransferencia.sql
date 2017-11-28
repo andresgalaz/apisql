@@ -2,6 +2,13 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS prControlCierreTransferenciaInicio //
 CREATE PROCEDURE prControlCierreTransferenciaInicio ()
 BEGIN
+	DECLARE nMesAvance INTEGER DEFAULT 1;
+	CALL prControlCierreTransferenciaInicio( nMesAvanca );
+END //
+
+DROP PROCEDURE IF EXISTS prControlCierreTransferenciaInicioDef //
+CREATE PROCEDURE prControlCierreTransferenciaInicioDef ( IN prm_nMesAvance INTEGER )
+BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryCierreTransf (
 		pVehiculo			INTEGER		UNSIGNED	NOT NULL,
         bVigente			BOOLEAN,
@@ -14,7 +21,7 @@ BEGIN
 		tUltControl			DATETIME	DEFAULT NULL,
         nDiasNoSincro		INTEGER		UNSIGNED	DEFAULT 0 NOT NULL,
 		dProximoCierre		DATE			 		NOT NULL,
-        nDiasAlCierre		INTEGER		UNSIGNED	DEFAULT 0 NOT NULL,
+        nDiasAlCierre		INTEGER					DEFAULT 0 NOT NULL,
 		PRIMARY KEY (pVehiculo)
 	) ENGINE=MEMORY;
     DELETE FROM wMemoryCierreTransf;
@@ -24,7 +31,7 @@ BEGIN
 		  ( pVehiculo  , bVigente	, cPatente	, cPoliza	, dIniVigencia	, fUsuarioTitular	, dProximoCierre 
           , tUltTransferencia )
     SELECT 	v.pVehiculo, v.bVigente	, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular
-		  , fnPeriodoActual( v.dIniVigencia, 1 )
+		  , fnPeriodoActual( v.dIniVigencia, prm_nMesAvance )
 		  , IFNULL( max(it.tRegistroActual) + INTERVAL -3 hour, v.dIniVigencia )
 	FROM 	tVehiculo v
 			LEFT JOIN score.tInicioTransferencia it  ON it.fVehiculo = v.pVehiculo
@@ -52,7 +59,7 @@ BEGIN
 				INSERT INTO wMemoryCierreTransf
 					  ( pVehiculo   , bVigente	, cPatente	, cPoliza	, dIniVigencia	, fUsuarioTitular	, dProximoCierre	
                       , tUltViaje	)
-				SELECT 	v.pVehiculo	, v.bVigente, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, 1 )
+				SELECT 	v.pVehiculo	, v.bVigente, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, prm_nMesAvance )
 					  , vtUltViaje
 				FROM 	tVehiculo v 
                 WHERE	v.pVehiculo = vnVehicleId;
@@ -88,7 +95,7 @@ BEGIN
 				INSERT INTO wMemoryCierreTransf
 					  ( pVehiculo   , bVigente	, cPatente	, cPoliza	, dIniVigencia	, fUsuarioTitular	, dProximoCierre	
                       , tUltControl	)
-				SELECT 	v.pVehiculo	, v.bVigente, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, 1 )
+				SELECT 	v.pVehiculo	, v.bVigente, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular	, fnPeriodoActual( v.dIniVigencia, prm_nMesAvance )
 					  , vtUltControl
 				FROM 	tVehiculo v 
                 WHERE	v.pVehiculo = vnVehicleId;
@@ -109,8 +116,7 @@ BEGIN
                               , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
                                         , IFNULL(DATE( tUltViaje        ), '0000-00-00')
                                         , IFNULL(DATE( tUltControl      ), '0000-00-00')) )
-		,	nDiasAlCierre = DATEDIFF(dProximoCierre,NOW()) + CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierre) <= 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END;
-
+		,	nDiasAlCierre = DATEDIFF(dProximoCierre,DATE(NOW())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierre) < 1 THEN DAY(LAST_DAY(NOW())) ELSE 0 END );
 END //
 
 DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
