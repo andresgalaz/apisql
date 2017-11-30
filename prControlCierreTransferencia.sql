@@ -132,7 +132,7 @@ BEGIN
 		SET prm_opcPoliza = 'TODOS';
 	END IF;
 	-- Crea tabla temporal wMemoryCierreTransf
-	CALL prControlCierreTransferenciaInicio();
+	CALL prControlCierreTransferenciaInicioDef(0);
     IF prm_opcPoliza = 'ANULADOS' THEN
 		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
 			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
