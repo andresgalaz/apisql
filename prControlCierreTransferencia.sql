@@ -1,11 +1,4 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS prControlCierreTransferenciaInicio //
-CREATE PROCEDURE prControlCierreTransferenciaInicio ()
-BEGIN
-	DECLARE nMesAvance INTEGER DEFAULT 1;
-	CALL prControlCierreTransferenciaInicio( nMesAvanca );
-END //
-
 DROP PROCEDURE IF EXISTS prControlCierreTransferenciaInicioDef //
 CREATE PROCEDURE prControlCierreTransferenciaInicioDef ( IN prm_nMesAvance INTEGER )
 BEGIN
@@ -112,7 +105,7 @@ BEGIN
 
 	-- Calcula los dias sin sincronizar y los días al cierre
     UPDATE	wMemoryCierreTransf
-    SET		nDiasNoSincro = DATEDIFF( DATE(NOW())
+    SET		nDiasNoSincro = DATEDIFF( LEAST( DATE(NOW()), dProximoCierre )
                               , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
                                         , IFNULL(DATE( tUltViaje        ), '0000-00-00')
                                         , IFNULL(DATE( tUltControl      ), '0000-00-00')) )

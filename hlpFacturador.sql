@@ -52,13 +52,57 @@ call prfacturador(402);
 call prfacturador(416);
 call prfacturador(421);
 call prfacturador(422);
-call prfacturador(423);
 call prfacturador(426);
 call prfacturador(432);
 call prfacturador(480);
 
 call prfacturador(426);
+-- 2017-12-04
+-- Octubre : -1
+call prfacturador(389);
+-- Noviembre normal
+call prfacturador(85);
+call prfacturador(101);
+call prfacturador(369);
+call prfacturador(393);
+call prfacturador(402);
+call prfacturador(403);
+call prfacturador(404);
+call prfacturador(416);
+call prfacturador(421);
+call prfacturador(422);
+call prfacturador(423);
+call prfacturador(426);
+call prfacturador(432);
+call prfacturador(442);
+call prfacturador(480);
+call prfacturador(481);
+call prfacturador(482);
+call prfacturador(483);
+-- Noviembre normal Sincro
+call prfacturador(85);
+call prfacturador(393);
+call prfacturador(402);
+call prfacturador(416);
+call prfacturador(421);
+call prfacturador(422);
+call prfacturador(423);
+call prfacturador(432);
+call prfacturador(482);
+-- Noviembre normal Aun no Sincro, se espera hasta el 6/12/2017
+call prfacturador(101);
+call prfacturador(369);
+call prfacturador(403);
+call prfacturador(404);
+call prfacturador(426);
+call prfacturador(442);
+call prfacturador(480);
+call prfacturador(481);
+call prfacturador(483);
 
+
+call prfacturador(414);
+call prfacturador(423);
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -68,7 +112,7 @@ from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
-and t.tCreacion >= '2017-11-01 00:00:00'
+and t.tCreacion >= '2017-12-03 18:30:00'
 union all
 select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -78,5 +122,5 @@ from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 2 and v.dIniVigencia < t.dFin
-and t.tCreacion >= '2017-11-01 00:00:00'
+and t.tCreacion >= '2017-12-03 18:30:00'
 order by dIniVigencia, cPatente, cTpCalculo ; 

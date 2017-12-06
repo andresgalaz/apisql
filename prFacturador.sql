@@ -1,4 +1,4 @@
-﻿DELIMITER //
+DELIMITER //
 DROP PROCEDURE IF EXISTS prFacturador //
 CREATE PROCEDURE prFacturador (IN prm_pVehiculo INTEGER)
 BEGIN
