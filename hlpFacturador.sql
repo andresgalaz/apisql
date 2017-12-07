@@ -98,11 +98,13 @@ call prfacturador(426);
 call prfacturador(442);
 call prfacturador(480);
 call prfacturador(481);
+call prfacturador(428);
+-- 
+call prfacturador(486);
 call prfacturador(483);
-
-
+--
+call prfacturador(413);
 call prfacturador(414);
-call prfacturador(423);
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -112,7 +114,7 @@ from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
-and t.tCreacion >= '2017-12-03 18:30:00'
+and t.tCreacion >= '2017-12-05 18:30:00'
 union all
 select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -122,5 +124,29 @@ from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 2 and v.dIniVigencia < t.dFin
-and t.tCreacion >= '2017-12-03 18:30:00'
+-- and t.tCreacion >= '2017-12-05 18:30:00'
+order by dIniVigencia, cPatente, cTpCalculo ; 
+
+
+select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
+     , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
+     , t.nDescuentoKM + t.nDescuentoSinUso + t.nDescuentoPunta as nDescSinPonderar, t.nDescuento
+     , t.nQViajes, t.nQFrenada, t.nQAceleracion, t.nQVelocidad, t.nQCurva, t.nDiasTotal, t.nDiasUso, t.nDiasPunta, t.nDiasSinMedicion, t.tUltimoViaje, t.tUltimaSincro, t.tCreacion dFacturacion
+from tFactura t
+join tVehiculo v on v.pVehiculo = t.pVehiculo
+join tUsuario  u on u.pUsuario = v.fUsuarioTitular
+where t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
+and t.pVehiculo in ( 483, 413, 414 )
+-- and t.tCreacion >= '2017-12-07 10:30:00'
+union all
+select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
+     , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
+     , t.nDescuentoKM + t.nDescuentoSinUso + t.nDescuentoPunta as nDescSinPonderar, t.nDescuento
+     , t.nQViajes, t.nQFrenada, t.nQAceleracion, t.nQVelocidad, t.nQCurva, t.nDiasTotal, t.nDiasUso, t.nDiasPunta, t.nDiasSinMedicion, t.tUltimoViaje, t.tUltimaSincro, t.tCreacion dFacturacion
+from tFactura t
+join tVehiculo v on v.pVehiculo = t.pVehiculo
+join tUsuario  u on u.pUsuario = v.fUsuarioTitular
+where t.pTpFactura = 2 and v.dIniVigencia < t.dFin
+and t.pVehiculo in ( 483, 413, 414 )
+-- and t.tCreacion >= '2017-12-07 10:30:00'
 order by dIniVigencia, cPatente, cTpCalculo ; 
