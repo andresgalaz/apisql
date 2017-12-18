@@ -103,7 +103,7 @@ AND		t.dFecha	<	prm_dFin;
     WHERE	pVehiculo = prm_pVehiculo;
 
 -- DEBUG
--- SELECT vdInstalacion, vdIniVigencia, vdInicio, prm_dIni, prm_dFin;
+-- SELECT vdInstalacion, prm_dIni, prm_dFin;
 
     IF prm_dIni < vdInstalacion THEN
 		SET vdInicio = vdInstalacion;
@@ -130,6 +130,9 @@ AND		t.dFecha	<	prm_dFin;
 	ELSE
 		SET vdInicio = prm_dIni;
     END IF;
+
+-- DEBUG
+-- SELECT vdInstalacion, vdInicio, prm_dIni, prm_dFin;
     
 	-- Tabla temporal de cantidad de días totales y de uso
 	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryScoreVehiculoCount (
@@ -198,7 +201,6 @@ AND		t.dFecha	<	prm_dFin;
     END;
 
 -- DEBUG
-
 /*
 SELECT	dFecha, min(bSinMedicion) bSinMedicion
 FROM	tScoreDia
@@ -279,7 +281,7 @@ AND		bSinMedicion	= '0';
 										 vnDescuento, vnDescuentoKM, vnDescDiaSinUso, vnDescNoHoraPunta, vnFactorDias, vnKmsPond );
 
 -- DEBUG
--- SELECT 'CALL prCalculaDescuento: Sin medicion', vnKms, vnDiasUso, vnDiasPunta, 0, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicioScore )
+-- SELECT 'CALL prCalculaDescuento: Sin medicion', vnKms, vnDiasUso, vnDiasPunta, vnDiasSinMedicion, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicioScore )
 --       , vnDescuento, vnDescuentoKM, vnDescDiaSinUso, vnDescNoHoraPunta, vnFactorDias, vnKmsPond;
 
 				-- Se espera que ya exista la tabla wMemoryScoreVehiculo, la cual es creada por prCreaTmpScoreVehiculo
@@ -302,7 +304,7 @@ AND		bSinMedicion	= '0';
 			CALL prCalculaDescuento( vnKms, vnDiasUso, vnDiasPunta, vnDiasSinMedicion, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicioScore ),
 									 vnDescuento, vnDescuentoKM, vnDescDiaSinUso, vnDescNoHoraPunta, vnFactorDias, vnKmsPond );
 -- DEBUG
--- SELECT 'CALL prCalculaDescuento', vnKms, vnDiasUso, vnDiasPunta, 0, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicioScore )
+-- SELECT 'CALL prCalculaDescuento', vnKms, vnDiasUso, vnDiasPunta, vnDiasSinMedicion, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicioScore )
 --       , vnDescuento, vnDescuentoKM, vnDescDiaSinUso, vnDescNoHoraPunta, vnFactorDias, vnKmsPond;
 					
 			-- Se espera que ya exista la tabla wMemoryScoreVehiculo, la cual es creada por prCreaTmpScoreVehiculo

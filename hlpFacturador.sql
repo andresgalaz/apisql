@@ -59,6 +59,20 @@ call prfacturador(480);
 
 call prfacturador(426);
 
+select pVehiculo from tVehiculo where cPatente in ( 'AB686YD','KPB890','JBH851','NXL561','FST135','NDR954','IXF122','KJO549','OJD100','NMZ478','IAH606','LQB799','NAG223');
+call prfacturador(353);
+call prfacturador(389);
+call prfacturador(390);
+call prfacturador(392);
+call prfacturador(394);
+call prfacturador(395);
+call prfacturador(414);
+call prfacturador(429);
+call prfacturador(430);
+call prfacturador(437);
+call prfacturador(440);
+call prfacturador(442);
+call prfacturador(480);
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -68,7 +82,7 @@ from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
-and t.tCreacion >= '2017-11-01 00:00:00'
+and t.tCreacion >= '2017-11-29 00:00:00'
 union all
 select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -78,5 +92,5 @@ from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 2 and v.dIniVigencia < t.dFin
-and t.tCreacion >= '2017-11-01 00:00:00'
+and t.tCreacion >= '2017-11-29 00:00:00'
 order by dIniVigencia, cPatente, cTpCalculo ; 
