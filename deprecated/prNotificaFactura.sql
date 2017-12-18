@@ -19,7 +19,7 @@ BEGIN
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCur = 1;
     
 	-- Crea tabla temporal wMemoryCierreTransf
-	CALL prControlCierreTransferenciaInicio();
+	CALL prControlCierreTransferenciaInicioDef(0);
 	OPEN cur;    
 	FETCH cur INTO vpVehiculo, vdPeriodo, nDiasUltCicloFact;
 	WHILE NOT eofCur DO
