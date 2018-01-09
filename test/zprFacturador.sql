@@ -1,6 +1,6 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS prFacturador //
-CREATE PROCEDURE prFacturador (IN prm_pVehiculo INTEGER)
+DROP PROCEDURE IF EXISTS zprFacturador //
+CREATE PROCEDURE zprFacturador (IN prm_pVehiculo INTEGER)
 BEGIN
 	-- En caso de querer facturar un mes anterior poner -1, u otro mes mas antiguo -2, y así sucesivamente
 	SET @mesDesface = 0;
@@ -11,38 +11,32 @@ BEGIN
 	BEGIN
 		DECLARE vpVehiculo			INTEGER;
 		DECLARE vdIniVigencia		DATE;
-		DECLARE vdIniPoliza			DATE;
 		DECLARE vdIniCierre			DATE;
 		DECLARE vdFinCierre			DATE;
         
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE curVeh CURSOR FOR
-			SELECT	v.pVehiculo, v.dIniPoliza, v.dIniVigencia
-				  , score.fnPeriodoActual( v.dIniVigencia, -1 + @mesDesface ) dIniCierre
-				  , score.fnPeriodoActual( v.dIniVigencia, 0 + @mesDesface ) dFinCierre
+			SELECT	v.pVehiculo, v.dIniVigencia,
+					score.fnPeriodoActual( v.dIniVigencia, -1 + @mesDesface ) dIniCierre,
+					score.fnPeriodoActual( v.dIniVigencia, 0 + @mesDesface ) dFinCierre
 			FROM	score.tVehiculo v
-			WHERE	v.fTpDispositivo = 3
-			AND		v.cIdDispositivo is not null
-			AND		v.bVigente in ('1')
+			WHERE	v.cPoliza is not null
+			AND		v.bVigente = '1'
 			AND		( prm_pVehiculo is null or v.pVehiculo=prm_pVehiculo );
 
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurVeh = 1;
 
 		OPEN curVeh;
-		FETCH curVeh INTO vpVehiculo, vdIniPoliza, vdIniVigencia, vdIniCierre, vdFinCierre;
+		FETCH curVeh INTO	vpVehiculo, vdIniVigencia, vdIniCierre, vdFinCierre;
 		WHILE NOT eofCurVeh DO
-			-- La fecha de inicio del cierre no puede ser anterior a la fecha de la Póliza
-			IF vdIniCierre < vdIniPoliza THEN
-				SET vdIniCierre = vdIniPoliza;
-            END IF;
 			-- No factura periodos anteriores al de inicio de la vigencia
-			IF vdIniPoliza < vdFinCierre THEN
+			IF vdIniVigencia < vdFinCierre THEN
 -- DEBUG            
--- SELECT vpVehiculo, vdIniVigencia, vdIniCierre, vdFinCierre;
+SELECT vpVehiculo, vdIniVigencia, vdIniCierre, vdFinCierre;
 				-- Calcula score y descuento del vehículo
 				CALL prCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
 			END IF;
-			FETCH curVeh INTO vpVehiculo, vdIniPoliza, vdIniVigencia, vdIniCierre, vdFinCierre;
+			FETCH curVeh INTO	vpVehiculo, vdIniVigencia, vdIniCierre, vdFinCierre;
 		END WHILE;
 		CLOSE curVeh;
 	END;
@@ -94,5 +88,4 @@ BEGIN
 				  nDiasUso				, nDiasPunta			, nDiasSinMedicion
 		FROM	wMemoryScoreVehiculoSinMulta;
 	END IF;    
-    
 END //

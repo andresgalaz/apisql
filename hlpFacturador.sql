@@ -35,7 +35,13 @@ AND		v.cIdDispositivo is not null
 AND		v.bVigente in ('1');
 
 
-select pVehiculo, cPatente, dIniVigencia from tVehiculo where cPatente in ( 'KXZ633','AA929DU','KXZ633','MKZ002','FUZ056','LJL447');
+select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente, cIdDispositivo, fnPeriodoActual(dIniVigencia,0) dIniCierre from tVehiculo where cPatente in ( 'NXL561','NMZ478','JBH851','LQT601','MJK040','NJK040');
+
+-- Paz dario (2 meses)	'MJK040'
+
+select concat('call prFacturador(', pVehiculo, '); -- ', cPatente) 
+from tVehiculo where cPatente in ( 'NXL561','NMZ478','JBH851','LQT601','MJK040');
+
 -- Lista Aceleraciones
 select * from tEvento e where e.fVehiculo in (402,422,404,482,421)
 and e.tEvento >= '2017-12-01' and e.tEvento < '2018-01-01'
@@ -64,17 +70,16 @@ and fTpEvento=3;
 
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'2017-11-30\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) 
-from tVehiculo where pVehiculo in (402,422,404,482,421);
+from tVehiculo where pVehiculo in (509,438);
 -- Recalcula
-call prRecalculaScore('2017-11-30',402,208); call prFacturador(402); -- AA929DU
-call prRecalculaScore('2017-11-30',404,179); call prFacturador(404); -- KXZ633
-call prRecalculaScore('2017-11-30',421,233); call prFacturador(421); -- MKZ002
-call prRecalculaScore('2017-11-30',422,235); call prFacturador(422); -- FUZ056
-call prRecalculaScore('2017-11-30',482,289); call prFacturador(482); -- LJL447
+call prRecalculaScore('2017-10-19',438,268); call prFacturador(438); -- MJK040
+call prRecalculaScore('2017-12-06',509,343); call prFacturador(509); -- LQT601
 
 
 -- 2018-01
-call prFacturador(486);
+call zprFacturador(509); -- LQT601'
+call prFacturador(438); -- MJK040'
+
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -86,10 +91,11 @@ join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
 -- and v.cPatente = 'NDR954'
 -- and t.pVehiculo in ( 486 )
-and t.tCreacion >= now() + INTERVAL -5 MINUTE
+and t.tCreacion >= now() + INTERVAL -1 hour
 ;
 /*
 union all
+*/
 select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
      , t.nDescuentoKM + t.nDescuentoSinUso + t.nDescuentoPunta as nDescSinPonderar, t.nDescuento
@@ -98,9 +104,8 @@ from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 2 and v.dIniVigencia < t.dFin
--- and v.cPatente = 'NDR954'
-and t.pVehiculo in ( 442, 392 )
+and v.cPatente = 'LQT601'
+-- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
--- and t.tCreacion >= now() + INTERVAL -5 DAY
+-- and t.tCreacion >= now() + INTERVAL -5 MINUTE
 order by dIniVigencia, cPatente, cTpCalculo ; 
-*/

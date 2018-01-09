@@ -13,15 +13,16 @@ BEGIN
 	CALL prCreaTmpScoreVehiculo();
    
 	BEGIN
-		DECLARE vpUsuario			integer;
-		DECLARE vpVehiculo			integer;
+		DECLARE vpUsuario		INTEGER;
+		DECLARE vpVehiculo		INTEGER;
+		DECLARE vdIniPoliza		DATE;
 		DECLARE vdIniVigencia	DATE;
 		DECLARE vdIni			DATE;
 		DECLARE vdFin			DATE;
 		-- Cursor Vehiculos para borrar 
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE CurVeh CURSOR FOR
-			SELECT	uv.pUsuario, uv.pVehiculo, v.dIniVigencia
+			SELECT	uv.pUsuario, uv.pVehiculo, v.dIniPoliza, v.dIniVigencia
 			FROM	tUsuarioVehiculo uv
 					INNER JOIN tVehiculo v ON v.pVehiculo = uv.pVehiculo
 			WHERE	uv.fUsuarioTitular	= prm_pUsuarioTitular
@@ -45,16 +46,22 @@ BEGIN
 		END IF;
 
 		OPEN CurVeh;
-		FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniVigencia;
+		FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniPoliza, vdIniVigencia;
 		WHILE NOT eofCurVeh DO
 			IF prm_nPeriodo IS NOT NULL THEN
 				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(NOW()));
 				SET vdIni = fnPeriodoActual( vdIniVigencia, prm_nPeriodo);
 				SET vdFin = fnPeriodoActual( vdIniVigencia, prm_nPeriodo + 1);
 			END IF;
+            
+			-- La fecha de inicio no puede ser anterior a la fecha de la Póliza
+			IF vdIni < vdIniPoliza THEN
+				SET vdIni = vdIniPoliza;
+			END IF;
+            
 			-- Calcula score y descuento del vehículo
 			CALL prCalculaScoreConductor( vpUsuario, vpVehiculo, vdIni, vdFin );
-			FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniVigencia;
+			FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniPoliza, vdIniVigencia;
 		END WHILE;
 		CLOSE CurVeh;
 	END;

@@ -170,11 +170,11 @@ SELECT vpMovim		, vcPatente	, vcPoliza		,
 		-- 4. Se crea registro vehículo
 		INSERT INTO tVehiculo
 				( cPatente			, cMarca			, cModelo			, bVigente			
-				, fCuenta			, fUsuarioTitular	, dIniVigencia		, cPoliza
-				, fMovimCreacion	)
+				, fCuenta			, fUsuarioTitular	, dIniPoliza		, dIniVigencia
+                , cPoliza			, fMovimCreacion	)
 		VALUE	( vcPatente			, vcMarca			, vcModelo			, '1'
-				, vpCuenta			, vpUsuario			, vdIniVigencia		, vcPoliza
-				, vpMovim			);
+				, vpCuenta			, vpUsuario			, vdIniVigencia		, vdIniVigencia	- INTERVAL 4 DAY
+                , vcPoliza			, vpMovim			);
 	ELSE
 		BEGIN
 			DECLARE vcPolizaActual	VARCHAR(40);
@@ -190,6 +190,8 @@ SELECT vpMovim		, vcPatente	, vcPoliza		,
 				UPDATE	tVehiculo
 				SET		cPoliza			= vcPoliza
 					,	fMovimCreacion	= vpMovim
+                    ,	dIniPoliza		= vdIniVigencia
+                    ,	dIniVigencia	= vdIniVigencia - INTERVAL 4 DAY
 				WHERE	pVehiculo		= vpVehiculo;
 			END IF;
 		END;

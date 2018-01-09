@@ -3,12 +3,15 @@ DROP PROCEDURE IF EXISTS prKmsRangoFecha //
 CREATE PROCEDURE prKmsRangoFecha( IN prm_pUsuario INTEGER, IN prm_pVehiculo INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 LB_PRINCIPAL: BEGIN
 	DECLARE vdIni			DATE;
+	DECLARE vdIniPoliza		DATE;
 	DECLARE vdFin			DATE;
 
 	IF prm_nPeriodo IS NOT NULL THEN
 		-- Rango de fechas a partir de la fecha de vigencia
 		SELECT 	fnPeriodoActual( dIniVigencia, prm_nPeriodo), fnPeriodoActual( dIniVigencia, prm_nPeriodo+1)
+			  , dIniPoliza	
         INTO	vdIni, vdFin
+			  , vdIniPoliza	
 		FROM	tVehiculo
         WHERE 	pVehiculo = prm_pVehiculo;
 
@@ -28,6 +31,11 @@ LB_PRINCIPAL: BEGIN
 	ELSE
 		SELECT 4540 nCodigo, 'Se debe indicar periodo o rango de fechas' cMensaje;
 		LEAVE LB_PRINCIPAL;
+	END IF;
+
+	-- La fecha de inicio no puede ser anterior a la fecha de la Póliza
+	IF vdIni < vdIniPoliza THEN
+		SET vdIni = vdIniPoliza;
 	END IF;
 
 	-- CURSOR 1: Rango de fechas utilizadas

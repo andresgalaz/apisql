@@ -2,41 +2,41 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS prCalculaScoreVehiculo //
 CREATE PROCEDURE prCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 LB_PRINCIPAL:BEGIN
-	DECLARE kEventoInicio		INTEGER	DEFAULT 1;
-	DECLARE kEventoFin			INTEGER	DEFAULT 2;
-	DECLARE kEventoAceleracion	INTEGER	DEFAULT 3;
-	DECLARE kEventoFrenada		INTEGER	DEFAULT 4;
-	DECLARE kEventoVelocidad	INTEGER	DEFAULT 5;
-	DECLARE kEventoCurva		INTEGER	DEFAULT 6;
+	DECLARE kEventoInicio			INTEGER	DEFAULT 1;
+	DECLARE kEventoFin				INTEGER	DEFAULT 2;
+	DECLARE kEventoAceleracion		INTEGER	DEFAULT 3;
+	DECLARE kEventoFrenada			INTEGER	DEFAULT 4;
+	DECLARE kEventoVelocidad		INTEGER	DEFAULT 5;
+	DECLARE kEventoCurva			INTEGER	DEFAULT 6;
 	
-	DECLARE vdInicioScore		DATE;
-    DECLARE vdInstalacion		DATE;
-	DECLARE vdInicio			DATE;
-	DECLARE vnDiasTotal			INTEGER;
-	DECLARE vnDiasUso			INTEGER;
-	DECLARE vnDiasPunta			INTEGER;	
-	DECLARE vnDiasSinMedicion	INTEGER;
-	DECLARE vnKms				INTEGER;
-	DECLARE vnKmsPond			INTEGER;
-	DECLARE vnSumaFrenada		DECIMAL(10,2);
-	DECLARE vnSumaAceleracion	DECIMAL(10,2);
-	DECLARE vnSumaVelocidad		DECIMAL(10,2);
-	DECLARE vnSumaCurva			DECIMAL(10,2);
-	DECLARE vnQViajes			INTEGER;
-	DECLARE vnQFrenada			INTEGER;
-	DECLARE vnQAceleracion		INTEGER;
-	DECLARE vnQVelocidad		INTEGER;
-	DECLARE vnQCurva			INTEGER;
-	DECLARE vnPtjFrenada		DECIMAL(10,2) DEFAULT 0;
-	DECLARE vnPtjAceleracion	DECIMAL(10,2) DEFAULT 0;
-	DECLARE vnPtjVelocidad		DECIMAL(10,2) DEFAULT 0;
-	DECLARE vnPtjCurva			DECIMAL(10,2) DEFAULT 0;
-	DECLARE vnDescDiaSinUso		DECIMAL(10,2);
-	DECLARE vnDescNoHoraPunta	DECIMAL(10,2);
-	DECLARE vnScore				DECIMAL(10,2);
-	DECLARE vnDescuentoKM		DECIMAL(10,2);
-	DECLARE vnDescuento			DECIMAL(10,2);
-	DECLARE vnFactorDias		FLOAT;
+	DECLARE vdInicioScore			DATE;
+    DECLARE vdInstalacion			DATE;
+	DECLARE vdInicio				DATE;
+	DECLARE vnDiasTotal				INTEGER;
+	DECLARE vnDiasUso				INTEGER;
+	DECLARE vnDiasPunta				INTEGER;	
+	DECLARE vnDiasSinMedicion		INTEGER;
+	DECLARE vnKms					INTEGER;
+	DECLARE vnKmsPond				INTEGER;
+	DECLARE vnSumaFrenada			DECIMAL(10,2);
+	DECLARE vnSumaAceleracion		DECIMAL(10,2);
+	DECLARE vnSumaVelocidad			DECIMAL(10,2);
+	DECLARE vnSumaCurva				DECIMAL(10,2);
+	DECLARE vnQViajes				INTEGER;
+	DECLARE vnQFrenada				INTEGER;
+	DECLARE vnQAceleracion			INTEGER;
+	DECLARE vnQVelocidad			INTEGER;
+	DECLARE vnQCurva				INTEGER;
+	DECLARE vnPtjFrenada			DECIMAL(10,2) DEFAULT 0;
+	DECLARE vnPtjAceleracion		DECIMAL(10,2) DEFAULT 0;
+	DECLARE vnPtjVelocidad			DECIMAL(10,2) DEFAULT 0;
+	DECLARE vnPtjCurva				DECIMAL(10,2) DEFAULT 0;
+	DECLARE vnDescDiaSinUso			DECIMAL(10,2);
+	DECLARE vnDescNoHoraPunta		DECIMAL(10,2);
+	DECLARE vnScore					DECIMAL(10,2);
+	DECLARE vnDescuentoKM			DECIMAL(10,2);
+	DECLARE vnDescuento				DECIMAL(10,2);
+	DECLARE vnFactorDias			FLOAT;
 
 -- DEBUG
 -- SELECT CONCAT('CALL prCalculaScoreVehiculo(', prm_pVehiculo,',''', prm_dIni, ''',''', prm_dFin, ''' );' ) as `CALL`;
@@ -95,18 +95,13 @@ AND		t.dFecha	<	prm_dFin;
 		END IF;
 	END IF;
 
-	-- Toma la fecha mayor entre inicio de Poliza e Instalación, sin embargo
-    -- si la fecha de Vigencia es mayor a hoy se toma la de hoy (NOW() );
-	SELECT	GREATEST( LEAST( DATE( NOW()), dIniPoliza), IFNULL( dInstalacion, dIniPoliza )) dInstalacion
-    INTO	vdInstalacion
-    FROM	tVehiculo
-    WHERE	pVehiculo = prm_pVehiculo;
+    SET vdInicio = prm_dIni;
 
--- DEBUG
--- SELECT vdInstalacion, prm_dIni, prm_dFin;
-
+-- Se comenta, porque los días que el vehículo estuvo sin instalación se consideran días sin medición
+/*        
     IF prm_dIni < vdInstalacion THEN
 		SET vdInicio = vdInstalacion;
+        
 		-- Si el vehículo paso el vencimiento del mes sin haber instalado
 		IF vdInicio >= prm_dFin THEN
 			SET vnDiasTotal = DATEDIFF(prm_dFin, prm_dIni);
@@ -130,6 +125,7 @@ AND		t.dFecha	<	prm_dFin;
 	ELSE
 		SET vdInicio = prm_dIni;
     END IF;
+*/        
 
 -- DEBUG
 -- SELECT vdInstalacion, vdInicio, prm_dIni, prm_dFin;
@@ -165,6 +161,7 @@ AND		t.dFecha	<	prm_dFin;
 
 	-- Calcula días sin medición
     BEGIN
+		DECLARE vnDiasSinInstalacion	INTEGER;
 		-- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición, hasta el fin de periodo de cálculo.
 		-- Se mide desde la vigencia de la poliza, no desde la instalación.
 		DECLARE vdUltMovim	DATE;
@@ -196,8 +193,23 @@ AND		t.dFecha	<	prm_dFin;
 		FETCH curUlt INTO vdUltMovim;
 		CLOSE curUlt;
         
+        -- Se consideran los días sin medición del final del periodo
 		-- Si el fin del periodo es mayor a la fecha actual se toma la fecha actual.
 		SET vnDiasSinMedicion = DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(NOW())), IFNULL(vdUltMovim + INTERVAL 1 DAY, vdInicio));
+        
+		-- Toma la fecha mayor entre inicio de Poliza e Instalación, sin embargo
+		-- si la fecha de Vigencia es mayor a hoy se toma la de hoy (NOW() );
+		SELECT	DATEDIFF( LEAST( DATE( NOW()), dIniPoliza), IFNULL( dInstalacion, dIniPoliza )) nDiasSinInstalacion
+		INTO	vnDiasSinInstalacion
+		FROM	tVehiculo
+		WHERE	pVehiculo = prm_pVehiculo;
+SELECT DATEDIFF( LEAST( DATE( NOW()), dIniPoliza), IFNULL( dInstalacion, dIniPoliza )) nDiasSinInstalacion FROM tVehiculo;
+        
+        
+
+-- DEBUG
+-- SELECT vdInstalacion, prm_dIni, prm_dFin;
+        
     END;
 
 -- DEBUG

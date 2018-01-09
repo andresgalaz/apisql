@@ -25,6 +25,7 @@ BEGIN
 --              , ifnull(prm_fConductor,'NULL') ,',', ifnull(prm_bNoViajes,'NULL'), ')') as `CALL`;
 	BEGIN
 		DECLARE vpVehiculo		INTEGER;
+		DECLARE vdIniPoliza		DATE;
 		DECLARE vdIniVigencia	DATE;
 		DECLARE vdIni			DATE;
 		DECLARE vdFin			DATE;
@@ -33,7 +34,7 @@ BEGIN
 		-- Cursor Vehiculos para borrar 
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE CurVeh CURSOR FOR
-			SELECT	uv.pVehiculo, v.dIniVigencia
+			SELECT	uv.pVehiculo, v.dIniPoliza, v.dIniVigencia
 			FROM	tUsuarioVehiculo uv
 					INNER JOIN tVehiculo v ON v.pVehiculo = uv.pVehiculo
 			WHERE	uv.pUsuario		= vnUsuario
@@ -57,13 +58,18 @@ BEGIN
 		END IF;
 
 		OPEN CurVeh;
-		FETCH CurVeh INTO vpVehiculo, vdIniVigencia;
+		FETCH CurVeh INTO vpVehiculo, vdIniPoliza, vdIniVigencia;
 		WHILE NOT eofCurVeh DO
 			IF prm_nPeriodo IS NOT NULL THEN
 				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(NOW()));
 				SET vdIni = fnPeriodoActual( vdIniVigencia, prm_nPeriodo);
 				SET vdFin = fnPeriodoActual( vdIniVigencia, prm_nPeriodo + 1);
 			END IF;
+            -- La fecha de inicio no puede ser anterior a la fecha de la Póliza
+			IF vdIni < vdIniPoliza THEN
+				SET vdIni = vdIniPoliza;
+            END IF;
+            
 			-- Calcula score y descuento del vehículo
 			CALL prCalculaScoreVehiculo( vpVehiculo, vdIni, vdFin );
 			-- Calcula score del usuario por cada vehículo
@@ -71,7 +77,7 @@ BEGIN
 			SET vnKmsTotal		= vnKmsTotal	+ vnKms;
 			SET vnScoreGlobal	= vnScoreGlobal + vnScore;
 		
-			FETCH CurVeh INTO vpVehiculo, vdIniVigencia;
+			FETCH CurVeh INTO vpVehiculo, vdIniPoliza, vdIniVigencia;
 		END WHILE;
 		CLOSE CurVeh;
 	END;

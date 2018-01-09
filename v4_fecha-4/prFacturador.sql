@@ -21,9 +21,11 @@ BEGIN
 				  , score.fnPeriodoActual( v.dIniVigencia, -1 + @mesDesface ) dIniCierre
 				  , score.fnPeriodoActual( v.dIniVigencia, 0 + @mesDesface ) dFinCierre
 			FROM	score.tVehiculo v
-			WHERE	v.fTpDispositivo = 3
-			AND		v.cIdDispositivo is not null
-			AND		v.bVigente in ('1')
+			WHERE	v.cPoliza is not null
+            -- 08/01/2018: No cubría los casos que no instalaron
+			-- AND		v.fTpDispositivo = 3
+			-- AND		v.cIdDispositivo is not null
+            AND     v.bVigente in ('1')
 			AND		( prm_pVehiculo is null or v.pVehiculo=prm_pVehiculo );
 
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurVeh = 1;
