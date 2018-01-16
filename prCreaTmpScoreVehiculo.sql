@@ -10,7 +10,7 @@ BEGIN
 		pUsuario				INTEGER			UNSIGNED	NOT NULL	DEFAULT '0',
 		dInicio					DATE						NOT NULL,
 		dFin					DATE						NOT NULL,
-		dInstalacion			DATE						NOT NULL,
+		dInstalacion			DATE,
         tUltimoViaje			DATETIME,
         tUltimaSincro			DATETIME,
 		nKms					DECIMAL(10,2)	UNSIGNED	NOT NULL	DEFAULT '0.0',

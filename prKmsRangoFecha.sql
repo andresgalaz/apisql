@@ -3,27 +3,28 @@ DROP PROCEDURE IF EXISTS prKmsRangoFecha //
 CREATE PROCEDURE prKmsRangoFecha( IN prm_pUsuario INTEGER, IN prm_pVehiculo INTEGER, IN prm_nPeriodo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 LB_PRINCIPAL: BEGIN
 	DECLARE vdIni			DATE;
-	DECLARE vdIniPoliza		DATE;
+	DECLARE vdIniVigencia		DATE;
 	DECLARE vdFin			DATE;
 
 	IF prm_nPeriodo IS NOT NULL THEN
 		-- Rango de fechas a partir de la fecha de vigencia
-		SELECT 	fnPeriodoActual( dIniVigencia, prm_nPeriodo), fnPeriodoActual( dIniVigencia, prm_nPeriodo+1)
-			  , dIniPoliza	
+		SELECT 	fnFechaCierreIni( dIniVigencia, prm_nPeriodo )
+              , fnFechaCierreFin( dIniVigencia, prm_nPeriodo )
+			  , dIniVigencia	
         INTO	vdIni, vdFin
-			  , vdIniPoliza	
+			  , vdIniVigencia	
 		FROM	tVehiculo
         WHERE 	pVehiculo = prm_pVehiculo;
 
 	ELSEIF prm_dIni IS NOT NULL AND prm_dFin IS NOT NULL THEN
 		IF prm_dIni IS NULL THEN
-			SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAYOFMONTH(now()) - 1 DAY));
+			SET vdIni = DATE(DATE_SUB(fnNowTest(), INTERVAL DAYOFMONTH(fnNowTest()) - 1 DAY));
 		ELSE
 			SET vdIni = prm_dIni;
 		END IF;
 
 		IF prm_dFin IS NULL THEN
-			SET vdFin = now();
+			SET vdFin = fnNowTest();
 		ELSE
 			SET vdFin = prm_dFin;
 		END IF;
@@ -34,8 +35,8 @@ LB_PRINCIPAL: BEGIN
 	END IF;
 
 	-- La fecha de inicio no puede ser anterior a la fecha de la Póliza
-	IF vdIni < vdIniPoliza THEN
-		SET vdIni = vdIniPoliza;
+	IF vdIni < vdIniVigencia THEN
+		SET vdIni = vdIniVigencia;
 	END IF;
 
 	-- CURSOR 1: Rango de fechas utilizadas

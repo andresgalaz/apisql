@@ -1,0 +1,1 @@
+../prCreaTmpScoreVehiculo.sql

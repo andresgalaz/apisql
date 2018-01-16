@@ -15,14 +15,13 @@ BEGIN
 	BEGIN
 		DECLARE vpUsuario		INTEGER;
 		DECLARE vpVehiculo		INTEGER;
-		DECLARE vdIniPoliza		DATE;
 		DECLARE vdIniVigencia	DATE;
 		DECLARE vdIni			DATE;
 		DECLARE vdFin			DATE;
 		-- Cursor Vehiculos para borrar 
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE CurVeh CURSOR FOR
-			SELECT	uv.pUsuario, uv.pVehiculo, v.dIniPoliza, v.dIniVigencia
+			SELECT	uv.pUsuario, uv.pVehiculo, v.dIniVigencia
 			FROM	tUsuarioVehiculo uv
 					INNER JOIN tVehiculo v ON v.pVehiculo = uv.pVehiculo
 			WHERE	uv.fUsuarioTitular	= prm_pUsuarioTitular
@@ -32,13 +31,13 @@ BEGIN
 		-- Si no se indicó periodo, se trae la misma fecha para todos los vehículos
 		IF prm_nPeriodo IS NULL THEN
 			IF prm_dIni IS NULL THEN
-				SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAYOFMONTH(now()) - 1 DAY));
+				SET vdIni = DATE(DATE_SUB(fnNowTest(), INTERVAL DAYOFMONTH(fnNowTest()) - 1 DAY));
 			ELSE
 				SET vdIni = prm_dIni;
 			END IF;
 
 			IF prm_dFin IS NULL THEN
-				SET vdFin = now();
+				SET vdFin = fnNowTest();
 			ELSE
 				SET vdFin = prm_dFin;
 			END IF;
@@ -46,22 +45,17 @@ BEGIN
 		END IF;
 
 		OPEN CurVeh;
-		FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniPoliza, vdIniVigencia;
+		FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniVigencia;
 		WHILE NOT eofCurVeh DO
 			IF prm_nPeriodo IS NOT NULL THEN
-				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(NOW()));
-				SET vdIni = fnPeriodoActual( vdIniVigencia, prm_nPeriodo);
-				SET vdFin = fnPeriodoActual( vdIniVigencia, prm_nPeriodo + 1);
-			END IF;
-            
-			-- La fecha de inicio no puede ser anterior a la fecha de la Póliza
-			IF vdIni < vdIniPoliza THEN
-				SET vdIni = vdIniPoliza;
+				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(fnNowTesfnNowTest));
+				SET vdIni = fnFechaCierreIni( vdIniVigencia, prm_nPeriodo );
+				SET vdFin = fnFechaCierreFin( vdIniVigencia, prm_nPeriodo );
 			END IF;
             
 			-- Calcula score y descuento del vehículo
 			CALL prCalculaScoreConductor( vpUsuario, vpVehiculo, vdIni, vdFin );
-			FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniPoliza, vdIniVigencia;
+			FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniVigencia;
 		END WHILE;
 		CLOSE CurVeh;
 	END;

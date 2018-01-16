@@ -25,7 +25,6 @@ BEGIN
 --              , ifnull(prm_fConductor,'NULL') ,',', ifnull(prm_bNoViajes,'NULL'), ')') as `CALL`;
 	BEGIN
 		DECLARE vpVehiculo		INTEGER;
-		DECLARE vdIniPoliza		DATE;
 		DECLARE vdIniVigencia	DATE;
 		DECLARE vdIni			DATE;
 		DECLARE vdFin			DATE;
@@ -34,7 +33,7 @@ BEGIN
 		-- Cursor Vehiculos para borrar 
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE CurVeh CURSOR FOR
-			SELECT	uv.pVehiculo, v.dIniPoliza, v.dIniVigencia
+			SELECT	uv.pVehiculo, v.dIniVigencia
 			FROM	tUsuarioVehiculo uv
 					INNER JOIN tVehiculo v ON v.pVehiculo = uv.pVehiculo
 			WHERE	uv.pUsuario		= vnUsuario
@@ -44,13 +43,13 @@ BEGIN
 		-- Si no se indicó periodo, se trae la misma fecha para todos los vehículos
 		IF prm_nPeriodo IS NULL THEN
 			IF prm_dIni IS NULL THEN
-				SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAYOFMONTH(now()) - 1 DAY));
+				SET vdIni = DATE(DATE_SUB(fnNowTest(), INTERVAL DAYOFMONTH(fnNowTest()) - 1 DAY));
 			ELSE
 				SET vdIni = prm_dIni;
 			END IF;
 
 			IF prm_dFin IS NULL THEN
-				SET vdFin = now();
+				SET vdFin = fnNowTest();
 			ELSE
 				SET vdFin = prm_dFin;
 			END IF;
@@ -58,16 +57,16 @@ BEGIN
 		END IF;
 
 		OPEN CurVeh;
-		FETCH CurVeh INTO vpVehiculo, vdIniPoliza, vdIniVigencia;
+		FETCH CurVeh INTO vpVehiculo, vdIniVigencia;
 		WHILE NOT eofCurVeh DO
 			IF prm_nPeriodo IS NOT NULL THEN
-				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(NOW()));
-				SET vdIni = fnPeriodoActual( vdIniVigencia, prm_nPeriodo);
-				SET vdFin = fnPeriodoActual( vdIniVigencia, prm_nPeriodo + 1);
+				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(fnNowTest()));
+				SET vdIni = fnFechaCierreIni( vdIniVigencia, prm_nPeriodo );
+				SET vdFin = fnFechaCierreFin( vdIniVigencia, prm_nPeriodo );
 			END IF;
             -- La fecha de inicio no puede ser anterior a la fecha de la Póliza
-			IF vdIni < vdIniPoliza THEN
-				SET vdIni = vdIniPoliza;
+			IF vdIni < vdIniVigencia THEN
+				SET vdIni = vdIniVigencia;
             END IF;
             
 			-- Calcula score y descuento del vehículo
@@ -77,7 +76,7 @@ BEGIN
 			SET vnKmsTotal		= vnKmsTotal	+ vnKms;
 			SET vnScoreGlobal	= vnScoreGlobal + vnScore;
 		
-			FETCH CurVeh INTO vpVehiculo, vdIniPoliza, vdIniVigencia;
+			FETCH CurVeh INTO vpVehiculo, vdIniVigencia;
 		END WHILE;
 		CLOSE CurVeh;
 	END;

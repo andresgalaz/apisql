@@ -10,8 +10,8 @@ BEGIN
 	DECLARE eofCur				INTEGER DEFAULT 0;
 	DECLARE cur CURSOR FOR
 		SELECT	v.pVehiculo
-			  , fnPeriodo(fnPeriodoActual( v.dIniVigencia, -1 ))		dPeriodo
-			  , datediff(now(),fnPeriodoActual( v.dIniVigencia, 0 ))	nDiasUltCicloFact
+			  , fnPeriodo(fnFechaCierreIni( v.dIniVigencia, -1 ))		dPeriodo
+			  , datediff(now(),fnFechaCierreFin( v.dIniVigencia, -1 ))	nDiasUltCicloFact
 		FROM	tVehiculo v
 		WHERE	v.cPoliza IS NOT NULL
         AND		v.bVigente = '1'

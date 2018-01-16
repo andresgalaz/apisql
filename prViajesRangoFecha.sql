@@ -19,18 +19,18 @@ BEGIN
 
 	IF prm_nPeriodo IS NOT NULL THEN
 		-- Primer día mes actual
-		SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAY(now()) - 1 DAY));
-		SET vdIni = fnPeriodoActual( vdIni, prm_nPeriodo);
-		SET vdFin = fnPeriodoActual( vdIni, prm_nPeriodo + 1);
+		SET vdIni = DATE(DATE_SUB(fnNowTest(), INTERVAL DAY(fnNowTest()) - 1 DAY));
+		SET vdIni = fnFechaCierreIni( vdIni, prm_nPeriodo );
+		SET vdFin = fnFechaCierreFin( vdIni, prm_nPeriodo );
 	ELSEIF prm_dIni IS NOT NULL AND prm_dFin IS NOT NULL THEN
 		IF prm_dIni IS NULL THEN
-			SET vdIni = DATE(DATE_SUB(now(), INTERVAL DAYOFMONTH(now()) - 1 DAY));
+			SET vdIni = DATE(DATE_SUB(fnNowTest(), INTERVAL DAYOFMONTH(fnNowTest()) - 1 DAY));
 		ELSE
 			SET vdIni = prm_dIni;
 		END IF;
 
 		IF prm_dFin IS NULL THEN
-			SET vdFin = now();
+			SET vdFin = fnNowTest();
 		ELSE
 			SET vdFin = prm_dFin;
 		END IF;

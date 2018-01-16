@@ -27,15 +27,15 @@ order by dInicio, cPatente, cTpCalculo ;
 SELECT	v.pVehiculo				, v.cPatente				, v.cIdDispositivo			, v.bVigente				,
 		v.fTpDispositivo		, v.fCuenta					, v.fUsuarioTitular			, v.tModif					,
 		v.dIniVigencia			,
-		score.fnPeriodoActual( v.dIniVigencia, -1 ) dIniCierre,
-		score.fnPeriodoActual( v.dIniVigencia, 0 ) dFinCierre
+		score.fnFechaCierreIni( v.dIniVigencia, -1 ) dIniCierre,
+		fnFechaCierreFin( v.dIniVigencia, -1 ) dFinCierre
 FROM	score.tVehiculo v
 WHERE	v.fTpDispositivo = 3
 AND		v.cIdDispositivo is not null
 AND		v.bVigente in ('1');
 
 
-select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente, cIdDispositivo, fnPeriodoActual(dIniVigencia,0) dIniCierre from tVehiculo where cPatente in ( 'NXL561','NMZ478','JBH851','LQT601','MJK040','NJK040');
+select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente, cIdDispositivo, fnFechaCierreIni(dIniVigencia,0) dIniCierre from tVehiculo where cPatente in ( 'KZI628');
 
 -- Paz dario (2 meses)	'MJK040'
 
@@ -90,8 +90,8 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
 -- and v.cPatente = 'NDR954'
--- and t.pVehiculo in ( 486 )
-and t.tCreacion >= now() + INTERVAL -1 hour
+and t.pVehiculo in ( 481)
+-- and t.tCreacion >= now() + INTERVAL -1 hour
 ;
 /*
 union all

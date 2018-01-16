@@ -1,5 +1,5 @@
-DROP PROCEDURE IF EXISTS prRecalculaScoreCursor;
 DELIMITER //
+DROP PROCEDURE IF EXISTS prRecalculaScoreCursor //
 CREATE PROCEDURE prRecalculaScoreCursor( in prm_dInicio DATE )
 BEGIN
 	DECLARE vpVehiculo	INTEGER;
@@ -17,4 +17,15 @@ BEGIN
 		FETCH cur INTO vpVehiculo, vpUsuario;
 	END WHILE;	
 END //
-DELIMITER ;
+
+DROP PROCEDURE IF EXISTS prRecalculaScoreFromFecha //
+CREATE PROCEDURE prRecalculaScoreFromFecha( in prm_dInicio DATE )
+BEGIN
+	DECLARE dAct DATE DEFAULT prm_dInicio;
+	WHILE dAct <= fnNowTest() DO
+		call prRecalculaScoreCursor( dAct );
+		SET dAct = dAct + INTERVAL 1 DAY;
+	END WHILE;	
+END //
+
+

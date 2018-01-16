@@ -5,6 +5,5 @@ CREATE TRIGGER trgVehiculoInsBefore BEFORE INSERT
 BEGIN
 	IF new.dIniVigencia IS NULL THEN
 		SET new.dIniVigencia = DATE(NOW());
-		SET new.dIniPoliza = DATE(NOW());
     END IF;
 END;
