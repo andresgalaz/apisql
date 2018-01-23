@@ -1,6 +1,6 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS prControlCierreTransferenciaInicioDef //
-CREATE PROCEDURE prControlCierreTransferenciaInicioDef ( IN prm_nMesAvance INTEGER )
+DROP PROCEDURE IF EXISTS zprControlCierreTransferenciaInicioDef //
+CREATE PROCEDURE zprControlCierreTransferenciaInicioDef ( IN prm_nMesAvance INTEGER )
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS wMemoryCierreTransf (
 		pVehiculo			INTEGER		UNSIGNED	NOT NULL,
@@ -26,7 +26,7 @@ BEGIN
 		  , dProximoCierreIni, dProximoCierreFin
           , tUltTransferencia )
     SELECT 	v.pVehiculo, v.bVigente	, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular
-		  , fnFechaCierreIni( v.dIniVigencia, prm_nMesAvance ), fnFechaCierreFin( v.dIniVigencia, prm_nMesAvance )
+		  , zfnFechaCierreIni( v.dIniVigencia, prm_nMesAvance ), zfnFechaCierreFin( v.dIniVigencia, prm_nMesAvance )
 		  , IFNULL( max(it.tRegistroActual) + INTERVAL -3 hour, v.dIniVigencia )
 	FROM 	tVehiculo v
 			LEFT JOIN score.tInicioTransferencia it  ON it.fVehiculo = v.pVehiculo
@@ -55,7 +55,7 @@ BEGIN
 					  , dProximoCierreIni, dProximoCierreFin
                       , tUltViaje	)
 				SELECT 	v.pVehiculo	, v.bVigente, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular
-					  , fnFechaCierreIni( v.dIniVigencia, prm_nMesAvance ), fnFechaCierreFin( v.dIniVigencia, prm_nMesAvance )
+					  , zfnFechaCierreIni( v.dIniVigencia, prm_nMesAvance ), zfnFechaCierreFin( v.dIniVigencia, prm_nMesAvance )
 					  , vtUltViaje
 				FROM 	tVehiculo v 
                 WHERE	v.pVehiculo = vnVehicleId;
@@ -93,7 +93,7 @@ BEGIN
 					  , dProximoCierreIni, dProximoCierreFin
                       , tUltControl	)
 				SELECT 	v.pVehiculo	, v.bVigente, v.cPatente, v.cPoliza	, v.dIniVigencia, v.fUsuarioTitular
-					  , fnFechaCierreIni( v.dIniVigencia, prm_nMesAvance ), fnFechaCierreFin( v.dIniVigencia, prm_nMesAvance )
+					  , zfnFechaCierreIni( v.dIniVigencia, prm_nMesAvance ), zfnFechaCierreFin( v.dIniVigencia, prm_nMesAvance )
 					  , vtUltControl
 				FROM 	tVehiculo v 
                 WHERE	v.pVehiculo = vnVehicleId;
@@ -110,15 +110,15 @@ BEGIN
 
 	-- Calcula los dias sin sincronizar y los días al cierre
     UPDATE	wMemoryCierreTransf
-    SET		nDiasNoSincro = DATEDIFF( LEAST( DATE(fnNow()), dProximoCierreIni )
+    SET		nDiasNoSincro = DATEDIFF( LEAST( DATE(zfnNow()), dProximoCierreIni )
                               , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
                                         , IFNULL(DATE( tUltViaje        ), '0000-00-00')
                                         , IFNULL(DATE( tUltControl      ), '0000-00-00')) )
-		,	nDiasAlCierre = DATEDIFF(dProximoCierreIni,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
+		,	nDiasAlCierre = DATEDIFF(dProximoCierreIni,DATE(zfnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(zfnNow())) ELSE 0 END );
 END //
 
-DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
-CREATE PROCEDURE prControlCierreTransferencia (IN prm_opcPoliza VARCHAR(40))
+DROP PROCEDURE IF EXISTS zprControlCierreTransferencia //
+CREATE PROCEDURE zprControlCierreTransferencia (IN prm_opcPoliza VARCHAR(40))
 BEGIN
 	/*
 	 * Opción póliza:

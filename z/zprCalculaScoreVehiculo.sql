@@ -1,6 +1,6 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS prCalculaScoreVehiculo //
-CREATE PROCEDURE prCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
+DROP PROCEDURE IF EXISTS zprCalculaScoreVehiculo //
+CREATE PROCEDURE zprCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
 	DECLARE kEventoInicio			INTEGER	DEFAULT 1;
 	DECLARE kEventoFin				INTEGER	DEFAULT 2;
@@ -38,7 +38,7 @@ BEGIN
 	DECLARE vnFactorDias			FLOAT;
 
 -- DEBUG
--- SELECT CONCAT('CALL prCalculaScoreVehiculo(', prm_pVehiculo,',''', prm_dIni, ''',''', prm_dFin, ''' );' ) as `CALL`;
+-- SELECT CONCAT('CALL zprCalculaScoreVehiculo(', prm_pVehiculo,',''', prm_dIni, ''',''', prm_dFin, ''' );' ) as `CALL`;
 
 	SELECT	MIN( t.dFecha )				dInicio			, SUM( t.nKms )				nKms
 		 ,	SUM( t.nFrenada )			nSumaFrenada	, SUM( t.nAceleracion )		nSumaAceleracion
@@ -144,7 +144,7 @@ BEGIN
         -- Se consideran los días sin medición del final del periodo
 		-- Si el fin del periodo es mayor a la fecha actual se toma la fecha actual.
 		if prm_dFin >= IFNULL(vdUltMovim, prm_dFin) THEN
-			SET vnDiasSinMedicion = DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(fnNow())), IFNULL(vdUltMovim + INTERVAL 1 DAY, prm_dIni));
+			SET vnDiasSinMedicion = DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(zfnNow())), IFNULL(vdUltMovim + INTERVAL 1 DAY, prm_dIni));
         ELSE
 			SET vnDiasSinMedicion = 0;
         END IF;

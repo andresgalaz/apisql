@@ -6,8 +6,8 @@ BEGIN
 	-- Parametros
 	DECLARE vdDia				date DEFAULT prm_dInicio;
     
-    WHILE vdDia < fnNowTest() DO
---      SELECT 'DIA', fnNowTest(), vdDia;
+    WHILE vdDia < fnNow() DO
+--      SELECT 'DIA', fnNow(), vdDia;
         CALL prCalculaScoreDiaInicio( vdDia );
 	    SET vdDia = ADDDATE( vdDia, INTERVAL 1 DAY);
     END WHILE;
@@ -15,10 +15,10 @@ BEGIN
 	SET vdDia = prm_dInicio;
     
     /*
-    WHILE vdDia < fnNowTest() DO
-        SELECT 'MES', fnNowTest(), vdDia;
+    WHILE vdDia < fnNow() DO
+        SELECT 'MES', fnNow(), vdDia;
         CALL prCalculaScoreMesInicio( vdDia );
---      SELECT 'CONDUCTOR', fnNowTest(), vdDia;
+--      SELECT 'CONDUCTOR', fnNow(), vdDia;
         CALL prCalculaScoreMesConductorInicio( vdDia );
 	    SET vdDia = ADDDATE( vdDia, INTERVAL 1 MONTH);
     END WHILE;

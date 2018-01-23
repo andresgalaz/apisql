@@ -1,1 +1,0 @@
-../prScoreConductorRangoFecha.sql

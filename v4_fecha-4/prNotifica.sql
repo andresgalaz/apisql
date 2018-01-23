@@ -1,1 +1,0 @@
-../prNotifica.sql

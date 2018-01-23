@@ -1,1 +1,0 @@
-../prControlCierreTransferencia.sql
