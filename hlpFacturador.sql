@@ -1,14 +1,26 @@
-SELECT	v.pVehiculo, v.dIniVigencia
-	  , score.fnFechaCierreIni( v.dIniVigencia, -1 ) dIniCierre
-	  , score.fnFechaCierreFin( v.dIniVigencia, -1 ) dFinCierre
-FROM	score.tVehiculo v
-WHERE	v.cPoliza is not null
--- 08/01/2018: No cubría los casos que no instalaron
--- AND		v.fTpDispositivo = 3
--- AND		v.cIdDispositivo is not null
-AND     v.bVigente in ('1')
-AND		v.pVehiculo = 442 ;
-
+-- Factura Admin
+SELECT v.pVehiculo
+     , v.cPatente
+     , v.cPoliza
+     , v.fUsuarioTitular
+     , u.cNombre, u.cEmail
+     , v.dIniVigencia
+     , zfnNow() zHoy
+     , zfnFechaCierreIni(v.dIniVigencia, 0) dIni_0
+     , DATEDIFF(zfnFechaCierreIni(v.dIniVigencia, 0),zfnNow()) alCierre_0
+     , zfnFechaCierreFin(v.dIniVigencia, 1) dIni_1
+     , DATEDIFF(zfnFechaCierreIni(v.dIniVigencia, 1),zfnNow()) alCierre_1
+     , (zfnFechaCierreIni(v.dIniVigencia, 1) > v.dIniVigencia) bVigValida
+ FROM  tVehiculo v
+       JOIN tUsuario u ON u.pUsuario = v.fUsuarioTitular
+ WHERE v.cPoliza is not null
+ AND   v.bVigente = '1'
+-- AND   zfnFechaCierreIni(v.dIniVigencia, 1) > v.dIniVigencia
+--  Dias al cierre 3
+-- AND    DATEDIFF(fnFechaCierreIni(v.dIniVigencia, 1),fnNow()) = 3;
+and v.cPatente in ( 'MRW848', 'MZC135', 'KPB890' )
+ ORDER BY day(v.dIniVigencia);
+                
 drop table wMemoryScoreVehiculo;
 drop table wMemoryScoreVehiculoSinMulta;
 drop table wMemoryScoreVehiculoCount;
@@ -50,40 +62,49 @@ select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente
      , cIdDispositivo
      , fnFechaCierreIni(dIniVigencia,-1) dIniCierre, fnFechaCierreFin(dIniVigencia,-1) dFinCierre
      , zfnFechaCierreIni(dIniVigencia,-1) dIniCierreZ, zfnFechaCierreFin(dIniVigencia,-1) dFinCierreZ, zfnNow()
-from tVehiculo where cPatente in ( 'LQB799','NAG223','FAA680')
+from tVehiculo where cPatente in ( 'AB686YD','KZI628','NAG223')
 union 
 select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente
      , cIdDispositivo
      , fnFechaCierreIni(dIniVigencia,0) dIniCierre, fnFechaCierreFin(dIniVigencia,0) dFinCierre
      , zfnFechaCierreIni(dIniVigencia,0) dIniCierreZ, zfnFechaCierreFin(dIniVigencia,0) dFinCierreZ, zfnNow()
-from tVehiculo where cPatente in ( 'LQB799','NAG223','FAA680')
+from tVehiculo where cPatente in ( 'AB686YD','KZI628','NAG223')
 order by cPatente, dIniCierre;
 
 -- Paz dario (2 meses)	'MJK040'
 
 select concat('call prFacturador(', pVehiculo, '); -- ', cPatente) 
-from tVehiculo where cPatente in ( 'LQB799','NAG223','FAA680');
+from tVehiculo where cPatente in ( 'MRW848', 'MZC135', 'KPB890' );
 
 -- Lista Aceleraciones
 select * from tEvento e where e.fVehiculo in (414)
 and e.tEvento >= '2017-12-12' and e.tEvento < '2018-01-12'
-and fTpEvento=3;
-
+and fTpEvento=3
+;
 -- Borra Aceleraciones
 delete from tEvento  where fVehiculo in (414)
 and tEvento >= '2017-12-12' -- and tEvento < '2018-01-12'
 and fTpEvento=3;
 
+-- Lista Fenadas
+select * from tEvento e where e.nIdViaje = 103964
+and fTpEvento<4
+;
+-- Borra Frenadas
+delete from tEvento where e.nIdViaje = 103964
+and fTpEvento=4;
+
+
 -- Genera proceso a recalcular
-select concat('call prRecalculaScore(','\'2017-12-12\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) 
-from tVehiculo where pVehiculo in (414);
+select concat('call prRecalculaScore(','\'2010-01-25\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) 
+from tVehiculo where pVehiculo in (505);
 -- Recalcula
 call prRecalculaScore('2017-12-12',414,222); call prFacturador(414); -- NXL561
 
 -- 2018-01
-call prFacturador(505); -- FAA680
-call prFacturador(392); -- LQB799
-call prFacturador(394); -- NAG223
+call prFacturador(480); -- KPB890
+call prFacturador(483); -- MRW848
+call prFacturador(492); -- MZC135
 
 
 
@@ -114,7 +135,3 @@ where t.pTpFactura = 2 and v.dIniVigencia < t.dFin
 -- and t.tCreacion >= '2017-12-07 10:30:00'
 and t.tCreacion >= now() + INTERVAL -3 MINUTE
 order by dIniVigencia, cPatente, cTpCalculo, dInicio ; 
-
-
-
-set @d='2017-10-24';set @f=null;call zprFechasCierre(@d,@f,-2);set @d='2017-10-24';call zprFechasCierre(@d,@f,-1);set @d='2017-10-24';call zprFechasCierre(@d,@f,0);set @d='2017-10-24';call zprFechasCierre(@d,@f,1);set @d='2017-10-24';call zprFechasCierre(@d,@f,2);
