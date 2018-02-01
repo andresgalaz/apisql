@@ -1,0 +1,6 @@
+= Pendiente
+ * 
+
+= v00005 =
+@ 01/02/2018 - AGALAZ
+ * Se corrige prNotifica, que además actualiza las fechas de vigencia
