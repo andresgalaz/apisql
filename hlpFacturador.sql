@@ -74,7 +74,7 @@ order by cPatente, dIniCierre;
 -- Paz dario (2 meses)	'MJK040'
 
 select concat('call prFacturador(', pVehiculo, '); -- ', cPatente) 
-from tVehiculo where cPatente in ( 'MRW848', 'MZC135', 'KPB890' );
+from tVehiculo where cPatente in ( 'LPT144' );
 
 -- Lista Aceleraciones
 select * from tEvento e where e.fVehiculo in (414)
@@ -106,7 +106,7 @@ call prFacturador(480); -- KPB890
 call prFacturador(483); -- MRW848
 call prFacturador(492); -- MZC135
 
-
+call prFacturador(510); -- LPT144
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta

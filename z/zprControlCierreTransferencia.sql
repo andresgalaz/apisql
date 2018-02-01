@@ -135,6 +135,7 @@ BEGIN
 		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
 			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
+             , zfnFechaCierreIni( w.dIniVigencia, 0 ) dAnteriorCierreIni
 			 , w.dProximoCierreIni
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
@@ -145,6 +146,7 @@ BEGIN
 		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
 			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
+             , zfnFechaCierreIni( w.dIniVigencia, 0 ) dAnteriorCierreIni
 			 , w.dProximoCierreIni
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
@@ -153,6 +155,7 @@ BEGIN
 		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
 			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
+             , zfnFechaCierreIni( w.dIniVigencia, 0 ) dAnteriorCierreIni
 			 , w.dProximoCierreIni
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w

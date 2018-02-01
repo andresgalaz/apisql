@@ -120,7 +120,7 @@ BEGIN
 --                            , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
                               , GREATEST( IFNULL(DATE( tUltViaje        ), '0000-00-00')
                                         , IFNULL(DATE( tUltControl      ), '0000-00-00')) )
-		,	nDiasAlCierre = DATEDIFF(dProximoCierreFin,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreFin) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
+		,	nDiasAlCierre = DATEDIFF(dProximoCierreIni,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
 END //
 
 DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
@@ -136,7 +136,7 @@ BEGIN
 		SET prm_opcPoliza = 'TODOS';
 	END IF;
 	-- Crea tabla temporal wMemoryCierreTransf
-	CALL prControlCierreTransferenciaInicioDef(0);
+	CALL prControlCierreTransferenciaInicioDef(1);
     IF prm_opcPoliza = 'ANULADOS' THEN
 		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
 			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
@@ -148,8 +148,8 @@ BEGIN
 */    
 -- 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
 			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
+             , fnFechaCierreIni( w.dIniVigencia, 0 ) dAnteriorCierreIni
 			 , w.dProximoCierreIni
-			 , w.dProximoCierreFin
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
@@ -166,8 +166,8 @@ BEGIN
 */    
 -- 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
 			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
+             , fnFechaCierreIni( w.dIniVigencia, 0 ) dAnteriorCierreIni
 			 , w.dProximoCierreIni
-			 , w.dProximoCierreFin
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular;
@@ -182,8 +182,8 @@ BEGIN
 */    
 -- 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
 			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
+             , fnFechaCierreIni( w.dIniVigencia, 0 ) dAnteriorCierreIni
 			 , w.dProximoCierreIni
-			 , w.dProximoCierreFin
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
