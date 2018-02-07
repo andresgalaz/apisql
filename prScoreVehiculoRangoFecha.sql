@@ -94,8 +94,13 @@ BEGIN
 			SUBSTRING(w.dInicio					, 1, 10 )	AS dInicio,
 			SUBSTRING(w.dFin + INTERVAL -1 DAY	, 1, 10 )	AS dFin,
 			w.nKms				, w.nScore,
-			w.nDescuento		, w.nDiasTotal,
-			w.nDiasUso			, w.nDiasPunta,
+-- 			El descuento se va dando de a poco, a medida que se avanza en el periodo, excepto para
+-- 			Los recargos se muestran tal cual
+ 			CASE WHEN w.nDescuento >= 0 
+				THEN ROUND(w.nDescuento * ( w.nDiasTotal / DATEDIFF(w.dFin, w.dInicio )),0) 
+                ELSE w.nDescuento
+			END 				  nDescuento,
+            w.nDiasTotal		, w.nDiasUso			, w.nDiasPunta,
 -- 			w.nQFrenada			, w.nQAceleracion		, w.nQVelocidad			, w.nQCurva,
 			w.nQViajes,
             w.tUltimoViaje					AS tUltimoRegistro,

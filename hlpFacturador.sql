@@ -97,7 +97,7 @@ and fTpEvento=4;
 
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'2010-01-25\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) 
-from tVehiculo where pVehiculo in (505);
+from tVehiculo where pVehiculo in (483);
 -- Recalcula
 call prRecalculaScore('2017-12-12',414,222); call prFacturador(414); -- NXL561
 
