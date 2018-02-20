@@ -77,13 +77,13 @@ select concat('call prFacturador(', pVehiculo, '); -- ', cPatente)
 from tVehiculo where cPatente in ( 'LPT144' );
 
 -- Lista Aceleraciones
-select * from tEvento e where e.fVehiculo in (414)
-and e.tEvento >= '2017-12-12' and e.tEvento < '2018-01-12'
+select * from tEvento e where e.fVehiculo in (494)
+and e.tEvento >= '2018-01-15' and e.tEvento < now()
 and fTpEvento=3
 ;
 -- Borra Aceleraciones
-delete from tEvento  where fVehiculo in (414)
-and tEvento >= '2017-12-12' -- and tEvento < '2018-01-12'
+delete from tEvento  where fVehiculo in (494)
+and tEvento >= '2018-01-15' 
 and fTpEvento=3;
 
 -- Lista Fenadas
@@ -96,17 +96,14 @@ and fTpEvento=4;
 
 
 -- Genera proceso a recalcular
-select concat('call prRecalculaScore(','\'2010-01-25\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) 
-from tVehiculo where pVehiculo in (483);
--- Recalcula
-call prRecalculaScore('2017-12-12',414,222); call prFacturador(414); -- NXL561
+select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
+from tVehiculo where cPatente in ('AC040NQ','NMZ478','NNN048','AC156IE'); -- pVehiculo in (494);
+-- 2018-02-19
+call prRecalculaScore('2018-02-13',493,326); call prFacturador(493); -- AC040NQ
+call prRecalculaScore('2018-02-15',514,350); call prFacturador(514); -- AC156IE
+call prRecalculaScore('2018-02-14',353,118); call prFacturador(353); -- NMZ478
+call prRecalculaScore('2018-02-14',508,342); call prFacturador(508); -- NNN048
 
--- 2018-01
-call prFacturador(480); -- KPB890
-call prFacturador(483); -- MRW848
-call prFacturador(492); -- MZC135
-
-call prFacturador(510); -- LPT144
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -115,7 +112,7 @@ select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, 
 from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
-where t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
+where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
 -- and t.dInicio = '2017-11-30'
 -- and v.cPatente = 'AB686YD'
 -- and t.pVehiculo in ( 481)
@@ -128,10 +125,46 @@ select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEm
 from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
-where t.pTpFactura = 2 and v.dIniVigencia < t.dFin
+where v.cPoliza <> 'TEST' and t.pTpFactura = 2 and v.dIniVigencia < t.dFin
 -- and t.dInicio = '2017-11-30'
 -- and v.cPatente = 'AB686YD'
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
 and t.tCreacion >= now() + INTERVAL -3 MINUTE
 order by dIniVigencia, cPatente, cTpCalculo, dInicio ; 
+
+-- diasViaje
+select v.cPoliza, v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
+	 , t.dInicio iniPeriodo, (t.dFin + INTERVAL -1 DAY ) finPeriodo
+     , t.nDescuento descuento, t.nKms kms, t.nKmsPond kmsPond
+     , t.nScore score
+     , t.nQFrenada qFrenadas, t.nQAceleracion qAceleraciones, t.nQVelocidad qExcesosVel, t.nQCurva qCurvas
+     , t.nQViajes qViajes, t.nDiasTotal diasTotal, t.nDiasUso diasUso, t.nDiasPunta diasPunta, t.nDiasSinMedicion diasSinMedicion
+from tFactura t
+join tVehiculo v on v.pVehiculo = t.pVehiculo
+join tUsuario  u on u.pUsuario = v.fUsuarioTitular
+where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
+-- and t.dInicio = '2017-11-30'
+and v.cPatente = 'AC040NQ'
+-- and t.pVehiculo in ( 481)
+-- and t.tCreacion >= now() + INTERVAL -1 DAY + INTERVAL -1 hour -- MINUTE
+;
+--
+select v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
+	 , t.dInicio iniPeriodo, (t.dFin + INTERVAL -1 DAY ) finPeriodo
+     , t.nDescuento descuento, t.nKms kms, t.nKmsPond kmsPond
+     , t.nScore score
+     , t.nQFrenada qFrenadas, t.nQAceleracion qAceleraciones, t.nQVelocidad qExcesosVel, t.nQCurva qCurvas
+     , t.nQViajes qViajes, t.nDiasTotal diasTotal, t.nDiasUso diasUso, t.nDiasPunta diasPunta, t.nDiasSinMedicion diasSinMedicion
+from tFactura t
+join tVehiculo v on v.pVehiculo = t.pVehiculo
+join tUsuario  u on u.pUsuario = v.fUsuarioTitular
+where v.cPoliza <> 'TEST' and t.pTpFactura = 2 and v.dIniVigencia < t.dFin
+-- and t.dInicio = '2017-11-30'
+-- and v.cPatente = 'AB686YD'
+-- and t.pVehiculo in ( 442, 392 )
+-- and t.tCreacion >= '2017-12-07 10:30:00'
+and t.tCreacion >= now() + INTERVAL -3 MINUTE
+order by dIniVigencia, cPatente, cTpCalculo, dInicio
+;
+

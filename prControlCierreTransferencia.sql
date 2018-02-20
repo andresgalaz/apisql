@@ -16,6 +16,7 @@ BEGIN
 		dProximoCierreIni	DATE			 		NOT NULL,
 		dProximoCierreFin	DATE			 		NOT NULL,
         nDiasAlCierre		INTEGER					DEFAULT 0 NOT NULL,
+        nDiasAlCierreAnt	INTEGER					DEFAULT 0 NOT NULL,
 		PRIMARY KEY (pVehiculo)
 	) ENGINE=MEMORY;
     DELETE FROM wMemoryCierreTransf;
@@ -120,7 +121,10 @@ BEGIN
 --                            , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
                               , GREATEST( IFNULL(DATE( tUltViaje        ), '0000-00-00')
                                         , IFNULL(DATE( tUltControl      ), '0000-00-00')) )
-		,	nDiasAlCierre = DATEDIFF(dProximoCierreFin,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreFin) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
+        --  Se calcula días al cierre a partir de la fecha de Inicio del periodo, sin embargo
+        --  si esta 
+		,	nDiasAlCierre    = DATEDIFF(dProximoCierreFin,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreFin) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END )
+		,	nDiasAlCierreAnt = DATEDIFF(dProximoCierreIni,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
 END //
 
 DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
