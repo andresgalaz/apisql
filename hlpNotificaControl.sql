@@ -12,8 +12,8 @@ SELECT w.cPatente
 	 , w.dIniVigencia
  FROM  wMemoryCierreTransf w
        JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
- WHERE w.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135','NMZ478','MJK040','AC040NQ','NNN048' )
---     w.nDiasAlCierre = 3
+ WHERE -- w.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135','NMZ478','MJK040','AC040NQ','NNN048' )
+       w.nDiasAlCierre between 1 and 6
  AND   w.cPoliza is not null
  AND   w.bVigente = '1'
  ;
@@ -35,8 +35,8 @@ SELECT w.cPatente
  , w.nDiasNoSincro
 FROM  wMemoryCierreTransf w
    LEFT JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
-WHERE w.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135' )
--- AND   nDiasAlCierreAnt = -2
+WHERE -- w.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135' )
+      w.nDiasAlCierreAnt between -5 and 5
 -- AND   nDiasNoSincro > 0
 AND   w.cPoliza is not null
 AND   w.bVigente = '1'
@@ -60,5 +60,6 @@ SELECT v.pVehiculo
  AND    fnFechaCierreIni(v.dIniVigencia, 0) > v.dIniVigencia
 -- Dias al cierre
 --  AND    DATEDIFF(fnFechaCierreIni(v.dIniVigencia, 0),fnNow()) = ?
-AND v.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135' )
+-- TEST
+--  AND v.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135' )
 ;

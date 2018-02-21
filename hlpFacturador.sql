@@ -1,4 +1,13 @@
--- Factura Admin
+DELIMITER //
+DROP FUNCTION IF EXISTS zfnNow //
+CREATE FUNCTION zfnNow() RETURNS DATE
+BEGIN
+	RETURN DATE('2018-02-19');
+    -- RETURN DATE(NOW());
+END //
+DELIMITER ;
+
+-- Factura Admin Z
 SELECT v.pVehiculo
      , v.cPatente
      , v.cPoliza
@@ -18,8 +27,8 @@ SELECT v.pVehiculo
 -- AND   zfnFechaCierreIni(v.dIniVigencia, 1) > v.dIniVigencia
 --  Dias al cierre 3
 -- AND    DATEDIFF(fnFechaCierreIni(v.dIniVigencia, 1),fnNow()) = 3;
-and v.cPatente in ( 'MRW848', 'MZC135', 'KPB890' )
- ORDER BY day(v.dIniVigencia);
+and v.cPatente in ( 'AB844YD' )
+ORDER BY day(v.dIniVigencia);
                 
 drop table wMemoryScoreVehiculo;
 drop table wMemoryScoreVehiculoSinMulta;
@@ -114,10 +123,10 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
 -- and t.dInicio = '2017-11-30'
--- and v.cPatente = 'AB686YD'
+and v.cPatente = 'AB844YD'
 -- and t.pVehiculo in ( 481)
-and t.tCreacion >= now() + INTERVAL -3 MINUTE
-union all
+-- and t.tCreacion >= now() + INTERVAL -3 MINUTE
+; -- union all
 select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
      , t.nDescuentoKM + t.nDescuentoSinUso + t.nDescuentoPunta as nDescSinPonderar, t.nDescuento
@@ -145,7 +154,7 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
 -- and t.dInicio = '2017-11-30'
-and v.cPatente = 'AC040NQ'
+and v.cPatente = 'AB844YD'
 -- and t.pVehiculo in ( 481)
 -- and t.tCreacion >= now() + INTERVAL -1 DAY + INTERVAL -1 hour -- MINUTE
 ;

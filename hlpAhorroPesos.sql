@@ -23,8 +23,9 @@ SELECT m.pMovim, m.NOMBRE, m.APELLIDO, m.NRO_PATENTE, m.FECHA_EMISION,year(m.fec
 	 , (((( m.prima - 47.83 ) / 1.23250368 ) / ( 1 - m.PORCENT_DESCUENTO/100 ) + 47.83 ) * 1.23250368) * (((m.derechoemi + m.ingbrutos + m.impsellados + m.iva + m.impvarios+m.impinternos + m.tasasuper + m.servsoc)/prima )  + 1 ) premioSinDesc
 	 , round(m.premio / ( 1 - m.PORCENT_DESCUENTO/100 )) - m.premio ahorro
 FROM integrity.tMovim m
-where m.premio > 0 and m.PORCENT_DESCUENTO is not null
-AND month(m.fecha_inicio_vig) in (11,12)
+where m.premio > 0 -- and m.PORCENT_DESCUENTO is not null
+-- AND m.PORCENT_DESCUENTO = 0
+AND m.fecha_inicio_vig >= '2017-12-01'
 AND m.nro_patente in (
 'AB686YD',
 'AA467BP',

@@ -32,14 +32,14 @@ select v.pVehiculo, v.cPatente, v.dIniVigencia, m.PORCENT_DESCUENTO, zfnFechaCie
 from tVehiculo v
      left join integrity.tMovim m on m.nro_patente = v.cPatente
 --     and m.FECHA_INICIO_VIG between fnFechaCierreIni(v.dIniVigencia,-1) and fnFechaCierreFin(v.dIniVigencia,-1)
-where v.cPatente = 'JBH851'
+where v.cPatente = 'LQB799'
 ;
 
-select v.pVehiculo, v.cPatente, v.dIniVigencia, zfnFechaCierreIni(v.dIniVigencia,1) dIni , f.dInicio, f.nDescuento
+select v.pVehiculo, v.cPatente, v.dIniVigencia, zfnFechaCierreIni(v.dIniVigencia,1) dIni, f.dInicio, f.nDescuento
      , v.fTpDispositivo, v.cIdDispositivo, v.fUsuarioTitular, u.cNombre, u.cEmail
      , f.tCreacion
 from tFactura f 
-	inner join tVehiculo v on v.pVehiculo = f.pVehiculo
-    inner join tUsuario  u on u.pUsuario = v.fUsuarioTitular
-where f.pTpFactura = 1 AND  f.pVehiculo in ( 438 )
+	left join tVehiculo v on v.pVehiculo = f.pVehiculo
+    left join tUsuario  u on u.pUsuario = v.fUsuarioTitular
+where f.pTpFactura = 1 AND  f.pVehiculo in ( 392 )
 ;
