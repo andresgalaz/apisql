@@ -1,6 +1,6 @@
-DROP PROCEDURE IF EXISTS prCalculaScoreDia;
+DROP PROCEDURE IF EXISTS zprCalculaScoreDia;
 DELIMITER //
-CREATE PROCEDURE prCalculaScoreDia	(	in prmDia		DATE
+CREATE PROCEDURE zprCalculaScoreDia	(	in prmDia		DATE
 									,	in prmVehiculo	INTEGER
 									,	in prmUsuario	INTEGER )
 BEGIN
@@ -90,29 +90,18 @@ BEGIN
 		AND		dFecha	 	= vdDia;
 
 		-- Ajusta días sin medición
-		/*
-		Fecha : 29/01/2018
-		Autor: A.GALAZ
-		Motivo: Se deja de utilizar la tabla tInicioTransferencia, porque distorsiona
-				La fecha real del último viaje o control file.
-		
 		SELECT	max(tRegistroActual)
 		FROM	score.tInicioTransferencia
 		WHERE 	fVehiculo = prmVehiculo
 		UNION ALL
-        */
-        
-	    -- Archivo de control sin actividad por hora
-		SELECT	MAX(DATE(f.event_date + INTERVAL -3 HOUR))
-		FROM	snapcar.control_files f JOIN snapcar.clients c on c.id=f.client_id 
-		WHERE	c.vehicle_id	=	prmVehiculo
+		SELECT	max(tEvento) 
+		FROM	score.tEvento
+		WHERE	fVehiculo = prmVehiculo
 		UNION ALL
-		-- Viajes realizados o no (acepta los Status='N' y los que tienen 0 km
-		SELECT	MAX(DATE(f.to_date + INTERVAL -3 HOUR))
-        INTO    vdUltimaSincro
-		FROM	snapcar.trips f 
-				JOIN snapcar.clients c on c.id=f.client_id 
-		WHERE	c.vehicle_id	=	prmVehiculo
+		SELECT	max(event_date)  		INTO vdUltimaSincro
+		FROM	snapcar.control_files f 
+				JOIN snapcar.clients c 	ON c.id = f.client_id
+		WHERE	c.vehicle_id = prmVehiculo
 		ORDER BY 1 DESC
 		LIMIT 1;
 

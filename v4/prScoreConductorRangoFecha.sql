@@ -48,7 +48,7 @@ BEGIN
 		FETCH CurVeh INTO vpUsuario, vpVehiculo, vdIniVigencia;
 		WHILE NOT eofCurVeh DO
 			IF prm_nPeriodo IS NOT NULL THEN
-				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(fnNow()));
+				SET vdIniVigencia = IFNULL( vdIniVigencia, DATE(fnNow));
 				SET vdIni = fnFechaCierreIni( vdIniVigencia, prm_nPeriodo );
 				SET vdFin = fnFechaCierreFin( vdIniVigencia, prm_nPeriodo );
 			END IF;
@@ -59,7 +59,6 @@ BEGIN
 		END WHILE;
 		CLOSE CurVeh;
 	END;
-
 
 	-- CURSOR 1: Entrega un cursor con los totales globales del conductor
 	SELECT	w.pUsuario	, u.cNombre         AS cUsuario	,

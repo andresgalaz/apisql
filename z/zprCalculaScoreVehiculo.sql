@@ -1,6 +1,6 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS prCalculaScoreVehiculo //
-CREATE PROCEDURE prCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
+DROP PROCEDURE IF EXISTS zprCalculaScoreVehiculo //
+CREATE PROCEDURE zprCalculaScoreVehiculo (IN prm_pVehiculo INTEGER, IN prm_dIni DATE, IN prm_dFin DATE )
 BEGIN
 	DECLARE kEventoInicio			INTEGER	DEFAULT 1;
 	DECLARE kEventoFin				INTEGER	DEFAULT 2;
@@ -38,7 +38,7 @@ BEGIN
 	DECLARE vnFactorDias			FLOAT;
 
 -- DEBUG
--- SELECT CONCAT('CALL prCalculaScoreVehiculo(', prm_pVehiculo,',''', prm_dIni, ''',''', prm_dFin, ''' );' ) as `CALL`;
+-- SELECT CONCAT('CALL zprCalculaScoreVehiculo(', prm_pVehiculo,',''', prm_dIni, ''',''', prm_dFin, ''' );' ) as `CALL`;
 
 	SELECT	MIN( t.dFecha )				dInicio			, SUM( t.nKms )				nKms
 		 ,	SUM( t.nFrenada )			nSumaFrenada	, SUM( t.nAceleracion )		nSumaAceleracion
@@ -103,8 +103,8 @@ BEGIN
 	GROUP BY dFecha;
 
 	-- Con el máximo por día se suma la cantidad de días de uso
-	SELECT	COUNT(*)	, SUM(bUso)	, SUM(bHoraPunta)
-	INTO	vnDiasTotal	, vnDiasUso	, vnDiasPunta
+	SELECT	COUNT(*)	, SUM(bUso)	, SUM(bHoraPunta)	-- 	, SUM(nDiasSinMedicion)
+	INTO	vnDiasTotal	, vnDiasUso	, vnDiasPunta		-- 	, vnDiasSinMedicion
 	FROM	wMemoryScoreVehiculoCount;
 
 	-- Calcula días sin medición
@@ -113,11 +113,6 @@ BEGIN
 		-- Los días sin medición, es la cantidad de días que hay a la última fecha que hubo medición, hasta el fin de periodo de cálculo.
 		-- Se mide desde la vigencia de la poliza, no desde la instalación.
 		DECLARE vdUltMovim		DATE;
-		/*
-		Fecha : 29/01/2018
-		Autor: A.GALAZ
-		Motivo: Se deja de utilizar la tabla tInicioTransferencia, porque distorsiona
-				La fecha real del último viaje o control file.
 		DECLARE eofCurUlt		INTEGER DEFAULT 0;
 		DECLARE curUlt CURSOR FOR
 			-- Inicio de transferencia
@@ -145,29 +140,11 @@ BEGIN
 		OPEN curUlt;
 		FETCH curUlt INTO vdUltMovim;
 		CLOSE curUlt;
-		*/        
-        
-	    -- Archivo de control sin actividad por hora
-		SELECT	MAX(DATE(f.event_date + INTERVAL -3 HOUR))
-		FROM	snapcar.control_files f JOIN snapcar.clients c on c.id=f.client_id 
-		WHERE	c.vehicle_id	=	prm_pVehiculo
-		AND		f.event_date	>=	prm_dIni
-		UNION ALL
-		-- Viajes realizados o no (acepta los Status='N' y los que tienen 0 km
-		SELECT	MAX(DATE(f.to_date + INTERVAL -3 HOUR))
-		INTO	vdUltMovim
-		FROM	snapcar.trips f 
-				JOIN snapcar.clients c on c.id=f.client_id 
-		WHERE	c.vehicle_id	=	prm_pVehiculo
-		AND		f.from_date		>=	prm_dIni
-		ORDER BY 1 DESC
-		LIMIT 1;
-        
         
         -- Se consideran los días sin medición del final del periodo
 		-- Si el fin del periodo es mayor a la fecha actual se toma la fecha actual.
 		if prm_dFin >= IFNULL(vdUltMovim, prm_dFin) THEN
-			SET vnDiasSinMedicion = DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(fnNow())), IFNULL(vdUltMovim + INTERVAL 1 DAY, prm_dIni));
+			SET vnDiasSinMedicion = DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(zfnNow())), IFNULL(vdUltMovim + INTERVAL 1 DAY, prm_dIni));
         ELSE
 			SET vnDiasSinMedicion = 0;
         END IF;
@@ -235,12 +212,6 @@ BEGIN
             AND		trips.distance > 300
             AND		trips.`status` = 'S';
 			
-			/*
-			Fecha : 29/01/2018
-            Autor: A.GALAZ
-            Motivo: Se deja de utilizar la tabla tInicioTransferencia, porque distorsiona
-                    La fecha real del último viaje o control file.
-            
 			SELECT	max(it.tRegistroActual)
 			INTO	vtUltimaSincro
 			FROM	tInicioTransferencia it
@@ -250,22 +221,6 @@ BEGIN
 			IF vtUltimaSincro < vtUltimoViaje THEN
 				SET vtUltimaSincro = vtUltimoViaje;
 			END IF;
-
-            */
-            
-			SELECT	max(trips.`to_date`) + INTERVAL - 3 HOUR
-			FROM	snapcar.trips 
-					JOIN snapcar.clients ON clients.id = trips.client_id
-			WHERE	clients.vehicle_id = prm_pVehiculo
-			UNION ALL
-			SELECT	max(ctrl.event_date) + INTERVAL - 3 HOUR
-			INTO	vtUltimaSincro
-			FROM	snapcar.control_files ctrl
-					JOIN snapcar.clients ON clients.id = ctrl.client_id
-			WHERE	clients.vehicle_id = prm_pVehiculo
-			ORDER BY 1 DESC
-			LIMIT 1;
-            
 			IF vnDiasSinMedicion > 0 THEN
 				-- Se calcula e inserta este caso, solo para efectos de comparación, de lo que hubiese ahorrado
 				CALL prCalculaDescuento( vnKms, vnDiasUso, vnDiasPunta, 0, vnScore, vnDiasTotal, DATEDIFF( prm_dFin, vdInicioScore ),

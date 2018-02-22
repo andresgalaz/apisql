@@ -16,7 +16,6 @@ BEGIN
 		dProximoCierreIni	DATE			 		NOT NULL,
 		dProximoCierreFin	DATE			 		NOT NULL,
         nDiasAlCierre		INTEGER					DEFAULT 0 NOT NULL,
-        nDiasAlCierreAnt	INTEGER					DEFAULT 0 NOT NULL,
 		PRIMARY KEY (pVehiculo)
 	) ENGINE=MEMORY;
     DELETE FROM wMemoryCierreTransf;
@@ -112,19 +111,10 @@ BEGIN
 	-- Calcula los dias sin sincronizar y los días al cierre
     UPDATE	wMemoryCierreTransf
     SET		nDiasNoSincro = DATEDIFF( LEAST( DATE(fnNow()), dProximoCierreIni )
-/*    
-	Fecha : 29/01/2018
-	Autor: A.GALAZ
-	Motivo: Se deja de utilizar la tabla tInicioTransferencia, porque distorsiona
-			La fecha real del último viaje o control file.
-*/    
---                            , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
-                              , GREATEST( IFNULL(DATE( tUltViaje        ), '0000-00-00')
+                              , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
+                                        , IFNULL(DATE( tUltViaje        ), '0000-00-00')
                                         , IFNULL(DATE( tUltControl      ), '0000-00-00')) )
-        --  Se calcula días al cierre a partir de la fecha de Inicio del periodo, sin embargo
-        --  si esta 
-		,	nDiasAlCierre    = DATEDIFF(dProximoCierreFin,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreFin) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END )
-		,	nDiasAlCierreAnt = DATEDIFF(dProximoCierreIni,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
+		,	nDiasAlCierre = DATEDIFF(dProximoCierreIni,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
 END //
 
 DROP PROCEDURE IF EXISTS prControlCierreTransferencia //
@@ -140,20 +130,12 @@ BEGIN
 		SET prm_opcPoliza = 'TODOS';
 	END IF;
 	-- Crea tabla temporal wMemoryCierreTransf
-	CALL prControlCierreTransferenciaInicioDef(0);
+	CALL prControlCierreTransferenciaInicioDef(1);
     IF prm_opcPoliza = 'ANULADOS' THEN
 		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
 			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
-/*    
-	Fecha : 29/01/2018
-	Autor: A.GALAZ
-	Motivo: Se deja de utilizar la tabla tInicioTransferencia, porque distorsiona
-			La fecha real del último viaje o control file.
-*/    
--- 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
-			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
+			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
 			 , w.dProximoCierreIni
-			 , w.dProximoCierreFin
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
@@ -162,32 +144,16 @@ BEGIN
     ELSEIF prm_opcPoliza = 'TODOS' THEN
 		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
 			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
-/*    
-	Fecha : 29/01/2018
-	Autor: A.GALAZ
-	Motivo: Se deja de utilizar la tabla tInicioTransferencia, porque distorsiona
-			La fecha real del último viaje o control file.
-*/    
--- 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
-			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
+			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
 			 , w.dProximoCierreIni
-			 , w.dProximoCierreFin
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular;
     ELSE
 		SELECT w.fUsuarioTitular pUsuario, w.pVehiculo idVehiculo, w.cPatente, w.cPoliza, w.dIniVigencia, u.cEmail, u.cNombre
 			 , w.tUltTransferencia fecUltTransferencia, w.tUltViaje fecUltViaje, w.tUltControl fecUltControl
-/*    
-	Fecha : 29/01/2018
-	Autor: A.GALAZ
-	Motivo: Se deja de utilizar la tabla tInicioTransferencia, porque distorsiona
-			La fecha real del último viaje o control file.
-*/    
--- 			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
-			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
+			 , greatest(w.tUltTransferencia, w.tUltViaje, w.tUltControl ) fecMaxima
 			 , w.dProximoCierreIni
-			 , w.dProximoCierreFin
 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular

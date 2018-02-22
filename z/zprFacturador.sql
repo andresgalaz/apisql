@@ -1,6 +1,6 @@
 DELIMITER //
-DROP PROCEDURE IF EXISTS prFacturador //
-CREATE PROCEDURE prFacturador (IN prm_pVehiculo INTEGER)
+DROP PROCEDURE IF EXISTS zprFacturador //
+CREATE PROCEDURE zprFacturador (IN prm_pVehiculo INTEGER)
 BEGIN
 	-- En caso de querer facturar un mes anterior poner -1, u otro mes mas antiguo -2, y así sucesivamente
 	SET @mesDesface = 0;
@@ -17,8 +17,8 @@ BEGIN
 		DECLARE eofCurVeh INTEGER DEFAULT 0;
 		DECLARE curVeh CURSOR FOR
 			SELECT	v.pVehiculo, v.dIniVigencia
-				  , score.fnFechaCierreIni( v.dIniVigencia, -1 + @mesDesface ) dIniCierre
-   				  , score.fnFechaCierreFin( v.dIniVigencia, -1 + @mesDesface ) dFinCierre
+				  , zfnFechaCierreIni( v.dIniVigencia, -1 + @mesDesface ) dIniCierre
+   				  , zfnFechaCierreFin( v.dIniVigencia, -1 + @mesDesface ) dFinCierre
 			FROM	score.tVehiculo v
 			WHERE	v.cPoliza is not null
             -- 08/01/2018: No cubría los casos que no instalaron
@@ -36,11 +36,11 @@ BEGIN
 			IF vdIniVigencia < vdFinCierre THEN
 				IF prm_pVehiculo is not null THEN
 					-- Si se indicó vehículo, para mejorar la precisión, se recalcula el Score Diario y por Viaje
-                    call prFacturadorSub( prm_pVehiculo, vdIniCierre );
+                    call zprFacturadorSub( prm_pVehiculo, vdIniCierre );
                     SET eofCurVeh = 0;
 				END IF;
 				-- Calcula score y descuento del vehículo
-				CALL prCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
+				CALL zprCalculaScoreVehiculo( vpVehiculo, vdIniCierre, vdFinCierre);
 			END IF;
 			FETCH curVeh INTO vpVehiculo, vdIniVigencia, vdIniCierre, vdFinCierre;
 		END WHILE;
@@ -97,8 +97,8 @@ BEGIN
     
 END //
 
-DROP PROCEDURE IF EXISTS prFacturadorSub //
-CREATE PROCEDURE prFacturadorSub (IN prm_pVehiculo INTEGER, IN prm_dInicio DATE )
+DROP PROCEDURE IF EXISTS zprFacturadorSub //
+CREATE PROCEDURE zprFacturadorSub (IN prm_pVehiculo INTEGER, IN prm_dInicio DATE )
 BEGIN
 	BEGIN
 		DECLARE vnCount			INTEGER DEFAULT 0;
@@ -115,7 +115,7 @@ BEGIN
 		OPEN  CurEvento;
 		FETCH CurEvento INTO vnIdViaje;
 		WHILE NOT eofCurEvento DO
-			CALL prCalculaScoreViaje( vnIdViaje );
+			CALL zprCalculaScoreViaje( vnIdViaje );
 			FETCH CurEvento INTO vnIdViaje;
 		END WHILE;
 		CLOSE CurEvento;
@@ -139,7 +139,7 @@ BEGIN
 		FETCH CurEvento INTO vpVehiculo, vpUsuario, vdFecha;
 		WHILE NOT eofCurEvento DO
 			-- Calcula Score diario
-			CALL prCalculaScoreDia( vdFecha, vpVehiculo, vpUsuario );
+			CALL zprCalculaScoreDia( vdFecha, vpVehiculo, vpUsuario );
 			FETCH CurEvento INTO vpVehiculo, vpUsuario, vdFecha;
 		END WHILE;
 		CLOSE CurEvento;

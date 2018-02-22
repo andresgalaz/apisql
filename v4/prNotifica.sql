@@ -34,14 +34,14 @@ BEGIN
 					m.poliza							AS cPoliza		,
 					m.FECHA_INICIO_VIG					AS dIniVigencia	,
                     m.FECHA_EMISION						AS dEmision		,
-                    CONCAT( m.NOMBRE, ' ', m.APELLIDO )	AS cNombre		,
+                    concat( m.NOMBRE, ' ', m.APELLIDO )	AS cNombre		,
                     m.TIPO_DOC							AS cTpDoc		,
                     m.DOCUMENTO							AS cDocumento	,
                     m.MAIL								AS cEmail		,
                     m.FECHA_NACIMIENTO					AS dNacimiento	,
 					m.COD_MARCA							AS cMarca		,
 					m.COD_MODELO						AS cModelo		,
-                    IFNULL(m.CODENDOSO, '0000')			AS cTpEndoso
+                    m.CODENDOSO							AS cTpEndoso
 			FROM	integrity.tMovim m 
 			WHERE 	m.MAIL IS NOT NULL
             AND		m.NRO_PATENTE <> 'A/D'
@@ -73,9 +73,9 @@ BEGIN
 				0365	1483	3322	3728	3741
 				3725	9594	0377
 			*/
-            IF vcTpEndoso IN ( '0053','0052','0917','1205','1486','3528','3545','3546','9592','9593','1571','5423',
-							   '1235','0871','1407','1445','3520','3536','3537','5425',
-							   '0952','1367','0443','0339','0470','0365','1483','3322','3728','3741','3725','9594','0377' ) THEN
+            IF vcTpEndoso IN ('0053','0052','0917','1205','1486','3528','3545','3546','9592','9593','1571','5423',
+							  '1235','0871','1407','1445','3520','3536','3537','5425',
+                              '0952','1367','0443','0339','0470','0365','1483','3322','3728','3741','3725','9594','0377' ) THEN
 				UPDATE	score.tVehiculo 
                 SET		tBaja = vdEmision
 					  , bVigente = '0'
@@ -126,7 +126,7 @@ SELECT vpMovim		, vcPatente	, vcPoliza		,
 	   vdIniVigencia, vcNombre	, vcTpDoc		,
 	   vcDocumento	, vcEmail	, vdNacimiento	,
 	   vcMarca		, vcModelo	;
-*/       
+*/
 	-- Vehículo existe
 	SET bCreaVehiculo = FALSE;
 	IF EXISTS( SELECT '1' FROM score.tVehiculo WHERE cPatente = vcPatente ) THEN
@@ -173,7 +173,7 @@ SELECT vpMovim		, vcPatente	, vcPoliza		,
 				, fCuenta			, fUsuarioTitular	, dIniVigencia
                 , cPoliza			, fMovimCreacion	)
 		VALUE	( vcPatente			, vcMarca			, vcModelo			, '1'
-				, vpCuenta			, vpUsuario			, vdIniVigencia
+				, vpCuenta			, vpUsuario			, vdIniVigencia	- INTERVAL 4 DAY
                 , vcPoliza			, vpMovim			);
 	ELSE
 		BEGIN
@@ -185,11 +185,12 @@ SELECT vpMovim		, vcPatente	, vcPoliza		,
 			FROM	score.tVehiculo v
 			WHERE	v.cPatente	= vcPatente
 			AND		v.bVigente	= '1';
+
 			IF vpVehiculo IS NOT NULL AND vcPolizaActual IS NULL THEN
 				UPDATE	tVehiculo
 				SET		cPoliza			= vcPoliza
 					,	fMovimCreacion	= vpMovim
-                    ,	dIniVigencia	= vdIniVigencia
+                    ,	dIniVigencia	= vdIniVigencia - INTERVAL 4 DAY
 				WHERE	pVehiculo		= vpVehiculo;
 			END IF;
 		END;
