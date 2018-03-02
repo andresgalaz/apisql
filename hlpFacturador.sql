@@ -71,7 +71,7 @@ select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente
      , cIdDispositivo
      , fnFechaCierreIni(dIniVigencia,-1) dIniCierre, fnFechaCierreFin(dIniVigencia,-1) dFinCierre
      , zfnFechaCierreIni(dIniVigencia,-1) dIniCierreZ, zfnFechaCierreFin(dIniVigencia,-1) dFinCierreZ, zfnNow()
-from tVehiculo where cPatente in ( 'AB686YD','KZI628','NAG223')
+from tVehiculo where cPatente in ( 'EPZ791','FWI555','AA929DU','AA467BP','KXZ633','OJE370','MKZ002','FUZ056','KPI916','EXM369','LDP315','LJL447')
 union 
 select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente
      , cIdDispositivo
@@ -83,13 +83,34 @@ order by cPatente, dIniCierre;
 -- Paz dario (2 meses)	'MJK040'
 
 select concat('call prFacturador(', pVehiculo, '); -- ', cPatente) 
-from tVehiculo where cPatente in ( 'LPT144' );
+from tVehiculo where cPatente in ( 'EPZ791','FWI555','AA929DU','AA467BP','KXZ633','OJE370','MKZ002','FUZ056','KPI916','EXM369','LDP315','LJL447' );
 
 -- Lista Aceleraciones
-select * from tEvento e where e.fVehiculo in (494)
-and e.tEvento >= '2018-01-15' and e.tEvento < now()
-and fTpEvento=3
+select v.cPatente, u.cNombre, u.cEmail, e.* 
+from tEvento e 
+	 inner join tVehiculo v on v.pVehiculo = e.fVehiculo
+     inner join tUsuario u on u.pUsuario = v.fUsuarioTitular
+where v.cPatente in ('AA429CP','FAA680','JBH851','ONV367' )
+-- and e.tEvento >= '2018-01-01' -- and e.tEvento < now()
+and e.fTpEvento = 3
 ;
+
+-- usuarioClase.BSH 
+SELECT u.pUsuario, u.cEmail , u.cNombre, u.nDNI, v.pVehiculo, v.cPatente
+     , d.cDescripcion cTpDispositivo, v.cIdDispositivo
+     , max( e.tEvento ) tEvento
+ FROM  tUsuario u
+       LEFT OUTER JOIN tUsuarioVehiculo uv ON uv.pUsuario      = u.pUsuario
+       LEFT OUTER JOIN tVehiculo        v  ON v.pVehiculo      = uv.pVehiculo
+       LEFT OUTER JOIN tTpDispositivo   d  ON d.pTpDispositivo = v.fTpDispositivo
+       LEFT OUTER JOIN tEvento          e  ON e.fUsuario       = uv.pUsuario
+                                          AND e.fVehiculo      = uv.pVehiculo
+ WHERE 1 = 1
+ GROUP BY u.pUsuario, u.cEmail , u.cNombre, u.nDNI, v.pVehiculo, v.cPatente
+        , d.cDescripcion, v.cIdDispositivo
+ ORDER BY tEvento DESC
+ ;
+
 -- Borra Aceleraciones
 delete from tEvento  where fVehiculo in (494)
 and tEvento >= '2018-01-15' 
@@ -106,12 +127,21 @@ and fTpEvento=4;
 
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
-from tVehiculo where cPatente in ('AC040NQ','NMZ478','NNN048','AC156IE'); -- pVehiculo in (494);
+from tVehiculo where cPatente in ('EPZ791','FWI555','AA929DU','AA467BP','KXZ633','OJE370','MKZ002','FUZ056','KPI916','EXM369','LDP315','LJL447'); -- pVehiculo in (494);
 -- 2018-02-19
-call prRecalculaScore('2018-02-13',493,326); call prFacturador(493); -- AC040NQ
-call prRecalculaScore('2018-02-15',514,350); call prFacturador(514); -- AC156IE
-call prRecalculaScore('2018-02-14',353,118); call prFacturador(353); -- NMZ478
-call prRecalculaScore('2018-02-14',508,342); call prFacturador(508); -- NNN048
+call prRecalculaScore('2018-02-21',403,179); call prFacturador(403); -- AA467BP
+call prRecalculaScore('2018-02-21',402,208); call prFacturador(402); -- AA929DU
+call prRecalculaScore('2018-02-21',101,48); call prFacturador(101); -- EPZ791
+call prRecalculaScore('2018-02-21',426,241); call prFacturador(426); -- EXM369
+call prRecalculaScore('2018-02-21',422,235); call prFacturador(422); -- FUZ056
+call prRecalculaScore('2018-02-21',393,181); call prFacturador(393); -- FWI555
+call prRecalculaScore('2018-02-21',491,181); call prFacturador(491); -- FWI555
+call prRecalculaScore('2018-02-21',423,235); call prFacturador(423); -- KPI916
+call prRecalculaScore('2018-02-21',404,179); call prFacturador(404); -- KXZ633
+call prRecalculaScore('2018-02-21',432,247); call prFacturador(432); -- LDP315
+call prRecalculaScore('2018-02-21',482,289); call prFacturador(482); -- LJL447
+call prRecalculaScore('2018-02-21',421,233); call prFacturador(421); -- MKZ002
+call prRecalculaScore('2018-02-21',416,224); call prFacturador(416); -- OJE370
 
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
@@ -168,12 +198,31 @@ select v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
 from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
-where v.cPoliza <> 'TEST' and t.pTpFactura = 2 and v.dIniVigencia < t.dFin
+where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
 -- and t.dInicio = '2017-11-30'
 -- and v.cPatente = 'AB686YD'
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
-and t.tCreacion >= now() + INTERVAL -3 MINUTE
-order by dIniVigencia, cPatente, cTpCalculo, dInicio
-;
+and t.tCreacion >= now() + INTERVAL -5 MINUTE
+-- order by dIniVigencia, cPatente, dInicio
 
+union all
+
+select v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
+	 , t.dInicio iniPeriodo, (t.dFin + INTERVAL -1 DAY ) finPeriodo
+     , t.nDescuento descuento, t.nKms kms, t.nKmsPond kmsPond
+     , t.nScore score
+     , t.nQFrenada qFrenadas, t.nQAceleracion qAceleraciones, t.nQVelocidad qExcesosVel, t.nQCurva qCurvas
+     , t.nQViajes qViajes, t.nDiasTotal diasTotal, t.nDiasUso diasUso, t.nDiasPunta diasPunta, t.nDiasSinMedicion diasSinMedicion
+from tFactura t
+join tVehiculo v on v.pVehiculo = t.pVehiculo
+join tUsuario  u on u.pUsuario = v.fUsuarioTitular
+where v.cPoliza <> 'TEST' and t.pTpFactura = 2 and v.dIniVigencia < t.dFin
+-- and t.dInicio = '2017-11-30'
+and v.cPatente = 'AA929DU'
+-- and t.pVehiculo in ( 442, 392 )
+-- and t.tCreacion >= '2017-12-07 10:30:00'
+and t.tCreacion >= now() + INTERVAL -5 MINUTE
+
+order by inicioVigencia, patente, iniPeriodo
+;

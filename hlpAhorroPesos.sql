@@ -54,7 +54,6 @@ AND m.nro_patente in (
 order by m.NRO_PATENTE,month(m.fecha_inicio_vig);
 -- GROUP BY m.nro_patente, m.PORCENT_DESCUENTO ;
 
-<<<<<<< HEAD
 drop table ahorro;
 
 create table ahorro as 
@@ -74,6 +73,7 @@ order by m.NRO_PATENTE,m.pMovim;
 
 SELECT a.pMovim, concat(a.NOMBRE,' ', a.APELLIDO) nombre, a.NRO_PATENTE patente, a.FECHA_EMISION
      , a.descuento
+     , a.descInv
      , a.sumaaseg
      , a.prima
      , a.derechoemi, a.impsellados
@@ -82,34 +82,9 @@ SELECT a.pMovim, concat(a.NOMBRE,' ', a.APELLIDO) nombre, a.NRO_PATENTE patente,
      , a.prima+ a.suma_imp premioCalc
      , a.premio
      , a.primaTecnica
-     , ( a.primaTecnica * descInv )   primaTecnicaSinDesc
+     , round(a.primaTecnica * descInv )   primaTecnicaSinDesc
      , round(a.prima * descInv ) primaSinDesc
 	 , round(a.premio * descInv)  premioSinDesc
 	 , round(a.premio * descInv) - a.premio ahorro
 from ahorro a
-where a.descuento = 0;
-=======
-select
-AB686YD, 2.596,
-AA467BP, 3.411,
-EPZ791, 1.617,
-KXZ633, 2.987,
-EXM369, 1.566,
-KZI628, 1.789,
-MRW848, 1.578,
-AB844YD, 2.221,
-LTQ105, 2.093,
-GOZ716, 1.429,
-NXL561, 2.063
-
-LTA765, 1.952,
-AA929DU, 3287,
-FUZ056, 2.062,
-KPI916, 3.191,
-LDP315, 3.555,
-MKZ002, 1.490,
-OJE370, 2.146,
-FWI555, 1.529,
-LJL447, 1.930,
-FST135, 1.556;
->>>>>>> 32ce1b073594865599a9f4e3c76bc81c3cf97af7
+where a.descuento > 20; --  between 1 and 10;
