@@ -71,19 +71,19 @@ select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente
      , cIdDispositivo
      , fnFechaCierreIni(dIniVigencia,-1) dIniCierre, fnFechaCierreFin(dIniVigencia,-1) dFinCierre
      , zfnFechaCierreIni(dIniVigencia,-1) dIniCierreZ, zfnFechaCierreFin(dIniVigencia,-1) dFinCierreZ, zfnNow()
-from tVehiculo where cPatente in ( 'EPZ791','FWI555','AA929DU','AA467BP','KXZ633','OJE370','MKZ002','FUZ056','KPI916','EXM369','LDP315','LJL447')
+from tVehiculo where cPatente in ( 'LGH390')
 union 
 select pVehiculo, cPatente, cPoliza, dIniVigencia, dInstalacion, bVigente
      , cIdDispositivo
      , fnFechaCierreIni(dIniVigencia,0) dIniCierre, fnFechaCierreFin(dIniVigencia,0) dFinCierre
      , zfnFechaCierreIni(dIniVigencia,0) dIniCierreZ, zfnFechaCierreFin(dIniVigencia,0) dFinCierreZ, zfnNow()
-from tVehiculo where cPatente in ( 'AB686YD','KZI628','NAG223')
+from tVehiculo where cPatente in ( 'LGH390')
 order by cPatente, dIniCierre;
 
 -- Paz dario (2 meses)	'MJK040'
 
 select concat('call prFacturador(', pVehiculo, '); -- ', cPatente) 
-from tVehiculo where cPatente in ( 'EPZ791','FWI555','AA929DU','AA467BP','KXZ633','OJE370','MKZ002','FUZ056','KPI916','EXM369','LDP315','LJL447' );
+from tVehiculo where cPatente in ( 'LGH390' );
 
 -- Lista Aceleraciones
 select v.cPatente, u.cNombre, u.cEmail, e.* 
@@ -127,21 +127,10 @@ and fTpEvento=4;
 
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
-from tVehiculo where cPatente in ('EPZ791','FWI555','AA929DU','AA467BP','KXZ633','OJE370','MKZ002','FUZ056','KPI916','EXM369','LDP315','LJL447'); -- pVehiculo in (494);
+from tVehiculo where cPatente in ('LGH390'); -- pVehiculo in (494);
 -- 2018-02-19
-call prRecalculaScore('2018-02-21',403,179); call prFacturador(403); -- AA467BP
-call prRecalculaScore('2018-02-21',402,208); call prFacturador(402); -- AA929DU
-call prRecalculaScore('2018-02-21',101,48); call prFacturador(101); -- EPZ791
-call prRecalculaScore('2018-02-21',426,241); call prFacturador(426); -- EXM369
-call prRecalculaScore('2018-02-21',422,235); call prFacturador(422); -- FUZ056
-call prRecalculaScore('2018-02-21',393,181); call prFacturador(393); -- FWI555
-call prRecalculaScore('2018-02-21',491,181); call prFacturador(491); -- FWI555
-call prRecalculaScore('2018-02-21',423,235); call prFacturador(423); -- KPI916
-call prRecalculaScore('2018-02-21',404,179); call prFacturador(404); -- KXZ633
-call prRecalculaScore('2018-02-21',432,247); call prFacturador(432); -- LDP315
-call prRecalculaScore('2018-02-21',482,289); call prFacturador(482); -- LJL447
-call prRecalculaScore('2018-02-21',421,233); call prFacturador(421); -- MKZ002
-call prRecalculaScore('2018-02-21',416,224); call prFacturador(416); -- OJE370
+
+call prRecalculaScore('2018-02-21',504,330); call prFacturador(504); -- LGH390
 
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
@@ -153,9 +142,9 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
 -- and t.dInicio = '2017-11-30'
-and v.cPatente = 'AB844YD'
+-- and v.cPatente = 'AB844YD'
 -- and t.pVehiculo in ( 481)
--- and t.tCreacion >= now() + INTERVAL -3 MINUTE
+and t.tCreacion >= now() + INTERVAL -3 MINUTE
 ; -- union all
 select 'Sin multa' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
      , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -219,7 +208,7 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 2 and v.dIniVigencia < t.dFin
 -- and t.dInicio = '2017-11-30'
-and v.cPatente = 'AA929DU'
+-- and v.cPatente = 'AA929DU'
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
 and t.tCreacion >= now() + INTERVAL -5 MINUTE
