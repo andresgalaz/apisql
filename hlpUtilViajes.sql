@@ -21,8 +21,8 @@ SELECT t.id trip_id, t.client_id, c.vehicle_id, c.driver_id,
 -- Lista viajes desde la base de lucho
 select * 
 from snapcar.trips t join snapcar.clients c on c.id = t.client_id
-where ( c.driver_id=184 or c.vehicle_id=395 )
-and t.`status`='S'
+where ( c.driver_id=77 or c.vehicle_id=203 )
+-- and t.`status`='S'
 order by from_date desc;
 -- Permite modificar
 select * 
@@ -34,4 +34,11 @@ order by from_date desc;
 UPDATE snapcar.trips set UPDATED_AT=NOW()
 where client_id=511
 and `status` in ('S');
+                
+-- Lista viajes desde la base de lucho
+select * 
+from snapcar.control_files t join snapcar.clients c on c.id = t.client_id
+where ( c.driver_id=77 or c.vehicle_id=203 )
+-- and t.`status`='S'
+order by event_date desc;
                 

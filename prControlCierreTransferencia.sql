@@ -111,7 +111,7 @@ BEGIN
 
 	-- Calcula los dias sin sincronizar y los días al cierre
     UPDATE	wMemoryCierreTransf
-    SET		nDiasNoSincro = DATEDIFF( LEAST( DATE(fnNow()), dProximoCierreIni )
+    SET		nDiasNoSincro = DATEDIFF( LEAST( DATE(fnNow()), dProximoCierreFin )
 /*    
 	Fecha : 29/01/2018
 	Autor: A.GALAZ
