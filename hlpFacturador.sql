@@ -130,7 +130,7 @@ select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) 
 from tVehiculo where cPatente in ('LGH390'); -- pVehiculo in (494);
 -- 2018-02-19
 
-call prRecalculaScore('2018-02-21',504,330); call prFacturador(504); -- LGH390
+call prRecalculaScore('2018-01-24',504,330); call prFacturador(504); -- LGH390
 
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
@@ -173,7 +173,7 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin -- and cPatente <> 'NMZ478'
 -- and t.dInicio = '2017-11-30'
-and v.cPatente = 'AB844YD'
+and v.cPatente = 'LGH390'
 -- and t.pVehiculo in ( 481)
 -- and t.tCreacion >= now() + INTERVAL -1 DAY + INTERVAL -1 hour -- MINUTE
 ;
@@ -215,3 +215,5 @@ and t.tCreacion >= now() + INTERVAL -5 MINUTE
 
 order by inicioVigencia, patente, iniPeriodo
 ;
+
+select * from tFactura t where t.pVehiculo = 504;
