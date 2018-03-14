@@ -123,7 +123,7 @@ BEGIN
                                         , IFNULL(DATE( tUltControl      ), '0000-00-00')) )
         --  Se calcula días al cierre a partir de la fecha de Inicio del periodo, sin embargo
         --  si esta 
-		,	nDiasAlCierre    = DATEDIFF(dProximoCierreFin,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreFin) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END )
+		,	nDiasAlCierre    = DATEDIFF(dProximoCierreFin,DATE(fnNow())) -- ( 12/03/2018 AGALAZ ) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreFin) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END )
 		,	nDiasAlCierreAnt = DATEDIFF(dProximoCierreIni,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
 END //
 
@@ -154,7 +154,7 @@ BEGIN
 			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
 			 , w.dProximoCierreIni
 			 , w.dProximoCierreFin
-			 , w.nDiasAlCierre
+ 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
 		WHERE 	w.bVigente = '0' 
@@ -172,7 +172,7 @@ BEGIN
 			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
 			 , w.dProximoCierreIni
 			 , w.dProximoCierreFin
-			 , w.nDiasAlCierre
+ 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular;
     ELSE
@@ -188,7 +188,7 @@ BEGIN
 			 , GREATEST(IFNULL(w.tUltViaje, '0000-00-00'), IFNULL(w.tUltControl, '0000-00-00') ) fecMaxima
 			 , w.dProximoCierreIni
 			 , w.dProximoCierreFin
-			 , w.nDiasAlCierre
+ 			 , w.nDiasAlCierre
 		FROM	wMemoryCierreTransf w
 				JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
 		WHERE 	w.bVigente = '1' 

@@ -1,9 +1,9 @@
-DROP VIEW IF EXISTS trip_observations_no_deleted_view;
-CREATE VIEW trip_observations_no_deleted_view as
+DROP VIEW IF EXISTS snapcar.trip_observations_no_deleted_view;
+CREATE VIEW snapcar.trip_observations_no_deleted_view as
 SELECT o.*
-FROM trip_observations_g  o
--- WHERE NOT EXISTS ( SELECT 1 FROM trip_observations_deleted d WHERE d.id = o.id )
-WHERE EXISTS ( SELECT 1 FROM score.tEvento d WHERE d.nIdObservation = o.id )
+FROM snapcar.trip_observations_g  o
+WHERE NOT EXISTS ( SELECT 1 FROM snapcar.trip_observations_deleted d WHERE d.id = o.id )
+-- WHERE EXISTS ( SELECT 1 FROM score.tEvento d WHERE d.nIdObservation = o.id )
 AND o.`status` = 'OK';
 
 # pEvento, nIdViaje, nIdTramo, fTpEvento, tEvento, nLG, nLT, cCalle, cCalleCorta, nVelocidadMaxima, nValor, nValorG, fVehiculo, fUsuario, nIdObservation, nPuntaje, nNivelApp, tModif, bVigente

@@ -13,7 +13,7 @@ BEGIN
 			JOIN wEvento		AS	fin	ON	fin.nIdViaje	= w.nIdViaje
 										AND fin.fTpEvento	= 2
 										AND	fin.nValor		> prm.nDistanciaMin
-    WHERE	w.tEvento >= '2017-01-01';
+    WHERE	w.tEvento >= '2017-10-01';
 	-- WHERE w.tEvento >= '2016-08-01';
 	-- SELECT '200 Crea tabla temporal', count(*) from tmpEvento;
     

@@ -1,28 +1,121 @@
--- delete from trip_observations_g where trip_id in ( 5714,5735,5716,5742,5737,5724,5728,5709,5706,5736,5711,5719,5732,5723,5704,5731,5718,5707,5738,5733,5741,5730,5722 ) and prefix_observation = 'A';
-	
-
-drop table if exists score.work_anomalia;
-create table score.work_anomalia as
+drop table if exists score.wEventoAnomalia;
+create table score.wEventoAnomalia as
 select trip_id, prefix_observation, count(*) cantidad
 from snapcar.trip_observations_g
-where from_time >= '2018-02-01'
+where from_time >= '2017-10-01'
+and status='OK'
 group by trip_id, prefix_observation
 order by cantidad desc;
 
-select t.id trip_id,t.from_date, t.to_date, v.cPatente, v.cIdDispositivo, u.cNombre, u.cEmail, a.prefix_observation, a.cantidad
-from score.work_anomalia a
+-- Por tiempo
+select t.client_id, c.vehicle_id, t.id trip_id,t.from_date, t.to_date, v.cPatente, v.cIdDispositivo, u.cNombre, u.cEmail, a.prefix_observation, a.cantidad
+     , time_to_sec( timediff(t.to_date, t.from_date ))/60 minutos, a.cantidad / time_to_sec( timediff(t.to_date, t.from_date )) cantXseg
+from score.wEventoAnomalia a
 	inner join snapcar.trips	t on t.id = a.trip_id
 	inner join snapcar.clients	c on c.id = t.client_id
 	inner join score.tVehiculo	v on v.pVehiculo = c.vehicle_id
-	inner join score.tUsuario	u on u.pUsuario = v.fUsuarioTitular
+	inner join score.tUsuario	u on u.pUsuario = v.fUsuarioTitular   
+    
+where v.cPatente not in ('AA211DH'    )
+and v.cPatente = 'LQB799'
+order by cantidad desc
 ;    
 
+-- Acumulado x KM
+select t.client_id, c.vehicle_id, substr(t.from_date,1,7) periodo, v.cPatente, v.cIdDispositivo, u.cNombre, u.cEmail, a.prefix_observation, sum(a.cantidad) cantidad, round(sum(t.distance)/1000) distance
+     , 1000 * sum(a.cantidad) / sum(t.distance) cantXkm
+--     , time_to_sec( timediff(t.to_date, t.from_date ))/60 minutos, a.cantidad / time_to_sec( timediff(t.to_date, t.from_date )) cantXseg
+from score.wEventoAnomalia a
+	inner join snapcar.trips	t on t.id = a.trip_id
+	inner join snapcar.clients	c on c.id = t.client_id
+	inner join score.tVehiculo	v on v.pVehiculo = c.vehicle_id
+	inner join score.tUsuario	u on u.pUsuario = v.fUsuarioTitular   
+    
+where v.cPatente in ('LGH390'    )
+group by t.client_id, c.vehicle_id, substr(t.from_date,1,7), v.cPatente, v.cIdDispositivo, u.cNombre, u.cEmail, a.prefix_observation
+order by cantidad desc
+;    
+
+-- Marca eventos en la BD de LUXO
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation = 'A'
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 557  ) -- 'AA429CP'
+;
+delete from score.tEvento WHERE fTpEvento = 3
+AND fVehiculo = 525 -- 'AA429CP'
+;
+
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation in ( 'A', 'F' )
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 531  ) -- JBH851
+;
+delete from score.tEvento WHERE fTpEvento in ( 3, 4 )
+AND fVehiculo = 437 -- JBH851
+;
+
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation in ( 'A', 'F' )
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 547  ) -- FAA680
+;
+delete from score.tEvento WHERE fTpEvento in ( 3, 4 )
+AND fVehiculo = 505 -- FAA680
+;
+
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation in ( 'A', 'F' )
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 541  ) -- EXM369
+;
+delete from score.tEvento WHERE fTpEvento in ( 3, 4 )
+AND fVehiculo = 426 -- EXM369
+;
+
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation in ( 'A', 'F' )
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 524  ) -- KPI916
+;
+delete from score.tEvento WHERE fTpEvento in ( 3, 4 )
+AND fVehiculo = 423 -- KPI916
+;
+
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation in ( 'A', 'F' )
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 524  ) -- KPI916
+;
+delete from score.tEvento WHERE fTpEvento in ( 3, 4 )
+AND fVehiculo = 423 -- KPI916
+;
+
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation in ( 'A', 'F' )
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 538  ) -- MRW848
+;
+delete from score.tEvento WHERE fTpEvento in ( 3, 4 )
+AND fVehiculo = 483 -- MRW848
+;
+
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation in ( 'A', 'F', 'C' )
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 521  ) -- NXL561
+;
+delete from score.tEvento WHERE fTpEvento in ( 3, 4, 6 )
+AND fVehiculo = 414 -- NXL561
+;
+
+update snapcar.trip_observations_g set status = 'D'
+WHERE prefix_observation in ( 'A', 'F', 'C' )
+AND trip_id = 125726 -- LQB799
+;
+delete from score.tEvento WHERE fTpEvento in ( 3, 4, 6 )
+AND nIdViaje = 125726 -- LQB799
+;
+
+
+
+-- Informe para JAM de algunos casos
 # trip_id, from_date, to_date, cPatente, cIdDispositivo, cNombre, cEmail, prefix_observation, cantidad
 # '126859', '2018-02-10 11:01:34', '2018-02-10 12:55:55', 'JBH851', '0087', 'Ricardo Alberto Sobrero', 'rsobrero@temaiken.org.ar', 'A', '382'
 # '121954', '2018-02-14 13:31:00', '2018-02-14 17:38:55', 'AA429CP', '0147', 'MIRIAN SOLEDAD OJEDA SANCHEZ', 'ojeda_mirian.s@hotmail.com', 'A', '285'
 # '138749', '2018-02-25 18:29:00', '2018-02-25 18:56:55', 'FAA680', '0227', 'GONZALO PUEBLA', 'gonzalopuebla@icloud.com', 'A', '110'
-
-
 
 SELECT * FROM snapcar.trip_details 
 where trip_id=126859

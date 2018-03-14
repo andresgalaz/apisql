@@ -1,12 +1,3 @@
-DELIMITER //
-DROP FUNCTION IF EXISTS zfnNow //
-CREATE FUNCTION zfnNow() RETURNS DATE
-BEGIN
-	RETURN DATE('2018-02-19');
-    -- RETURN DATE(NOW());
-END //
-DELIMITER ;
-
 -- Factura Admin Z
 SELECT v.pVehiculo
      , v.cPatente
@@ -127,10 +118,12 @@ and fTpEvento=4;
 
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
-from tVehiculo where cPatente in ('LGH390'); -- pVehiculo in (494);
+from tVehiculo where cPatente in ('NDR954'); -- pVehiculo in (494);
 -- 2018-02-19
 
 call prRecalculaScore('2018-01-24',504,330); call prFacturador(504); -- LGH390
+call prRecalculaScore('2018-01-01',390,174); call prFacturador(390); -- NDR954
+
 
 
 select 'Real' cTpCalculo, v.cPatente, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
@@ -216,4 +209,4 @@ and t.tCreacion >= now() + INTERVAL -5 MINUTE
 order by inicioVigencia, patente, iniPeriodo
 ;
 
-select * from tFactura t where t.pVehiculo = 504;
+select * from tFactura t where t.pVehiculo = 390;
