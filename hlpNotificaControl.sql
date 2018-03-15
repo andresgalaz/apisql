@@ -17,7 +17,8 @@ SELECT w.cPatente
  AND   w.cPoliza is not null
  AND   w.bVigente = '1'
  ;
- 
+
+
  
 -- Al cierre del periodo de facturación que es un días después del término, es decir Fecha Fin Periodo
 -- DIAS AL CIERRE = -1 
@@ -31,15 +32,32 @@ SELECT w.cPatente
 	 , GREATEST( IFNULL(DATE( w.tUltViaje        ), '0000-00-00')
 			   , IFNULL(DATE( w.tUltControl      ), '0000-00-00'))      dSincro
 -- Control           
+ , w.nDiasAlCierre
  , w.nDiasAlCierreAnt 
  , w.nDiasNoSincro
 FROM  wMemoryCierreTransf w
    LEFT JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
-WHERE -- w.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135' )
-      w.nDiasAlCierreAnt between -5 and 5
+WHERE w.cPatente in ( 'OOM918' )
+-- AND   w.nDiasAlCierreAnt between -5 and 5
+      
 -- AND   nDiasNoSincro > 0
 AND   w.cPoliza is not null
 AND   w.bVigente = '1'
+;
+
+SELECT w.cPatente 
+     , DATE_FORMAT(w.dProximoCierreIni, '%d/%m/%Y')    dInicio 
+     , DATE_FORMAT(w.dProximoCierreFin, '%d/%m/%Y')    dFin 
+     , w.nDiasNoSincro 
+     , u.cEmail, u.cNombre                                              cNombre 
+     , GREATEST( IFNULL(DATE( w.tUltViaje        ), '0000-00-00') 
+               , IFNULL(DATE( w.tUltControl      ), '0000-00-00'))      dSincro 
+ FROM  wMemoryCierreTransf w 
+       JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular 
+ WHERE nDiasAlCierreAnt = ? 
+ AND   nDiasNoSincro > 0 
+ AND   w.cPoliza is not null 
+ AND   w.bVigente = '1' 
 ;
 
 -- Facturación Administrativa

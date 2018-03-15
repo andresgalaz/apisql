@@ -95,6 +95,7 @@ BEGIN
 		FROM	wMemoryScoreVehiculoSinMulta;
 	END IF;    
     
+--    select * from tFactura t where tCreacion >= now() + INTERVAL -5 SECOND;
 END //
 
 DROP PROCEDURE IF EXISTS prFacturadorSub //

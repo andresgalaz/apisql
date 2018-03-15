@@ -124,7 +124,7 @@ BEGIN
         --  Se calcula días al cierre a partir de la fecha de Inicio del periodo, sin embargo
         --  si esta 
 		,	nDiasAlCierre    = DATEDIFF(dProximoCierreFin,DATE(fnNow())) -- ( 12/03/2018 AGALAZ ) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreFin) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END )
-		,	nDiasAlCierreAnt = DATEDIFF(dProximoCierreIni,DATE(fnNow())) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
+		,	nDiasAlCierreAnt = DATEDIFF(dProximoCierreIni,DATE(fnNow())); -- ( 15/03/2018 + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreIni) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END );
 END //
 
 DROP PROCEDURE IF EXISTS prControlCierreTransferencia //

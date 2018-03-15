@@ -118,11 +118,10 @@ and fTpEvento=4;
 
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
-from tVehiculo where cPatente in ('NDR954'); -- pVehiculo in (494);
+from tVehiculo where cPatente in ('OOM918') and bVigente='1'; -- pVehiculo in (494);
 -- 2018-02-19
 
-call prRecalculaScore('2018-01-24',504,330); call prFacturador(504); -- LGH390
-call prRecalculaScore('2018-01-01',390,174); call prFacturador(390); -- NDR954
+call prRecalculaScore('2018-02-11',532,361); call prFacturador(532); -- OOM918
 
 
 
@@ -185,7 +184,7 @@ where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
 -- and v.cPatente = 'AB686YD'
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
-and t.tCreacion >= now() + INTERVAL -5 MINUTE
+and t.tCreacion >= now() + INTERVAL -8 HOUR
 -- order by dIniVigencia, cPatente, dInicio
 
 union all
@@ -204,9 +203,9 @@ where v.cPoliza <> 'TEST' and t.pTpFactura = 2 and v.dIniVigencia < t.dFin
 -- and v.cPatente = 'AA929DU'
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
-and t.tCreacion >= now() + INTERVAL -5 MINUTE
+and t.tCreacion >= now() + INTERVAL -18 HOUR
 
 order by inicioVigencia, patente, iniPeriodo
 ;
 
-select * from tFactura t where t.pVehiculo = 390;
+select * from tFactura t where t.pVehiculo = 532;

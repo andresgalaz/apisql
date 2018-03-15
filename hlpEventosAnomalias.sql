@@ -2,7 +2,7 @@ drop table if exists score.wEventoAnomalia;
 create table score.wEventoAnomalia as
 select trip_id, prefix_observation, count(*) cantidad
 from snapcar.trip_observations_g
-where from_time >= '2017-10-01'
+where from_time >= '2018-03-11'
 and status='OK'
 group by trip_id, prefix_observation
 order by cantidad desc;
@@ -16,8 +16,8 @@ from score.wEventoAnomalia a
 	inner join score.tVehiculo	v on v.pVehiculo = c.vehicle_id
 	inner join score.tUsuario	u on u.pUsuario = v.fUsuarioTitular   
     
-where v.cPatente not in ('AA211DH'    )
-and v.cPatente = 'LQB799'
+-- where v.cPatente not in ('AA211DH'    )
+-- and v.cPatente = 'LQB799'
 order by cantidad desc
 ;    
 
