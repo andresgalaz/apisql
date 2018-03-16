@@ -120,7 +120,10 @@ BEGIN
 */    
 --                            , GREATEST( IFNULL(DATE( tUltTransferencia), '0000-00-00')
                               , GREATEST( IFNULL(DATE( tUltViaje        ), '0000-00-00')
-                                        , IFNULL(DATE( tUltControl      ), '0000-00-00')) )
+                                        , IFNULL(DATE( tUltControl      ), '0000-00-00')
+                                        -- Si no hay registros en la BD TRIPS, entonces NUNCA sincronizó, así es que
+                                        -- se calcula a partir de la fecha de vigencia
+                                        , dIniVigencia ))
         --  Se calcula días al cierre a partir de la fecha de Inicio del periodo, sin embargo
         --  si esta 
 		,	nDiasAlCierre    = DATEDIFF(dProximoCierreFin,DATE(fnNow())) -- ( 12/03/2018 AGALAZ ) + ( CASE WHEN TIMESTAMPDIFF(MONTH,dIniVigencia, dProximoCierreFin) < 1 THEN DAY(LAST_DAY(fnNow())) ELSE 0 END )

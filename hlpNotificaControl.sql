@@ -8,12 +8,13 @@ SELECT w.cPatente
 	 , w.nDiasNoSincro
 	 , u.cEmail, u.cNombre
 	 -- Control
+	 , w.nDiasAlCierreAnt
 	 , w.nDiasAlCierre
 	 , w.dIniVigencia
  FROM  wMemoryCierreTransf w
        JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
- WHERE -- w.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135','NMZ478','MJK040','AC040NQ','NNN048' )
-       w.nDiasAlCierre between 1 and 6
+ WHERE w.cPatente in ( 'FYC645' )
+--       w.nDiasAlCierre between 1 and 6
  AND   w.cPoliza is not null
  AND   w.bVigente = '1'
  ;
@@ -30,14 +31,15 @@ SELECT w.cPatente
 	 , w.nDiasNoSincro
 	 , u.cEmail, u.cNombre                                              cNombre
 	 , GREATEST( IFNULL(DATE( w.tUltViaje        ), '0000-00-00')
-			   , IFNULL(DATE( w.tUltControl      ), '0000-00-00'))      dSincro
+			   , IFNULL(DATE( w.tUltControl      ), '0000-00-00')
+               , w.dIniVigencia )      dSincro
 -- Control           
  , w.nDiasAlCierre
  , w.nDiasAlCierreAnt 
- , w.nDiasNoSincro
+ , w.nDiasNoSincro, w.pVehiculo, w.fUsuarioTitular
 FROM  wMemoryCierreTransf w
    LEFT JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
-WHERE w.cPatente in ( 'OOM918' )
+WHERE w.cPatente in ( 'FYC645' )
 -- AND   w.nDiasAlCierreAnt between -5 and 5
       
 -- AND   nDiasNoSincro > 0
