@@ -1,3 +1,12 @@
+DELIMITER //
+DROP FUNCTION IF EXISTS fnNow //
+CREATE FUNCTION fnNow() RETURNS DATE
+BEGIN
+	RETURN DATE('2018-03-19');
+    -- RETURN DATE(NOW());
+END //
+DELIMITER ;
+
 -- A Facturar: 2 días al cierre
 -- 			NO_SINCRO >= 5 mensaje 1
 --          SINO mensaje 2
@@ -82,4 +91,21 @@ SELECT v.pVehiculo
 --  AND    DATEDIFF(fnFechaCierreIni(v.dIniVigencia, 0),fnNow()) = ?
 -- TEST
 --  AND v.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135' )
+;
+
+
+-- No Sincro: Se busca que falten 10 o 20 días al cierre
+call prControlCierreTransferenciaInicioDef(0)
+;
+SELECT w.cPatente 
+, w.dProximoCierreIni		dInicio 
+, w.dProximoCierreFin		dFin 
+, w.nDiasNoSincro 
+, u.cEmail, u.cNombre 
+, w.nDiasAlCierre 
+ FROM  wMemoryCierreTransf w 
+       JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular 
+ WHERE 1=1 -- nDiasAlCierre in ( 10, 20? ) 
+ AND   w.nDiasNoSincro > 9  AND   w.cPoliza is not null 
+ AND   w.bVigente = '1' 
 ;
