@@ -1,4 +1,3 @@
-                
 drop table wMemoryScoreVehiculo;
 drop table wMemoryScoreVehiculoSinMulta;
 drop table wMemoryScoreVehiculoCount;
