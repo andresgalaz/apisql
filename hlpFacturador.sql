@@ -51,12 +51,11 @@ and fTpEvento=4;
 
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
-from tVehiculo where cPatente in ('MJK040','FYC645','AC040NQ') and bVigente='1'; -- pVehiculo in (494);
+from tVehiculo where cPatente in ('LQB799','AB844YD') and bVigente='1'; -- pVehiculo in (494);
 -- 2018-02-19
 
-call prRecalculaScore('2018-03-13',493,326); call prFacturador(493); -- AC040NQ
-call prRecalculaScore('2018-03-12',530,374); call prFacturador(530); -- FYC645
-call prRecalculaScore('2018-03-12',438,268); call prFacturador(438); -- MJK040
+call prRecalculaScore('2018-03-17',428,243); call prFacturador(428); -- AB844YD
+call prRecalculaScore('2018-03-17',392,180); call prFacturador(392); -- LQB799
 
 
 --
@@ -74,8 +73,8 @@ where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
 -- and v.cPatente = 'AB686YD'
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
-and u.cEmail = 'gonzalopuebla@icloud.com'
-and t.tCreacion >= now() + INTERVAL -8 DAY
+-- and u.cEmail = 'gonzalopuebla@icloud.com'
+and t.tCreacion >= now() + INTERVAL -1 hour
 order by dIniVigencia, cPatente, dInicio
 ;
 -- union all

@@ -102,7 +102,13 @@ SELECT w.cPatente
 , w.dProximoCierreFin		dFin 
 , w.nDiasNoSincro 
 , u.cEmail, u.cNombre 
-, w.nDiasAlCierre 
+, w.nDiasAlCierre
+, GREATEST( IFNULL(DATE( w.tUltViaje        ), '0000-00-00')
+  		  , IFNULL(DATE( w.tUltControl      ), '0000-00-00')
+		  -- Si no hay registros en la BD TRIPS, entonces NUNCA sincronizó, así es que
+		  -- se calcula a partir de la fecha de vigencia
+		  , w.dIniVigencia ) dUltimaSincro
+
  FROM  wMemoryCierreTransf w 
        JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular 
  WHERE 1=1 -- nDiasAlCierre in ( 10, 20? ) 
