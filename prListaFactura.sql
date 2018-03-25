@@ -5,8 +5,8 @@ BEGIN
 
 -- 	SET @likePatente=CONCAT('%', IFNULL( prm_cPatente, '' ),'%');
 -- 	SET @likeNombre=CONCAT('%', IFNULL( prm_cNombre, '' ),'%');
-    SET @dIni=IFNULL( prm_dIni, '2017-01-01') - INTERVAL 1 DAY;
-    SET @dFin=IFNULL( prm_dFin, fnNow())      - INTERVAL 1 DAY;
+    SET @dIni=IFNULL( prm_dIni, '2017-01-01'); -- + INTERVAL 0 DAY;
+    SET @dFin=IFNULL( prm_dFin, fnNow()); --      + INTERVAL 1 DAY;
     
 -- VER MOVMIENTOS DESDE INTEGRITY
 	SELECT 'Real' cTpCalculo, v.cPatente, substr(t.pPeriodo,1,7) pPeriodo, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
@@ -21,7 +21,8 @@ BEGIN
  	AND		t.dFin BETWEEN @dIni AND @dFin
     AND		v.cPatente	LIKE CONCAT('%', IFNULL( prm_cPatente, '' ),'%') -- @likePatente
     AND		u.cNombre	LIKE CONCAT('%', IFNULL( prm_cNombre, '' ),'%') -- @likeNombre
-	UNION ALL
+	/*
+    UNION ALL
 	SELECT 'Sin multa' cTpCalculo, v.cPatente, substr(t.pPeriodo,1,7) pPeriodo, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
 		 , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
 		 , t.nDescuentoKM + t.nDescuentoSinUso + t.nDescuentoPunta as nDescSinPonderar, t.nDescuento
@@ -35,5 +36,7 @@ BEGIN
     AND		v.cPatente	LIKE CONCAT('%', IFNULL( prm_cPatente, '' ),'%') -- @likePatente
     AND		u.cNombre	LIKE CONCAT('%', IFNULL( prm_cNombre, '' ),'%') -- @likeNombre
 	ORDER BY dIniVigencia, pPeriodo, cPatente, cTpCalculo ; 
-	
+	*/
+	ORDER BY dIniVigencia, pPeriodo, cPatente, cTpCalculo
+	;
 END //
