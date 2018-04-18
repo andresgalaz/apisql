@@ -1,6 +1,19 @@
+-- Deceta no actualización entre Viajes y Facturas
+create table agv as
+SELECT t.id viaje, t.updated_at, MAX(o.updated_at) max
+ FROM   snapcar.trips t 
+        JOIN snapcar.trip_observations_g o ON o.trip_id = t.id
+                                          AND o.`status` = 'OK'
+WHERE 1=1 -- MAX(o.update_at) > t.updated_at     
+AND t.from_date >= '2018-01-01'
+
+GROUP BY t.id, t.updated_at
+HAVING MAX(o.updated_at) > t.updated_at     ;
+
 SELECT t.id trip_id, t.client_id, c.vehicle_id, c.driver_id, 
         DATE_SUB(t.from_date,interval 3 HOUR) from_date, 
         DATE_SUB(t.to_date  ,interval 3 HOUR) to_date, 
+        t.updated_at,
 		 timestampdiff(SECOND,t.from_date, t.to_date) duracion_seg, 
         ROUND(t.distance/1000,2) distance, 
         SUM( CASE WHEN o.prefix_observation = 'A' THEN 1 ELSE 0 END ) as aceleracion, 
@@ -11,12 +24,16 @@ SELECT t.id trip_id, t.client_id, c.vehicle_id, c.driver_id,
         INNER JOIN      snapcar.clients c on c.id = t.client_id 
         LEFT OUTER JOIN snapcar.trip_observations_no_deleted_view o ON o.trip_id = t.id 
  WHERE  round(t.distance/1000,2) > 0.3 
- AND    c.vehicle_id in (405,406,408)
+ AND    t.id = 159601
+-- AND	  c.vehicle_id in (405,406,408)
 -- AND    c.driver_id  = 184 
 -- AND    t.from_date >= date_add( ?, interval 3 hour) 
 -- AND    t.from_date <  date_add(date_add( ?, interval 3 hour), interval 1 day) 
- GROUP  BY t.id, c.vehicle_id, c.driver_id, t.from_date, t.to_date, t.distance 
+ GROUP  BY t.id, c.vehicle_id, c.driver_id, t.from_date, t.to_date, t.distance, t.updated_at
  ORDER  BY from_date DESC;
+
+select * from tEvento e where e.nIdViaje=159601;
+select * from snapcar.trip_observations_no_deleted_view o where o.trip_id =159601;
 
 -- Lista viajes desde la base de lucho
 select * 
