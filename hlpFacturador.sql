@@ -50,11 +50,10 @@ and fTpEvento=4;
 
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
-from tVehiculo where cPatente in ('LQB799','AB844YD') and bVigente='1'; -- pVehiculo in (494);
--- 2018-02-19
-
-call prRecalculaScore('2018-03-17',428,243); call prFacturador(428); -- AB844YD
-call prRecalculaScore('2018-03-17',392,180); call prFacturador(392); -- LQB799
+from tVehiculo 
+where pVehiculo=544 -- OR cPatente in ('LQB799','AB844YD') and bVigente='1'; -- pVehiculo in (494)
+;
+call prRecalculaScore('2018-03-24',544,389); call prFacturador(544); -- NLF993
 
 
 --

@@ -31,18 +31,20 @@ from score.wEventoAnomalia a
 	inner join score.tVehiculo	v on v.pVehiculo = c.vehicle_id
 	inner join score.tUsuario	u on u.pUsuario = v.fUsuarioTitular   
     
-where v.cPatente in ('LGH390'    )
+where v.cPatente in ('NLF993'    )
 group by t.client_id, c.vehicle_id, substr(t.from_date,1,7), v.cPatente, v.cIdDispositivo, u.cNombre, u.cEmail, a.prefix_observation
 order by cantidad desc
 ;    
 
+select * from snapcar.clients where vehicle_id=544
+;
 -- Marca eventos en la BD de LUXO
 update snapcar.trip_observations_g set status = 'D'
 WHERE prefix_observation = 'A'
-AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 557  ) -- 'AA429CP'
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 573  ) -- 'NLF993'
 ;
 delete from score.tEvento WHERE fTpEvento = 3
-AND fVehiculo = 525 -- 'AA429CP'
+AND fVehiculo = 544 -- 'NLF993'
 ;
 
 update snapcar.trip_observations_g set status = 'D'
