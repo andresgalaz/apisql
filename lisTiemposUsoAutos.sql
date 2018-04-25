@@ -15,9 +15,23 @@ FROM   snapcar.trips t
 WHERE  t.distance > 300
 AND    t.status <> 'D'
 AND    c.vehicle_id > 0
+AND    t.from_date >= '2017-10-01'
+AND    TIMESTAMPDIFF(SECOND, t.from_date, t.to_date)/3600 < 12.0
 GROUP BY SUBSTR(t.from_date,1,10), c.vehicle_id
 ;
 
+-- Agrega los vehiculos que no se usaron ese dia
+INSERT INTO wHorasUsoVehiculo ( dia, vehicle_id, horas)
+SELECT dFecha, fVehiculo, MAX(bUso)
+FROM score.tScoreDia
+GROUP BY dFecha, fVehiculo
+HAVING MAX(bUso) = 0
+;
+
+SELECT * FROM wHorasUsoVehiculo
+ORDER BY dia
+LIMIT 999999
+;
 -- Lista cantidad de horas de uso por auto
 SELECT dia, count(vehicle_id) cantidad_vehiculos, sum(horas) total_horas, ROUND(sum(horas)  / count(vehicle_id),2) horas_por_vehiculo
 FROM wHorasUsoVehiculo
