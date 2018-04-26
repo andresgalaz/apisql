@@ -36,15 +36,15 @@ group by t.client_id, c.vehicle_id, substr(t.from_date,1,7), v.cPatente, v.cIdDi
 order by cantidad desc
 ;    
 
-select * from snapcar.clients where vehicle_id=544
+select * from snapcar.clients where vehicle_id=492
 ;
 -- Marca eventos en la BD de LUXO
 update snapcar.trip_observations_g set status = 'D'
 WHERE prefix_observation = 'A'
-AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 573  ) -- 'NLF993'
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 543  ) 
 ;
 delete from score.tEvento WHERE fTpEvento = 3
-AND fVehiculo = 544 -- 'NLF993'
+AND fVehiculo = 492
 ;
 
 update snapcar.trip_observations_g set status = 'D'

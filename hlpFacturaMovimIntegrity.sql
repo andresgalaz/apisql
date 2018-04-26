@@ -5,7 +5,7 @@ and   v.bVigente = '1'
 and   cPatente not in ( select nro_patente from integrity.tMovim );
 
 -- Verifica que todos los movimientos de Integrity tengan vehículo
-select nro_patente, poliza, fecha_emision, cod_endoso, codendoso, desc_endoso from integrity.tMovim
+select nro_patente, poliza, fecha_emision, endoso, cod_endoso, desc_endoso from integrity.tMovim
 where nro_patente <> 'A/D'
 AND nro_patente not in ( select cPatente from tVehiculo );
 
@@ -34,7 +34,7 @@ order by periodo, day(dIniVigencia);
 
 -- Lista todos los endosos de un vehículo
 select v.pVehiculo, v.cPatente, v.dIniVigencia, m.PORCENT_DESCUENTO, fnFechaCierreIni(v.dIniVigencia,-1) dIni_0, fnFechaCierreIni(v.dIniVigencia,0) dIni_1,  fnFechaCierreIni(v.dIniVigencia,1) dIni_2, m.FECHA_INICIO_VIG, m.FECHA_VENCIMIENTO -- , v.* , m.*
-     , m.CODENDOSO, m.COD_ENDOSO, m.DESC_ENDOSO, m.PREMIO
+     , m.COD_ENDOSO, m.ENDOSO, m.DESC_ENDOSO, m.PREMIO
 from tVehiculo v
      left join integrity.tMovim m on m.nro_patente = v.cPatente
 --     and m.FECHA_INICIO_VIG between fnFechaCierreIni(v.dIniVigencia,-1) and fnFechaCierreFin(v.dIniVigencia,-1)
