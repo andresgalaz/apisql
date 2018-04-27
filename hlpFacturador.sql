@@ -49,12 +49,11 @@ and fTpEvento=4;
 
 
 -- Genera proceso a recalcular
-select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
+select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, -1) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
 from tVehiculo 
-where cPatente in ('MZC135','KZI628') and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
+where cPatente in ('KPI916') and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
 ;
-call prRecalculaScore('2018-04-22',481,269); call prFacturador(481); -- KZI628
-call prRecalculaScore('2018-04-22',492,325); call prFacturador(492); -- MZC135
+call prRecalculaScore('2018-03-24',423,235); call prFacturador(423); -- KPI916
 
 
 --
@@ -64,17 +63,17 @@ select v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
      , t.nScore score
      , t.nQFrenada qFrenadas, t.nQAceleracion qAceleraciones, t.nQVelocidad qExcesosVel, t.nQCurva qCurvas
      , t.nQViajes qViajes, t.nDiasTotal diasTotal, t.nDiasUso diasUso, t.nDiasPunta diasPunta, t.nDiasSinMedicion diasSinMedicion
---   , t.tCreacion
+   , t.tCreacion
 from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
 -- and t.dInicio = '2017-11-30'
-AND v.cPatente in ('AB686YD','KPB890','KZI628','LTA765','MZC135')
+-- AND v.cPatente in ('AB686YD','KPB890','KZI628','LTA765','MZC135')
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
 -- and u.cEmail = 'gonzalopuebla@icloud.com'
-and t.tCreacion >= now() + INTERVAL -1 day
+and t.tCreacion >= now() + INTERVAL -10 HOUR
 order by dIniVigencia, cPatente, dInicio
 ;
 -- union all
