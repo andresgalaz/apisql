@@ -69,11 +69,11 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
 -- and t.dInicio = '2017-11-30'
--- AND v.cPatente in ('AB686YD','KPB890','KZI628','LTA765','MZC135')
+AND v.cPatente in ( /*'LTA765','AB686YD','KPB890','KZI628','MZC135',*/ 'NLF993')
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
 -- and u.cEmail = 'gonzalopuebla@icloud.com'
-and t.tCreacion >= now() + INTERVAL -10 HOUR
+and t.tCreacion >= now() + INTERVAL -10 DAY
 order by dIniVigencia, cPatente, dInicio
 ;
 -- union all
