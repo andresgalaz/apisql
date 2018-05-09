@@ -51,9 +51,14 @@ and fTpEvento=4;
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, -1) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
 from tVehiculo 
-where cPatente in ('KPI916') and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
+where cPatente in ('AC434ZA') and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
 ;
 call prRecalculaScore('2018-03-24',423,235); call prFacturador(423); -- KPI916
+call prRecalculaScore('2018-03-31',535,376); call prFacturador(535); -- EEL103
+call prRecalculaScore('2018-03-24',544,389); call prFacturador(544); -- NLF993
+
+call prRecalculaScore('2018-04-04',538,382); 
+call prFacturador(538); -- AC434ZA
 
 
 --
@@ -69,7 +74,7 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
 -- and t.dInicio = '2017-11-30'
-AND v.cPatente in ( /*'LTA765','AB686YD','KPB890','KZI628','MZC135',*/ 'NLF993')
+AND v.cPatente in ( 'AC434ZA')
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
 -- and u.cEmail = 'gonzalopuebla@icloud.com'

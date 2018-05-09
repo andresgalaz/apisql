@@ -76,12 +76,22 @@ BEGIN
             IF vcTpEndoso IN ( '0053','0052','0917','1205','1486','3528','3545','3546','9592','9593','1571','5423',
 							   '1235','0871','1407','1445','3520','3536','3537','5425',
 							   '0952','1367','0443','0339','0470','0365','1483','3322','3728','3741','3725','9594','0377' ) THEN
+				/*
+					AGALAZ 08/05/2018
+                    Se deja de anular el auto cuando hay anulaciones de Pólizas, solo de borrar el Nº de Póliza
+                    relacionado al vehículo, de esta manera no se le factura ni se le envían correos ni notificaciones.
+                */
+				-- UPDATE	score.tVehiculo 
+                -- SET		tBaja = vdEmision
+				-- 	  , bVigente = '0'
+                -- WHERE	cPatente = vcPatente
+                -- AND		cPoliza = vcPoliza
+                -- AND 	tBaja = '0000-00-00 00:00:00';
 				UPDATE	score.tVehiculo 
-                SET		tBaja = vdEmision
-					  , bVigente = '0'
+                SET		cPoliza = null
                 WHERE	cPatente = vcPatente
-                AND		cPoliza = vcPoliza
-                AND 	tBaja = '0000-00-00 00:00:00';
+                AND		cPoliza = vcPoliza;
+                
 			ELSE
 				-- Limpia email
 				SET vcEmail = REPLACE( vcEmail, ';', '' );
