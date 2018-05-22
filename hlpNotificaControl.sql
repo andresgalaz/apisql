@@ -2,7 +2,7 @@ DELIMITER //
 DROP FUNCTION IF EXISTS fnNow //
 CREATE FUNCTION fnNow() RETURNS DATE
 BEGIN
-	RETURN DATE('2018-03-19');
+	RETURN DATE('2018-05-10');
     -- RETURN DATE(NOW());
 END //
 DELIMITER ;
@@ -29,7 +29,6 @@ SELECT w.cPatente
  ;
 
 
- 
 -- Al cierre del periodo de facturación que es un días después del término, es decir Fecha Fin Periodo
 -- DIAS AL CIERRE = -1 
 -- Solo se envía si hay días sin medición
@@ -44,11 +43,12 @@ SELECT w.cPatente
 -- Control           
  , w.nDiasAlCierre
  , w.nDiasAlCierreAnt 
- , w.nDiasNoSincro, w.pVehiculo, w.fUsuarioTitular
+ , w.pVehiculo, w.fUsuarioTitular
+ , fnNow()
 FROM  wMemoryCierreTransf w
    LEFT JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
-WHERE w.cPatente in ( 'KZI628' )
--- AND   w.nDiasAlCierreAnt between -5 and 5
+WHERE 1=1 -- w.cPatente in ( 'HQX926' )
+AND   w.nDiasAlCierreAnt = -1
       
 -- AND   nDiasNoSincro > 0
 AND   w.cPoliza is not null
@@ -87,9 +87,9 @@ SELECT v.pVehiculo
  AND    v.bVigente = '1'
  AND    fnFechaCierreIni(v.dIniVigencia, 0) > v.dIniVigencia
 -- Dias al cierre
---  AND    DATEDIFF(fnFechaCierreIni(v.dIniVigencia, 0),fnNow()) = ?
+ AND    DATEDIFF(fnFechaCierreIni(v.dIniVigencia, 0),fnNow()) = -3
 -- TEST
---  AND v.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135' )
+-- AND v.cPatente in ( 'HQX926' )
 ;
 
 
@@ -139,6 +139,6 @@ SELECT
                              AND (f.dFin + INTERVAL 7 DAY) BETWEEN m.fecha_inicio_vig AND m.fecha_vencimiento 
  WHERE m.cod_endoso = '9900' 
  AND   m.bPdfProrroga = '1' 
- AND m.NRO_PATENTE = 'KZI628'
+ AND m.NRO_PATENTE = 'AC156IE'
  ORDER BY cPatente, dEmision desc 
 ;

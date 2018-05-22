@@ -51,28 +51,14 @@ and fTpEvento=4;
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, -1) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
 from tVehiculo 
-where cPatente in ('FST135',
-'NDR954',
-'LMQ446',
-'PGP838',
-'KJO549',
-'IXF122',
-'LZU277',
-'NJO348',
-'MCJ931') and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
+where cPatente in ('HQX926','AC156IE')
+and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
 ;
 
-call prRecalculaScore('2018-04-11',532,361); call prFacturador(532); -- OOM918
+call prRecalculaScore('2018-04-14',552,401); call prFacturador(552); -- AA021MA
 
-call prRecalculaScore('2018-04-06',389,172); call prFacturador(389); -- FST135
-call prRecalculaScore('2018-04-07',429,244); call prFacturador(429); -- IXF122
-call prRecalculaScore('2018-04-07',395,184); call prFacturador(395); -- KJO549
-call prRecalculaScore('2018-04-06',528,371); call prFacturador(528); -- LMQ446
-call prRecalculaScore('2018-04-09',494,327); call prFacturador(494); -- LZU277
-call prRecalculaScore('2018-04-10',516,353); call prFacturador(516); -- MCJ931
-call prRecalculaScore('2018-04-06',390,174); call prFacturador(390); -- NDR954
-call prRecalculaScore('2018-04-09',495,327); call prFacturador(495); -- NJO348
-call prRecalculaScore('2018-04-06',529,372); call prFacturador(529); -- PGP838
+call prRecalculaScore('2018-04-15',514,350); call prFacturador(514); -- AC156IE
+call prRecalculaScore('2018-04-06',550,397); call prFacturador(550); -- HQX926
 
 --
 select v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
@@ -87,7 +73,7 @@ join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
 -- and t.dInicio = '2017-11-30'
--- AND v.cPatente in ( 'AC434ZA')
+-- AND v.cPatente in ( 'HQX926')
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
 -- and u.cEmail = 'gonzalopuebla@icloud.com'

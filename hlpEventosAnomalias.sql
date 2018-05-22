@@ -16,7 +16,7 @@ from score.wEventoAnomalia a
 	inner join score.tVehiculo	v on v.pVehiculo = c.vehicle_id
 	inner join score.tUsuario	u on u.pUsuario = v.fUsuarioTitular   
     
- where v.cPatente  in ('LZU277')
+ where v.cPatente  in ('AA021MA')
 -- and v.cPatente = 'LQB799'
 order by from_date desc
 limit 10000
@@ -43,7 +43,7 @@ select * from snapcar.clients where vehicle_id=492
 -- Genera proceso a recalcular
 select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, -1) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); -- ', cPatente) 
 from tVehiculo 
-where cPatente in ('JBH851') and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
+where cPatente in ('AA021MA') and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
 ;
 call prRecalculaScore('2018-02-03',437,267); -- JBH851
 ;
@@ -52,10 +52,10 @@ call prRecalculaScore('2018-02-03',437,267); -- JBH851
 update snapcar.trip_observations_g set status = 'D'
 WHERE prefix_observation = 'A'
 AND status <> 'D'
-AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 551  ) 
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id = 580  ) 
 ;
 delete from score.tEvento WHERE fTpEvento = 3
-AND fVehiculo = 494
+AND fVehiculo = 552
 ;
 
 update snapcar.trip_observations_g set status = 'D'
