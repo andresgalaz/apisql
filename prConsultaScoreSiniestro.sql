@@ -8,8 +8,8 @@ BEGIN
 	SELECT	  COUNT(*) 'cantPolizas'
 			, dPeriodo
 			, ROUND(SUM(nScore)/COUNT(*),1) 'scorePromedio'
-			, count(idSiniestro) 'Cantidad de Siniestros'
-			, sum(nKms) 'Kilometros Totales'
+			, count(idSiniestro) 'cantSiniestros'
+			, sum(nKms) 'nKms'
 	FROM	wScoreSiniestro
 	GROUP BY dPeriodo;
 
@@ -28,8 +28,8 @@ END //
 DROP PROCEDURE IF EXISTS prCreaConsultaScoreSiniestro //
 CREATE PROCEDURE prCreaConsultaScoreSiniestro( IN prm_dPeriodo DATE )
 BEGIN
-	DECLARE vdIni DATE DEFAULT IFNULL( prm_dPeriodo + INTERVAL 1 MONTH, DATE( '2016-01-01' ));
-	DECLARE vdFIN DATE DEFAULT IFNULL( prm_dPeriodo + INTERVAL 2 MONTH - INTERVAL 1 DAY, fnNow());
+	DECLARE vdIni DATE DEFAULT IFNULL( prm_dPeriodo + INTERVAL 1 MONTH                 , DATE( '2016-01-01' ));
+	DECLARE vdFin DATE DEFAULT IFNULL( prm_dPeriodo + INTERVAL 2 MONTH - INTERVAL 1 DAY, fnNow()             );
     
 	-- Crea una tabla temporal para acumular por Vehículo x Siniestro
 	DROP	TEMPORARY TABLE IF EXISTS	wScoreSiniestro;
@@ -38,7 +38,7 @@ BEGIN
 			  m.pMovim
 			, m.poliza						AS cPoliza 
 			, m.nro_patente					AS cPatente
-			, DATE(CONCAT(SUBSTR(m.fecha_inicio_vig - INTERVAL 1 MONTH, 1, 7 ), '-01' ))	AS dPeriodo
+			, SUBSTR(m.fecha_inicio_vig - INTERVAL 1 MONTH, 1, 7 )	AS dPeriodo
 			, MIN(f.nScore)					AS nScore
 			, MAX(f.nKms)					AS nKms
 			, s.NUMERO_SINIESTRO			AS idSiniestro
@@ -65,12 +65,11 @@ BEGIN
 						)
 	GROUP BY m.pMovim, m.poliza, m.nro_patente, SUBSTR(m.fecha_inicio_vig,1,7), s.NUMERO_SINIESTRO, s.COVERAGE ;
 
-	SELECT vdIni, vdFin;
-	SELECT * FROM wScoreSiniestro;
-
 END //
 
-call prConsultaScoreSiniestro();
-call prConsultaScoreSiniestroPeriodo(DATE('2017-12-01'));
+DELIMITER ;
+
+call prConsultaScoreSiniestro() ;
+call prConsultaScoreSiniestroPeriodo(DATE('2017-12-01')) ;
 
 

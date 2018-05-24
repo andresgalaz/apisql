@@ -17,7 +17,7 @@ BEGIN
     
 	UNION ALL
 	*/    
-	SELECT  fVehiculo, max(tEvento) 
+	SELECT  fVehiculo, max(tEvento) tUltimaSincro
 	FROM    score.tEvento
     GROUP BY fVehiculo
     
