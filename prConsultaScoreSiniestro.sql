@@ -7,7 +7,7 @@ BEGIN
 	-- Cursor de Salida
 	SELECT	  COUNT(*) 'cantPolizas'
 			, dPeriodo
-			, ROUND(SUM(nScore)/COUNT(*),1) 'scorePromedio'
+			, ROUND(SUM(nScore*nKms)/SUM(nKms),2) 'scorePromedio'
 			, count(idSiniestro) 'cantSiniestros'
 			, sum(nKms) 'nKms'
 	FROM	wScoreSiniestro
@@ -43,6 +43,7 @@ BEGIN
 			, MAX(f.nKms)					AS nKms
 			, s.NUMERO_SINIESTRO			AS idSiniestro
 			, s.COVERAGE					AS cTpSiniestro
+            , s.DESCRIPCION_SINIESTRO		AS cDescripcion
 
  	FROM	integrity.tMovim		m 
 			INNER JOIN tVehiculo	v	ON	v.cPatente = m.nro_patente
