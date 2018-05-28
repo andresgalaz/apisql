@@ -166,10 +166,17 @@ BEGIN
         
         -- Se consideran los días sin medición del final del periodo
 		-- Si el fin del periodo es mayor a la fecha actual se toma la fecha actual.
-		if prm_dFin >= IFNULL(vdUltMovim, prm_dFin) THEN
+		IF prm_dFin >= IFNULL(vdUltMovim, prm_dFin) THEN
 			SET vnDiasSinMedicion = DATEDIFF( LEAST(prm_dFin + INTERVAL 0 DAY,DATE(fnNow())), IFNULL(vdUltMovim + INTERVAL 1 DAY, prm_dIni));
         ELSE
 			SET vnDiasSinMedicion = 0;
+        END IF;
+        
+        IF vnDiasSinMedicion > 0 THEN
+			SELECT nDiasSinMedicion	INTO vnDiasSinMedicion
+            FROM   score.tFacturaSinMedicion
+            WHERE  pVehiculo = prm_pVehiculo
+            AND    pPeriodo = fnPeriodo( prm_dIni );
         END IF;
         
         SELECT dInstalacion , dIniVigencia

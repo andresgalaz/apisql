@@ -8,9 +8,7 @@ BEGIN
     SET @dIni=IFNULL( prm_dIni, '2017-01-01'); -- + INTERVAL 0 DAY;
     SET @dFin=IFNULL( prm_dFin, fnNow()); --      + INTERVAL 1 DAY;
     SET @tCreacion=NOW() - INTERVAL IFNULL( prm_nHorasCreacion, 999999 ) * 60 MINUTE;
-    
-select @tCreacion;    
-    
+
 -- VER MOVMIENTOS DESDE INTEGRITY
 	SELECT 'Real' cTpCalculo, v.cPatente, substr(t.pPeriodo,1,7) pPeriodo, v.dIniVigencia, t.dInstalacion, u.cEmail, u.pUsuario, u.cNombre, t.pVehiculo, t.dInicio, (t.dFin + INTERVAL -1 DAY ) dFin, t.nKms, t.nKmsPond, t.nScore
 		 , t.nDescuentoKM, t.nDescuentoSinUso, t.nDescuentoPunta
@@ -46,5 +44,5 @@ select @tCreacion;
 END //
 
 
-call prListaFactura( null, null, 24*10, null, null)
+call prListaFactura( null, null, 6, null, null)
 //
