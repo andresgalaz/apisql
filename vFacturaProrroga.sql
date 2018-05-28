@@ -42,13 +42,13 @@ SELECT	  m.pMovim
 		          + m.tasasuper + m.servsoc ) / m.prima ))							nAhorro
 FROM	integrity.tMovim m
 WHERE	m.premio > 0 AND m.porcent_descuento IS NOT NULL
-AND     m.codEndoso = '9900'
+AND     m.cod_endoso = '9900'
 -- Si hay mas de una prorroga para el mismo periodo solo se considera la última, esto porque
 -- seguramente las otras son anulaciones
 AND		m.pMovim in	  (	SELECT	max(dup.pMovim)
 						FROM	integrity.tMovim dup
 						WHERE	dup.premio > 0 AND dup.porcent_descuento IS NOT NULL
-						AND     dup.codEndoso = '9900'
+						AND     dup.cod_endoso = '9900'
 						GROUP BY dup.NRO_PATENTE,dup.FECHA_INICIO_VIG,dup.FECHA_VENCIMIENTO
 					  )
 ;

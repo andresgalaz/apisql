@@ -49,13 +49,19 @@ and fTpEvento=4;
 
 
 -- Genera proceso a recalcular
-select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
-from tVehiculo where cPatente in ('LQB799','AB844YD') and bVigente='1'; -- pVehiculo in (494);
--- 2018-02-19
+select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, -1) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
+from tVehiculo 
+where cPatente in ('AB508RX')
+and bVigente='1' -- pVehiculo=544 -- OR cPatente in ('KZI628') and bVigente='1'; -- pVehiculo in (494)
+;
 
-call prRecalculaScore('2018-03-17',428,243); call prFacturador(428); -- AB844YD
-call prRecalculaScore('2018-03-17',392,180); call prFacturador(392); -- LQB799
+call prRecalculaScore('2018-04-14',552,401); call prFacturador(552); -- AA021MA
 
+call prRecalculaScore('2018-04-15',514,350); call prFacturador(514); -- AC156IE
+call prRecalculaScore('2018-04-06',550,397); call prFacturador(550); -- HQX926
+
+call prRecalculaScore('2018-04-19',394,183); call prFacturador(394); -- NAG223
+call prRecalculaScore('2018-04-19',534,365); call prFacturador(534); -- AB508RX
 
 --
 select v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
@@ -64,16 +70,17 @@ select v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
      , t.nScore score
      , t.nQFrenada qFrenadas, t.nQAceleracion qAceleraciones, t.nQVelocidad qExcesosVel, t.nQCurva qCurvas
      , t.nQViajes qViajes, t.nDiasTotal diasTotal, t.nDiasUso diasUso, t.nDiasPunta diasPunta, t.nDiasSinMedicion diasSinMedicion
+   , t.tCreacion
 from tFactura t
 join tVehiculo v on v.pVehiculo = t.pVehiculo
 join tUsuario  u on u.pUsuario = v.fUsuarioTitular
 where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
 -- and t.dInicio = '2017-11-30'
--- and v.cPatente = 'AB686YD'
+-- AND v.cPatente in ( 'HQX926')
 -- and t.pVehiculo in ( 442, 392 )
 -- and t.tCreacion >= '2017-12-07 10:30:00'
 -- and u.cEmail = 'gonzalopuebla@icloud.com'
-and t.tCreacion >= now() + INTERVAL -1 hour
+and t.tCreacion >= now() + INTERVAL -5 hour
 order by dIniVigencia, cPatente, dInicio
 ;
 -- union all

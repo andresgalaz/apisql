@@ -2,7 +2,7 @@ DELIMITER //
 DROP FUNCTION IF EXISTS fnNow //
 CREATE FUNCTION fnNow() RETURNS DATE
 BEGIN
-	RETURN DATE('2018-03-19');
+	RETURN DATE('2018-05-10');
     -- RETURN DATE(NOW());
 END //
 DELIMITER ;
@@ -29,7 +29,6 @@ SELECT w.cPatente
  ;
 
 
- 
 -- Al cierre del periodo de facturación que es un días después del término, es decir Fecha Fin Periodo
 -- DIAS AL CIERRE = -1 
 -- Solo se envía si hay días sin medición
@@ -39,17 +38,17 @@ SELECT w.cPatente
 	 , DATE_FORMAT(w.dProximoCierreFin, '%d/%m/%Y')    dFin
 	 , w.nDiasNoSincro
 	 , u.cEmail, u.cNombre                                              cNombre
-	 , GREATEST( IFNULL(DATE( w.tUltViaje        ), '0000-00-00')
-			   , IFNULL(DATE( w.tUltControl      ), '0000-00-00')
-               , w.dIniVigencia )      dSincro
+     , GREATEST( IFNULL(DATE( w.tUltViaje        ), '0000-00-00') 
+               , IFNULL(DATE( w.tUltControl      ), '0000-00-00'))      dSincro 
 -- Control           
  , w.nDiasAlCierre
  , w.nDiasAlCierreAnt 
- , w.nDiasNoSincro, w.pVehiculo, w.fUsuarioTitular
+ , w.pVehiculo, w.fUsuarioTitular
+ , fnNow()
 FROM  wMemoryCierreTransf w
    LEFT JOIN tUsuario u ON u.pUsuario = w.fUsuarioTitular
-WHERE w.cPatente in ( 'FYC645' )
--- AND   w.nDiasAlCierreAnt between -5 and 5
+WHERE 1=1 -- w.cPatente in ( 'HQX926' )
+AND   w.nDiasAlCierreAnt = -1
       
 -- AND   nDiasNoSincro > 0
 AND   w.cPoliza is not null
@@ -88,9 +87,9 @@ SELECT v.pVehiculo
  AND    v.bVigente = '1'
  AND    fnFechaCierreIni(v.dIniVigencia, 0) > v.dIniVigencia
 -- Dias al cierre
---  AND    DATEDIFF(fnFechaCierreIni(v.dIniVigencia, 0),fnNow()) = ?
+ AND    DATEDIFF(fnFechaCierreIni(v.dIniVigencia, 0),fnNow()) = -3
 -- TEST
---  AND v.cPatente in ( 'AC156IE','PJT083','FAA680','IAH606','MRW848','LQB799','AB844YD','LTA765','AB686YD','KPB890','KZI628','MZC135' )
+-- AND v.cPatente in ( 'HQX926' )
 ;
 
 
@@ -114,4 +113,32 @@ SELECT w.cPatente
  WHERE 1=1 -- nDiasAlCierre in ( 10, 20? ) 
  AND   w.nDiasNoSincro > 9  AND   w.cPoliza is not null 
  AND   w.bVigente = '1' 
+;
+
+-- Endoso Factura
+SELECT 
+       m.pMovim                                       , m.poliza                   as cPoliza 
+     , m.nro_patente              as cPatente         , m.fecha_emision            as dEmision 
+     , m.fecha_inicio_vig         as dInicioVig       , m.fecha_vencimiento        as dFinVig 
+     , m.sumaaseg                 as nSumaAsegurada   , m.desc_vehiculo            as cVehiculo 
+     , round(m.porcent_descuento) as nDescuento       , m.documento                as nDNI 
+     , u.cEmail                                       , u.cNombre 
+     , f.dInicio                                      , f.dFin 
+     , ROUND(f.nKms)              as nKms             , ROUND(f.nScore)            as nScore
+     , f.nQViajes                                     , f.nQFrenada 
+     , f.nQAceleracion                                , f.nQVelocidad 
+     , f.nQCurva                                      , f.nDiasPunta 
+     , f.nDiasUso - f.nDiasPunta  as nDiasNoPunta     , f.nDiasSinMedicion 
+     , datediff(f.dFin, f.dInicio) - f.nDiasUso - f.nDiasSinMedicion               as nDiasSinUso
+     , m.*
+ FROM  integrity.tMovim m 
+       INNER JOIN tVehiculo v ON v.cPatente = m.nro_patente AND v.bVigente = '1' 
+       INNER JOIN tUsuario  u ON u.pUsuario = v.fUsuarioTitular 
+       INNER JOIN tFactura  f ON f.pVehiculo = v.pVehiculo 
+                             AND f.pTpFactura = 1 
+                             AND (f.dFin + INTERVAL 7 DAY) BETWEEN m.fecha_inicio_vig AND m.fecha_vencimiento 
+ WHERE m.cod_endoso = '9900' 
+ AND   m.bPdfProrroga = '1' 
+ AND m.NRO_PATENTE = 'AC156IE'
+ ORDER BY cPatente, dEmision desc 
 ;

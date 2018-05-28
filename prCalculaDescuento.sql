@@ -101,6 +101,18 @@ BEGIN
 
 	-- Descuento por días de uso fuera de hora Punta, es igual a los días usados - los días en Punta
 	SET vo_nDescNoHoraPunta = ( vnDiasUso - vnDiasPunta ) * kParamNoHoraPunta;
+
+
+    -- AGALAZ ( 23/04/2018 )
+    -- Para el primer mes de la póliza que normalmente va a tener 23 días (periodo - 7 días), 
+    -- para Febrero que tiene 28 y para finalmente para los meses que tiene 31 días, se ajusta
+    -- el descuento sin uso a 30 días, así el 20% que es el máximo debería darse no importando
+    -- la cantidad de días del periodo
+	IF prmDiasMes > 0  AND prmDiasMes <> 30 THEN    
+		SET vo_nDescDiaSinUso = vo_nDescDiaSinUso * 30 / prmDiasMes;
+        SET vo_nDescNoHoraPunta = vo_nDescNoHoraPunta * 30 / prmDiasMes;
+    END IF;
+    
 	SET vo_nDescuento = vo_nDescuentoKM + vo_nDescDiaSinUso + vo_nDescNoHoraPunta;
     
 	-- Ajusta por el puntaje

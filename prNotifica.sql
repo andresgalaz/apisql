@@ -41,13 +41,13 @@ BEGIN
                     m.FECHA_NACIMIENTO					AS dNacimiento	,
 					m.COD_MARCA							AS cMarca		,
 					m.COD_MODELO						AS cModelo		,
-                    IFNULL(m.CODENDOSO, '0000')			AS cTpEndoso
+                    IFNULL(m.COD_ENDOSO, '0000')		AS cTpEndoso
 			FROM	integrity.tMovim m 
 			WHERE 	m.MAIL IS NOT NULL
             AND		m.NRO_PATENTE <> 'A/D'
 			AND		m.COD_TIPO_ESTADO in ( '04', '07' ) -- En Inspección y Póliza
       --    AND		m.POLIZA IS NOT NULL
-      --    AND		m.COD_ENDOSO	= '00000'
+      --    AND		m.ENDOSO	= '00000'
 			ORDER BY m.NRO_PATENTE, m.pMovim DESC;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET eofCurMovim = 1;
 
@@ -76,12 +76,22 @@ BEGIN
             IF vcTpEndoso IN ( '0053','0052','0917','1205','1486','3528','3545','3546','9592','9593','1571','5423',
 							   '1235','0871','1407','1445','3520','3536','3537','5425',
 							   '0952','1367','0443','0339','0470','0365','1483','3322','3728','3741','3725','9594','0377' ) THEN
+				/*
+					AGALAZ 08/05/2018
+                    Se deja de anular el auto cuando hay anulaciones de Pólizas, solo de borrar el Nº de Póliza
+                    relacionado al vehículo, de esta manera no se le factura ni se le envían correos ni notificaciones.
+                */
+				-- UPDATE	score.tVehiculo 
+                -- SET		tBaja = vdEmision
+				-- 	  , bVigente = '0'
+                -- WHERE	cPatente = vcPatente
+                -- AND		cPoliza = vcPoliza
+                -- AND 	tBaja = '0000-00-00 00:00:00';
 				UPDATE	score.tVehiculo 
-                SET		tBaja = vdEmision
-					  , bVigente = '0'
+                SET		cPoliza = null
                 WHERE	cPatente = vcPatente
-                AND		cPoliza = vcPoliza
-                AND 	tBaja = '0000-00-00 00:00:00';
+                AND		cPoliza = vcPoliza;
+                
 			ELSE
 				-- Limpia email
 				SET vcEmail = REPLACE( vcEmail, ';', '' );
@@ -179,12 +189,13 @@ SELECT vpMovim		, vcPatente	, vcPoliza		,
 		BEGIN
 			DECLARE vcPolizaActual	VARCHAR(40);
 			DECLARE vpVehiculo		INTEGER;
-			-- Busca PK vehículo, no debe estar dado de BAJA                    
+			-- Busca PK vehículo, no debe estar dado de BAJA                                
 			SELECT	v.pVehiculo	, v.cPoliza
 			INTO 	vpVehiculo	, vcPolizaActual
 			FROM	score.tVehiculo v
 			WHERE	v.cPatente	= vcPatente
 			AND		v.bVigente	= '1';
+            
 			IF vpVehiculo IS NOT NULL AND vcPolizaActual IS NULL THEN
 				UPDATE	tVehiculo
 				SET		cPoliza			= vcPoliza

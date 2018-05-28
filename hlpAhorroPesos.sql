@@ -6,7 +6,7 @@ PT * ( 1.2325036803 ) + 47.83 = prima
 
 -> PT = ( prima - 47.83 ) / 1.2325036803
 */
-SELECT m.pMovim, m.NOMBRE, m.APELLIDO, m.NRO_PATENTE, m.FECHA_EMISION,year(m.fecha_inicio_vig) `año`, monthname(m.fecha_inicio_vig) mes, m.fecha_inicio_vig, m.CODENDOSO, m.DESC_ENDOSO
+SELECT m.pMovim, m.NOMBRE, m.APELLIDO, m.NRO_PATENTE, m.FECHA_EMISION,year(m.fecha_inicio_vig) `año`, monthname(m.fecha_inicio_vig) mes, m.fecha_inicio_vig, m.COD_ENDOSO, m.DESC_ENDOSO
      , m.PORCENT_DESCUENTO
      , m.sumaaseg
      , m.prima
@@ -57,7 +57,7 @@ order by m.NRO_PATENTE,month(m.fecha_inicio_vig);
 drop table ahorro;
 
 create table ahorro as 
-SELECT m.pMovim, m.NOMBRE, m.APELLIDO, m.NRO_PATENTE, m.FECHA_EMISION,year(m.fecha_inicio_vig) `año`, monthname(m.fecha_inicio_vig) mes, m.fecha_inicio_vig, m.CODENDOSO, m.DESC_ENDOSO
+SELECT m.pMovim, m.NOMBRE, m.APELLIDO, m.NRO_PATENTE, m.FECHA_EMISION,year(m.fecha_inicio_vig) `año`, monthname(m.fecha_inicio_vig) mes, m.fecha_inicio_vig, m.COD_ENDOSO, m.DESC_ENDOSO
      , m.PORCENT_DESCUENTO descuento
      , m.sumaaseg
      , m.prima
