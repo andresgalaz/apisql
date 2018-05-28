@@ -1,0 +1,1 @@
+ALTER TABLE score.tEvento ADD bNotifica INT NOT NULL DEFAULT '0';
