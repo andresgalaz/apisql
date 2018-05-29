@@ -1,21 +1,27 @@
 DELIMITER //
 DROP PROCEDURE IF EXISTS prRefactura //
-CREATE PROCEDURE prRefactura ( IN prm_pVehiculo INTEGER, IN prm_dPeriodo DATE, IN prm_nDiasSinMedicion INTEGER, IN prm_bBorraAceleraciones BOOLEAN, IN prm_cUsuario VARCHAR(40))
+CREATE PROCEDURE prRefactura ( IN prm_pVehiculo INTEGER, IN prm_dPeriodo DATE, IN prm_nDiasSinMedicion INTEGER, IN prm_bBorraAceleraciones BOOLEAN, IN prm_cUsuario VARCHAR(40), IN prm_tCreacion TIMESTAMP)
 LB_PRINCIPAL:BEGIN
-	DECLARE vpPeriodo					DATE;
-	DECLARE vdInicio						DATE;
-    DECLARE vfUsuario					INTEGER;
+	DECLARE vcPatente			VARCHAR(40);
+	DECLARE vpPeriodo			DATE;
+	DECLARE vdInicio			DATE;
+    DECLARE vfUsuario			INTEGER;
     DECLARE vnDiasSinMedicion	INTEGER;
+    DECLARE vnDiasOriginal		INTEGER;
+    DECLARE vnQAceleracion		INTEGER;
     
 -- DEBUG : Parametros de entrada    
 -- SELECT  prm_pVehiculo, prm_dPeriodo, prm_nDiasSinMedicion, prm_bBorraAceleraciones, prm_cUsuario;
 
-	-- select concat('call prRecalculaScore(','\'',  fnFechaCierreIni(dIniVigencia, 0) - interval 1 day, '\'',',',pVehiculo,',',fUsuarioTitular,'); call prFacturador(', pVehiculo, '); -- ', cPatente) -- , dIniVigencia
-    --  from tVehiculo where cPatente in ('LQB799','AB844YD') and bVigente='1'; -- pVehiculo in (494);
-	SELECT	fnFechaCierreIni(dIniVigencia, -1) day, fUsuarioTitular
-    INTO		vdInicio, vfUsuario
-	FROM		tVehiculo
+	SELECT	fnFechaCierreIni(dIniVigencia, -1) day, fUsuarioTitular, cPatente
+    INTO	vdInicio, vfUsuario, vcPatente
+	FROM	tVehiculo
     WHERE	pVehiculo = prm_pVehiculo;
+    
+    IF vcPatente IS NULL THEN
+		SELECT 4014 nCodigo, 'No existe vehículo ID: ' + prm_pVehiculo cMensaje;
+		LEAVE LB_PRINCIPAL;
+    END IF;
 
     IF prm_bBorraAceleraciones THEN
 		-- Borra aceleraciones
@@ -33,48 +39,50 @@ LB_PRINCIPAL:BEGIN
 		AND		tEvento >= vdInicio - INTERVAL 1 MONTH
 		AND		fVehiculo = prm_pVehiculo;
 
--- select 'Aceleraciones borradas';
     END IF;
     
- 	SELECT	pPeriodo, nDiasSinMedicion
-    INTO		vpPeriodo, vnDiasSinMedicion
-    FROM		tFactura
-    WHERE	pVehiculo	= prm_pVehiculo
-    AND		dInicio			= vdInicio
-    AND		pTpFactura	= 1
+ 	SELECT	f.pPeriodo		, f.nDiasSinMedicion
+		  , f.nQAceleracion	, s.nDiasSinMedicionOriginal
+    INTO	vpPeriodo		, vnDiasSinMedicion
+		  , vnQAceleracion	, vnDiasOriginal
+    FROM	tFactura f
+			LEFT JOIN tFacturaSinMedicion s ON	s.pVehiculo = f.pVehiculo 
+											AND s.pPeriodo  = f.pPeriodo
+    WHERE	f.pVehiculo		= prm_pVehiculo
+    AND		f.dInicio		= vdInicio
+    AND		f.pTpFactura	= 1
     ;
     
  	IF vpPeriodo IS NOT NULL THEN
-		-- Existe una facturación la cual re-facturar
-		IF vnDiasSinMedicion > prm_nDiasSinMedicion THEN
-			INSERT INTO tFacturaSinMedicion
-							( pVehiculo, pPeriodo, nDiasSinMedicion
-							, nDifDias, cUsuario )
-			VALUES	( prm_pVehiculo, vpPeriodo, prm_nDiasSinMedicion
-							, prm_nDiasSinMedicion -  vnDiasSinMedicion, prm_cUsuario );
-		ELSE
-			SELECT 4010 nCodigo, 'No se puede aumentar la cantidad de días sin medición' cMensaje;
+
+		IF IFNULL( vnDiasOriginal, vnDiasSinMedicion ) < prm_nDiasSinMedicion THEN
+			SELECT 4014 nCodigo, concat('No se puede aumentar la cantidad de días sin medición. Patente =', vcPatente ) cMensaje;            
 			LEAVE LB_PRINCIPAL;
-         END IF;
-    END IF;
+		END IF;
+
+		IF vnDiasOriginal IS NULL THEN
+			INSERT INTO tFacturaSinMedicion
+					( pVehiculo				, pPeriodo				, nDiasSinMedicionOriginal
+                    , nDiasSinMedicion		, nQAceleracionOriginal	, cUsuario		)
+			VALUES	( prm_pVehiculo			, vpPeriodo				, vnDiasSinMedicion	
+					, prm_nDiasSinMedicion	, vnQAceleracion		, prm_cUsuario );
+		ELSE
+			UPDATE	tFacturaSinMedicion
+			SET		nDiasSinMedicion	= prm_nDiasSinMedicion
+			WHERE	pVehiculo			= prm_pVehiculo
+			AND		pPeriodo			= vpPeriodo;
+		END IF;
+	END IF;
     
 	CALL prRecalculaScore( vdInicio, prm_pVehiculo, vfUsuario);
 	CALL prFacturador( prm_pVehiculo );
 
--- select 'OK', vpPeriodo, vnDiasSinMedicion;
-
-select v.cPatente patente, u.cNombre nombre, v.dIniVigencia inicioVigencia
-	 , t.dInicio iniPeriodo, (t.dFin + INTERVAL -1 DAY ) finPeriodo
-     , t.nDescuento descuento, t.nKms kms, t.nKmsPond kmsPond
-     , t.nScore score
-     , t.nQFrenada qFrenadas, t.nQAceleracion qAceleraciones, t.nQVelocidad qExcesosVel, t.nQCurva qCurvas
-     , t.nQViajes qViajes, t.nDiasTotal diasTotal, t.nDiasUso diasUso, t.nDiasPunta diasPunta, t.nDiasSinMedicion diasSinMedicion
-   , t.tCreacion
-from tFactura t
-join tVehiculo v on v.pVehiculo = t.pVehiculo
-join tUsuario  u on u.pUsuario = v.fUsuarioTitular
-where v.cPoliza <> 'TEST' and t.pTpFactura = 1 and v.dIniVigencia < t.dFin
-and t.tCreacion >= now() + INTERVAL -10 SECOND
-;
+	-- Después de facturado se envian los nuevos valores como respuesta
+	SELECT	f.nDescuento, f.nScore, vcPatente cPatente
+	FROM 	tFactura f
+    WHERE	f.pVehiculo		= prm_pVehiculo
+    AND		f.dInicio		= vdInicio
+    AND		f.pTpFactura	= 1
+    ;
 
 END //
