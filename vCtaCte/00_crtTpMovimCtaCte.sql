@@ -9,3 +9,4 @@ CREATE TABLE score.tTpMovimCtaCte (
 insert into score.tTpMovimCtaCte ( pTpMovimCtaCte, cDescripcion ) values ( 'V', 'Vacaciones con Uso' );
 insert into score.tTpMovimCtaCte ( pTpMovimCtaCte, cDescripcion ) values ( 'MD', 'Manual Débito' );
 insert into score.tTpMovimCtaCte ( pTpMovimCtaCte, cDescripcion ) values ( 'CD', 'Manual Crébito' );
+insert into score.tTpMovimCtaCte ( pTpMovimCtaCte, cDescripcion ) values ( 'NS', 'No Sincronizado Periodo Anterior' );
