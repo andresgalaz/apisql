@@ -61,11 +61,14 @@ LB_PRINCIPAL:BEGIN
 		END IF;
 
 		IF vnDiasOriginal IS NULL THEN
-			INSERT INTO tFacturaSinMedicion
-					( pVehiculo				, pPeriodo				, nDiasSinMedicionOriginal
-                    , nDiasSinMedicion		, nQAceleracionOriginal	, cUsuario		)
-			VALUES	( prm_pVehiculo			, vpPeriodo				, vnDiasSinMedicion	
-					, prm_nDiasSinMedicion	, vnQAceleracion		, prm_cUsuario );
+			-- Solo se crea el registro si se cambian los días sin medición
+			IF vnDiasSinMedicion <> prm_nDiasSinMedicion THEN
+				INSERT INTO tFacturaSinMedicion
+						( pVehiculo				, pPeriodo				, nDiasSinMedicionOriginal
+						, nDiasSinMedicion		, nQAceleracionOriginal	, cUsuario		)
+				VALUES	( prm_pVehiculo			, vpPeriodo				, vnDiasSinMedicion	
+						, prm_nDiasSinMedicion	, vnQAceleracion		, prm_cUsuario );
+			END IF;
 		ELSE
 			UPDATE	tFacturaSinMedicion
 			SET		nDiasSinMedicion	= prm_nDiasSinMedicion
@@ -78,7 +81,7 @@ LB_PRINCIPAL:BEGIN
 	CALL prFacturador( prm_pVehiculo );
 
 	-- Después de facturado se envian los nuevos valores como respuesta
-	SELECT	f.nDescuento, f.nScore, vcPatente cPatente
+	SELECT	f.nDescuento, f.nScore, vcPatente cPatente, IFNULL(vnDiasOriginal,'null') as vnDiasOriginal, vnDiasSinMedicion, prm_nDiasSinMedicion
 	FROM 	tFactura f
     WHERE	f.pVehiculo		= prm_pVehiculo
     AND		f.dInicio		= vdInicio
