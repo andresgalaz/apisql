@@ -104,7 +104,13 @@ BEGIN
 														AND	eve.fTpEvento not in ( kEventoInicio, kEventoFin )
 		WHERE	uv.pUsuario		=	prm_pUsuario
 		AND		ini.tEvento		>=	vdIni
-		AND		fin.tEvento		<	vdFin
+		AND		ini.tEvento		<	vdFin
+		AND 	NOT EXISTS	(	SELECT	'x' 
+								FROM	wEventoDeleted we
+								WHERE	we.trip_id				= eve.nIdViaje 
+								AND		we.prefix_observation	= 'E'
+								AND		we.from_time			= date_add(eve.tEvento,interval 3 hour)
+							)
 		GROUP BY	uv.pVehiculo	, v.cPatente		, ini.nIdViaje		,
 					ini.cCalle		, fin.cCalle		, ini.cCalleCorta	, fin.cCalleCorta	,
                     ini.tEvento		, fin.tEvento		, ini.nValor		,
