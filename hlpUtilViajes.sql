@@ -1,4 +1,4 @@
--- Deceta no actualización entre Viajes y Facturas
+-- Detecta no actualización entre Viajes y Facturas
 create table agv as
 SELECT t.id viaje, t.updated_at, MAX(o.updated_at) max
  FROM   snapcar.trips t 
@@ -59,3 +59,19 @@ where ( c.driver_id=77 or c.vehicle_id=203 )
 -- and t.`status`='S'
 order by event_date desc;
                 
+-- Verifica un viaje                
+select * from tEvento where nIdViaje=269999 order by tEvento desc
+limit 10000
+;
+select * 
+from snapcar.trips t 
+where t.id=269999
+-- and t.`status` in ('S','A')
+order by from_date desc
+;
+select * 
+from snapcar.trip_details d
+where d.trip_id=269999
+order by d.event_date desc
+;
+                                

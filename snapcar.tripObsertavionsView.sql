@@ -1,7 +1,7 @@
 USE snapcar;
 DROP VIEW  IF EXISTS snapcar.trip_observations_view;
-create view snapcar.trip_observations_view as
-select t.id                     AS trip_id          , t.client_id              AS client_id
+CREATE VIEW snapcar.trip_observations_view AS
+SELECT t.id                     AS trip_id          , t.client_id              AS client_id
      , t.from_date              AS fecha_ini        , t.to_date                AS fecha_fin
      , t.distance               AS distance         , c.vehicle_id             AS vehicle_id
      , c.driver_id              AS driver_id        , o.prefix_observation     AS prefix
@@ -15,14 +15,16 @@ select t.id                     AS trip_id          , t.client_id              A
 	 , snapcar.fnNombreCalle( 'L', se.name, se.street_number, se.town, se.city, se.substate, se.state, se.country ) AS calle_fin
 	 , snapcar.fnNombreCalle( 'C', se.name, se.street_number, se.town, se.city, se.substate, se.state, se.country ) AS calle_fin_corta
      , d.latitude               AS latitude         , d.longitude              AS longitude
-     , t.updated_at             AS ts_modif 
-  from trips t
-       join      clients c                           on c.id            = t.client_id
-       left join trip_observations_no_deleted_view o on o.trip_id       = t.id
-       left join virloc_observation_ranges r         on r.id            = o.observation_range_id
-       left join g_streets so                        on so.id           = o.street_id
-       left join g_streets st                        on st.id           = t.start_street_id
-       left join g_streets se                        on se.id           = t.end_street_id
-       left join trip_details d                      on d.trip_id       = t.id 
-                                                    and d.event_date    = o.from_time
- where t.status = 'S'                                                    
+     , t.updated_at             AS ts_modif
+ FROM  trips t
+       join      clients c                           ON c.id            = t.client_id
+       left join trip_observations_no_deleted_view o ON o.trip_id       = t.id
+       left join virloc_observation_ranges r         ON r.id            = o.observation_range_id
+       left join g_streets so                        ON so.id           = o.street_id
+       left join g_streets st                        ON st.id           = t.start_street_id
+       left join g_streets se                        ON se.id           = t.end_street_id
+       left join trip_details d                      ON d.trip_id       = t.id
+                                                    AND d.event_date    = o.from_time
+ WHERE t.status = 'S'
+ -- AGALAZ: No se envían al facturador ni a la API
+ AND   r.points > 0
