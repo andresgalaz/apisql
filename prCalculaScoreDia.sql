@@ -109,10 +109,15 @@ BEGIN
 		UNION ALL
 		-- Viajes realizados o no (acepta los Status='N' y los que tienen 0 km
 		SELECT	MAX(DATE(f.to_date + INTERVAL -3 HOUR))
-        INTO    vdUltimaSincro
 		FROM	snapcar.trips f 
 				JOIN snapcar.clients c on c.id=f.client_id 
 		WHERE	c.vehicle_id	=	prmVehiculo
+		UNION ALL
+		-- Viajes migrados, esto no hace falta si hay acceso a la tabla snapcar.trips actualizada
+		SELECT	MAX(DATE(f.tEvento))
+        INTO    vdUltimaSincro
+		FROM	tEvento f
+		WHERE	f.fVehiculo	= prmVehiculo
 		ORDER BY 1 DESC
 		LIMIT 1;
 

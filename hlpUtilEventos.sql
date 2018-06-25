@@ -14,7 +14,7 @@ truncate table wEventoHist;
 
 -- Llena las tablas de Score con valores en cero para cada mes o dia, segun corresponda
 -- call prResetScore( '2016-08-01' );
-call prResetScore( '2017-10-01' );
+call prResetScore( '2017-01-01' );
 
 -- Correr la SHELL en el servidor de snapcar
 -- Dentro del dir: /home/ubuntu/migraObservations
