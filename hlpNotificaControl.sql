@@ -25,32 +25,36 @@ UPDATE tVehiculo  SET bPdfCobertura = '1' WHERE pVehiculo = ?
 
 -- ================================================================================================
 -- Busca los endoso de facturación (Prorrogas) que no han sido enviadas, se corre cada 10 minutos
-SELECT 
-       m.pMovim                                       , m.poliza                   as cPoliza 
-     , m.nro_patente              as cPatente         , m.fecha_emision            as dEmision 
-     , m.fecha_inicio_vig         as dInicioVig       , m.fecha_vencimiento        as dFinVig 
-     , m.sumaaseg                 as nSumaAsegurada   , m.desc_vehiculo            as cVehiculo 
-     , round(m.porcent_descuento) as nDescuento       , m.documento                as nDNI 
-     , u.cEmail                                       , u.cNombre 
-     , f.dInicio                                      , f.dFin 
+SELECT m.pMovim                                       , m.poliza                   as cPoliza
+     , m.nro_patente              as cPatente         , m.fecha_emision            as dEmision
+     , m.fecha_inicio_vig         as dInicioVig       , m.fecha_vencimiento        as dFinVig
+     , m.sumaaseg                 as nSumaAsegurada   , m.desc_vehiculo            as cVehiculo
+     , round(m.porcent_descuento) as nDescuento       , m.documento                as nDNI
+     , u.cEmail                                       , u.cNombre
+     , f.dInicio                                      , f.dFin
      , ROUND(f.nKms)              as nKms             , ROUND(f.nScore)            as nScore
-     , f.nQViajes                                     , f.nQFrenada 
-     , f.nQAceleracion                                , f.nQVelocidad 
-     , f.nQCurva                                      , f.nDiasPunta 
-     , f.nDiasUso - f.nDiasPunta  as nDiasNoPunta     , f.nDiasSinMedicion 
-     , datediff(f.dFin, f.dInicio) - f.nDiasUso - f.nDiasSinMedicion               as nDiasSinUso
-     , m.*
- FROM  integrity.tMovim m 
-       INNER JOIN tVehiculo v ON v.cPatente = m.nro_patente AND v.bVigente = '1' 
-       INNER JOIN tUsuario  u ON u.pUsuario = v.fUsuarioTitular 
-       INNER JOIN tFactura  f ON f.pVehiculo = v.pVehiculo 
-                             AND f.pTpFactura = 1 
-							-- Como la medición se hace 7 días antes del cierre, la fecha de vigencia de la prorroga siempre
-							-- debería estar dentro rango de fechas de medición
-                             AND (f.dFin + INTERVAL 7 DAY) BETWEEN m.fecha_inicio_vig AND m.fecha_vencimiento 
- WHERE m.cod_endoso = '9900' 
- AND   m.bPdfProrroga = '0' 
- ORDER BY cPatente, dEmision desc 
+     , f.nQViajes                                     , f.nQFrenada
+     , f.nQAceleracion                                , f.nQVelocidad
+     , f.nQCurva                                      , f.nDiasPunta
+     , f.nDiasUso - f.nDiasPunta  as nDiasNoPunta     , f.nDiasSinMedicion
+-- AGALAZ: Da un error de UNSIGNED cuando nDiasSinMedicion es mayor a la cantidad de días
+-- + "     , datediff(f.dFin, f.dInicio) - f.nDiasUso - f.nDiasSinMedicion               as nDiasSinUso
+     , CASE WHEN (datediff(f.dFin, f.dInicio) - f.nDiasUso ) > f.nDiasSinMedicion
+          THEN datediff(f.dFin, f.dInicio) - f.nDiasUso - f.nDiasSinMedicion
+       ELSE
+          0
+       END                        as nDiasSinUso                     
+ FROM  integrity.tMovim m
+       INNER JOIN tVehiculo v ON v.cPatente = m.nro_patente AND v.bVigente = '1'
+       INNER JOIN tUsuario  u ON u.pUsuario = v.fUsuarioTitular
+       INNER JOIN tFactura  f ON f.pVehiculo = v.pVehiculo
+                             AND f.pTpFactura = 1
+-- Como la medición se hace 7 días antes del cierre, la fecha de vigencia de la prorroga siempre
+-- debería estar dentro rango de fechas de medición
+                             AND (f.dFin + INTERVAL 7 DAY) BETWEEN m.fecha_inicio_vig AND m.fecha_vencimiento
+ WHERE m.cod_endoso = '9900'
+ AND   m.bPdfProrroga = '0'
+ ORDER BY cPatente, dEmision desc
 ;
 -- Actualiza la prorroga como enviadsa para evitar un re-envío
 UPDATE integrity.tMovim SET bPdfProrroga = '1' WHERE pMovim = ?

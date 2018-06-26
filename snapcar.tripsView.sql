@@ -12,9 +12,9 @@ SELECT t.id							AS trip_id		, c.driver_id					AS driver_id	, c.vehicle_id					
      , dFin.longitude				AS longitude_fin
 FROM   trips t
 	   INNER JOIN	clients			c		ON c.id = t.client_id
-	   INNER JOIN	trip_details	dIni	ON dIni.trip_id = t.id
+	   LEFT JOIN	trip_details	dIni	ON dIni.trip_id = t.id
 										   AND dIni.event_date = t.from_date
-	   INNER JOIN 	trip_details	dFin	ON dFin.trip_id = t.id
+	   LEFT JOIN 	trip_details	dFin	ON dFin.trip_id = t.id
 										   AND dFin.event_date = t.to_date
 	   LEFT JOIN	g_streets		st		ON st.id = t.start_street_id
 	   LEFT JOIN	g_streets		se		ON se.id = t.end_street_id
