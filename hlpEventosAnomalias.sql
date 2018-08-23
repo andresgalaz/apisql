@@ -2,7 +2,7 @@ drop table if exists score.wEventoAnomalia;
 create table score.wEventoAnomalia as
 select trip_id, prefix_observation, count(*) cantidad
 from snapcar.trip_observations_g
-where from_time >= '2018-03-01'
+where from_time >= '2018-07-20'
 and status='OK'
 group by trip_id, prefix_observation
 order by cantidad desc;
@@ -16,8 +16,8 @@ from score.wEventoAnomalia a
 	inner join score.tVehiculo	v on v.pVehiculo = c.vehicle_id
 	inner join score.tUsuario	u on u.pUsuario = v.fUsuarioTitular   
     
- where v.cPatente  in ('AA467BP','NLF993','LDP315','LGH390','OJE370','KPI916')
-and a.prefix_observation = 'A'
+ where v.cPatente  in ('NAG223')
+and a.prefix_observation in ('E','C', 'A')
 order by from_date desc
 limit 10000
 ;    
@@ -37,7 +37,7 @@ group by t.client_id, c.vehicle_id, substr(t.from_date,1,7), v.cPatente, v.cIdDi
 order by cantidad desc
 ;    
 
-select * from snapcar.clients where vehicle_id=492
+select * from snapcar.clients where vehicle_id=394
 ;
 
 -- Genera proceso a recalcular
@@ -49,13 +49,15 @@ call prRecalculaScore('2018-02-03',437,267); -- JBH851
 ;
 
 -- Marca eventos en la BD de LUXO
-update snapcar.trip_observations_g set status = 'D'
-WHERE prefix_observation = 'A'
+update snapcar.trip_observations_g set status = 'D', updated_at=now()
+WHERE prefix_observation in ('A','E','C')
 AND status <> 'D'
-AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id in ( 528,542 )  ) 
+AND trip_id in ( SELECT id FROM snapcar.trips WHERE client_id in ( 502, 507 )  ) 
+AND from_time >= '2018-08-16 00:00:00'
 ;
 delete from score.tEvento WHERE fTpEvento = 3
 AND fVehiculo in ( 432,403)
+AND tEvento >= '2018-08-16 00:00:00'
 ;
 
 update snapcar.trip_observations_g set status = 'D'
