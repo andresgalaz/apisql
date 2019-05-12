@@ -1,4 +1,4 @@
-﻿﻿-- Add/modify columns 
+﻿-- Add/modify columns 
 alter table tConsultaDetalle add CALINEACION char(1);
 alter table tConsultaDetalle add BFILTRO char(1) default '0' not null;
 -- Add comments to the columns 
